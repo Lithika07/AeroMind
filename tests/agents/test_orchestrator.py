@@ -101,3 +101,17 @@ def test_link_healthy_needs_no_llm_call(states):
     assert result["agents"]["telemetry_link"]["source"] == "rule"
     assert all(k != "TelemetryLinkOut" for k, _ in backend.calls)
     assert "diagnosis" not in result["agents"]
+
+
+def test_edits_follow_the_approved_diagnosis_not_the_rejected_one(states):
+    state, mission = states.get("s2") or pytest.skip("s2 not flown")
+    # the LLM labels the battery problem "setup" and cites findings that fail verification
+    diagnosis = {"findings": [{"id": "F1", "text": "landed with 14% remaining"}],
+                 "causes": [{"id": "C1", "cause": "battery too low", "category": "setup", "confidence": 0.8,
+                             "findings": ["F1"]}]}
+    advisor = {"edits": [{"action": "add_hold", "wp": 2, "value": 30, "cause": "C1"}],
+               "recommendations": [{"rank": 1, "text": "add_hold at WP2", "reason": "r", "evidence": "14 %"}]}
+    result = orchestrator.run(state, FakeBackend({"DiagnosisOut": [diagnosis], "AdvisorOut": [advisor]}), mission)
+    approved = result["approved"]
+    assert approved["diagnosis"]["causes"][0]["category"] == "low_battery"
+    assert {e["action"] for e in approved["advisor"]["edits"]} == {"remove_waypoint"}

@@ -10,7 +10,7 @@ import time
 from agents import fallbacks, prompts, verifier
 from tools import mission_io
 from agents.base import AgentResult, run_agent
-from agents.schemas import (AdvisorOut, DiagnosisOut, FlightSummaryOut, Plan, PlanStep, RiskOut, TelemetryLinkOut)
+from agents.schemas import (AdvisorOut, DiagnosisOut, Edit, FlightSummaryOut, Plan, PlanStep, RiskOut, TelemetryLinkOut)
 
 RERUN_ABOVE = 0.3
 ORDER = ("flight_summary", "telemetry_link", "diagnosis", "risk", "advisor", "verifier")
@@ -103,9 +103,26 @@ def _rejected(result, agent: str) -> dict:
     return {v.claim_id: v.reason for v in result.verdicts if v.agent == agent and v.status == "rejected"}
 
 
+def final_edits(proposed: list, diagnosis: DiagnosisOut, diagnosis_from_rules: bool, state: dict, mission) -> list:
+    """The edits that pass the limits against the approved diagnosis. When that diagnosis came from the
+    rules, the LLM's cause ids mean nothing, so the rule-based edits are used; likewise when none of
+    the proposed edits pass."""
+    if not mission:
+        return []
+    cause_ids = {c.id for c in diagnosis.causes}
+    advice_only = {c.id for c in diagnosis.causes if c.category == "link_loss"}
+    candidates = [] if diagnosis_from_rules else [Edit.model_validate(e) for e in proposed]
+    _, applied, _ = mission_io.apply_edits(mission, candidates, cause_ids, advice_only)
+    if not applied:
+        _, applied, _ = mission_io.apply_edits(mission, fallbacks.advisor(state, mission, diagnosis).edits,
+                                               cause_ids, advice_only)
+    return [a["edit"] for a in applied]
+
+
 def approve(outputs: dict, check, state: dict, mission) -> dict:
     """The outputs with every rejected item removed, refilled from the rule-based fallbacks."""
     approved = {}
+    diagnosis_from_rules = True
     if "flight_summary" in outputs:
         out, bad, rule = outputs["flight_summary"], _rejected(check, "flight_summary"), fallbacks.flight_summary(state)
         rule_story = {line.phase: line for line in rule.flight_story}
@@ -125,21 +142,25 @@ def approve(outputs: dict, check, state: dict, mission) -> dict:
         causes = [c for c in out["causes"] if c["id"] not in bad]
         diagnosis = DiagnosisOut(findings=[f for f in out["findings"] if f["id"] not in bad], causes=causes) \
             if causes else fallbacks.diagnosis(state)
+        diagnosis_from_rules = not causes
         approved["diagnosis"] = diagnosis.model_dump()
     if "risk" in outputs:
         out, bad = outputs["risk"], _rejected(check, "risk")
         approved["risk"] = (fallbacks.risk(state) if bad else RiskOut.model_validate(out)).model_dump()
     if "advisor" in outputs:
         out, bad = outputs["advisor"], _rejected(check, "advisor")
-        kept = [r for r in out["recommendations"] if f"rec[{r['rank']}]" not in bad]
         diagnosis = DiagnosisOut.model_validate(approved.get("diagnosis") or {"findings": [], "causes": []})
+        edits = final_edits(out["edits"], diagnosis, diagnosis_from_rules, state, mission)
+        kept_edits = {(e["action"], e["wp"]) for e in edits}
+        kept = [r for r in out["recommendations"] if f"rec[{r['rank']}]" not in bad
+                and not verifier.check_edit_mentions(r["text"], kept_edits)]
         for rule_rec in fallbacks.advisor(state, mission, diagnosis).recommendations:
             if len(kept) >= 3:
                 break
             if all(rule_rec.text != r["text"] for r in kept):
                 kept.append(rule_rec.model_dump())
         recs = [{**r, "rank": k + 1} for k, r in enumerate(kept[:3])]
-        approved["advisor"] = AdvisorOut(edits=out["edits"], recommendations=recs).model_dump()
+        approved["advisor"] = AdvisorOut(edits=edits, recommendations=recs).model_dump()
     return approved
 
 

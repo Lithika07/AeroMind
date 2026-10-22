@@ -18,7 +18,10 @@ CLAUDE_MODEL = os.environ.get("AEROMIND_CLAUDE_MODEL", "claude-opus-5-5")
 OLLAMA_URL = os.environ.get("AEROMIND_OLLAMA_URL", "http://127.0.0.1:11434")
 OLLAMA_MODEL = os.environ.get("AEROMIND_OLLAMA_MODEL", "qwen2.5:3b")
 MAX_OUTPUT_TOKENS = 4000
-OLLAMA_TIMEOUT_S = 300
+OLLAMA_TIMEOUT_S = 120
+#: After a connection failure or timeout, skip the backend this long: a dead server should cost one
+#: timeout, not one per agent per flight (a laptop resumed from suspend left Ollama's GPU unusable).
+BREAKER_S = 300
 OLLAMA_PING_S = 2
 
 
@@ -58,15 +61,21 @@ class OllamaBackend:
     def __init__(self, model: str = OLLAMA_MODEL, url: str = OLLAMA_URL):
         self.model = model
         self.url = url.rstrip("/")
+        self.down_until = 0.0
 
     def _post(self, path: str, body: dict, timeout: float) -> dict:
+        if time.monotonic() < self.down_until:
+            raise LLMError(f"Ollama at {self.url} failed recently; using the rules until it recovers")
         request = urllib.request.Request(f"{self.url}{path}", data=json.dumps(body).encode(),
                                          headers={"Content-Type": "application/json"})
         try:
             with urllib.request.urlopen(request, timeout=timeout) as response:
                 return json.load(response)
-        except (OSError, http.client.HTTPException, ValueError) as error:
+        except (OSError, http.client.HTTPException) as error:
+            self.down_until = time.monotonic() + BREAKER_S
             raise LLMError(f"Ollama at {self.url} failed: {error}") from error
+        except ValueError as error:
+            raise LLMError(f"Ollama at {self.url} returned invalid JSON: {error}") from error
 
     def complete(self, system: str, user: str, output: type[BaseModel]) -> BaseModel:
         body = {"model": self.model, "stream": False, "format": output.model_json_schema(),
