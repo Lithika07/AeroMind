@@ -154,11 +154,11 @@ fixtures are short slices of real S0–S4 tlogs, never hand-made data.
 | 6 ✅ | **Mission I/O** (PRD step 5) | `mission_io.py`: bounds checks (§5), apply edits, `mission_fixed.waypoints` + `changelog.md` | Fixed S1 mission uploads to SITL via `fly_scenario.py` and flies AUTO to RTL | 1.5 h |
 | 7 ✅ | **CLI** | `run.py` single / `--batch` / `--compare`; `outputs/<run_id>/state.json` cache | S4 end-to-end in < 60 s; `--compare` prints the results table | 1 h |
 | 8 ✅ | **Dashboard** (PRD step 6) | Streamlit: Summary tab first, then Track (plotly map on the world origin, path coloured by link), Telemetry, Anomalies, Power & attitude, History, Agents; "Use cached run" | Uploading S4 shows verdict, story, signal strip with the zone dropout near its WP, top 3, risk | 4 h |
-| 9 | **Re-fly + compare** (PRD step 7) | Fly fixed S1, S2, S4 under the same faults; `--compare` | S1 cross-track ≥ 40 % lower; S2 fixed ≥ 25 % battery; battery prediction within 10 points | 1.5 h |
+| 9 ✅ | **Re-fly + compare** (PRD step 7) | Fly fixed S1, S2, S4 under the same faults; `--compare` | S1 cross-track ≥ 40 % lower; S2 fixed ≥ 25 % battery; battery prediction within 10 points | 1.5 h |
 | 10 ✅ | **Report + Ask** (PRD step 8) | Jinja2 `report.html`; Ask tab answering from state with citations | "Why did the link drop?" gets an answer citing `link.dropouts[0]` | 2 h |
-| 11 | **Review + package** (PRD step 9) | Code + security review (API key in `.env`, upload validation); README with sim setup; results table; cached runs S0–S4 + re-flights; 6 slides; 2-min video | Fresh clone + README → demo runs from cache with no network | 2 h |
+| 11 ✅ | **Review + package** (PRD step 9) | Code + security review (API key in `.env`, upload validation); README with sim setup; results table; cached runs S0–S4 + re-flights; 6 slides; 2-min video | Fresh clone + README → demo runs from cache with no network | 2 h |
 
-Status 2026-10-22: phases 0-8 and 10 done; 9 (re-fly) and 11 (review, results, package) in progress.
+Status 2026-10-23: all phases done. Not produced: the 6-slide deck and the 2-minute video.
 Measured results are in [RESULTS.md](RESULTS.md) once `python3 run.py --results` has run.
 
 About 29 hours in total. Phase 0 is the main risk, so do it first. If a spike fails, the
