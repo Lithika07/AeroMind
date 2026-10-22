@@ -1,0 +1,38 @@
+# AeroMind additions, loaded after copter.parm and hexa.parm (sim/launch_sim.py).
+
+# Battery: SITL over JSON simulates none (12.6 V, 0 A, 100 % for a whole flight), so
+# sim/scripts/battery.lua feeds the scripting backend (29) with current from the motor outputs.
+# The capacity is the Hexa-X's 6S 10000 mAh; scenario S2 lowers it.
+SCR_ENABLE 1
+BATT_MONITOR 29
+BATT_CAPACITY 10000
+# Low / critical by voltage (3.50 / 3.40 V per cell), so the failsafe follows the simulated
+# discharge whatever the capacity is set to. Low -> RTL, critical -> land.
+BATT_LOW_VOLT 21.0
+BATT_CRT_VOLT 20.4
+BATT_LOW_MAH 0
+BATT_CRT_MAH 0
+BATT_FS_LOW_ACT 2
+BATT_FS_CRT_ACT 1
+
+# Wind: the airframe's drag is linear (0.9 N per m/s), so drag acceleration is MCOEF m/s^2 per m/s
+# of airspeed. Telling the EKF this lets it estimate wind (MAVLink WIND). 0.375 = 0.9 N per m/s over
+# the 2.40 kg the EKF effectively sees: with 0.35 a 10 m/s wind (9 N wrench) read 10.7 m/s.
+# The default noises left the estimate at 0.2 m/s after a minute; these converge in under 10 s.
+EK3_DRAG_MCOEF 0.375
+EK3_DRAG_M_NSE 0.2
+EK3_WIND_P_NSE 1.0
+
+# RTL climbs above the 44 m radio mast at (-40, 60) before flying home.
+RTL_ALT 5000
+
+# Telemetry rates on SERIAL0 (TCP 5760, MAVProxy); MAV1_* was SR0_* before ArduPilot 4.7. Similar
+# to a ground station's defaults, so every recorded tlog carries the same messages at the same
+# rates whatever GCS is connected.
+MAV1_POSITION 10
+MAV1_EXTRA1 10
+MAV1_EXTRA2 5
+MAV1_EXTRA3 2
+MAV1_EXT_STAT 5
+MAV1_RAW_SENS 2
+MAV1_RC_CHAN 2

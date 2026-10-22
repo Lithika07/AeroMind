@@ -1,0 +1,13 @@
+[project]
+name = "aeromind"
+version = "0.1.0"
+description = "Multi-agent post-flight analysis for ArduPilot drones"
+requires-python = ">=3.10"
+dependencies = ["pymavlink", "pandas", "numpy", "plotly", "streamlit", "jinja2", "python-dotenv", "pillow"]
+
+[project.optional-dependencies]
+dev = ["pytest", "pytest-cov"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
