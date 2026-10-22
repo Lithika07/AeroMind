@@ -1,0 +1,21 @@
+{
+  "scenario": "s3",
+  "title": "Telemetry dropout",
+  "speed_ms": 5.0,
+  "wind": null,
+  "params_set": {},
+  "mission_source": "generated",
+  "parent_run": null,
+  "armed_unix": 1792687102.7543106,
+  "wind_applied_unix": null,
+  "wind_cleared_unix": null,
+  "max_rel_alt_m": 30.02,
+  "disarmed_unix": 1792687427.2451007,
+  "duration_s": 324.5,
+  "tlogs": [
+    "2026-10-22_22-08-22.tlog",
+    "2026-10-22_22-10-04.tlog",
+    "2026-10-22_22-11-54.tlog"
+  ],
+  "outages": 2
+}

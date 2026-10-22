@@ -1,0 +1,11 @@
+{
+  "armed_unix": 1792686740.3140903,
+  "faults": {
+    "windows": [],
+    "zones": [],
+    "loss_pct": 0.0
+  },
+  "outages": [],
+  "packets_in": 36760,
+  "packets_written": 36760
+}

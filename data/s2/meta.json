@@ -1,0 +1,21 @@
+{
+  "scenario": "s2",
+  "title": "Undersized battery",
+  "speed_ms": 5.0,
+  "wind": null,
+  "params_set": {
+    "BATT_CAPACITY": 2200.0
+  },
+  "mission_source": "generated",
+  "parent_run": null,
+  "armed_unix": 1792686740.3241453,
+  "wind_applied_unix": null,
+  "wind_cleared_unix": null,
+  "max_rel_alt_m": 30.02,
+  "disarmed_unix": 1792687049.7783716,
+  "duration_s": 309.5,
+  "tlogs": [
+    "2026-10-22_22-02-20.tlog"
+  ],
+  "outages": 0
+}

@@ -1,0 +1,39 @@
+{
+  "armed_unix": 1792687102.7442558,
+  "faults": {
+    "windows": [
+      [
+        90.0,
+        12.0
+      ],
+      [
+        200.0,
+        12.0
+      ]
+    ],
+    "zones": [],
+    "loss_pct": 0.0
+  },
+  "outages": [
+    {
+      "reason": "timed",
+      "start_unix": 1792687192.809161,
+      "end_unix": 1792687204.8237965,
+      "duration_s": 12.015,
+      "start_t_armed": 90.06490516662598,
+      "lat": -35.362875,
+      "lon": 149.1674192
+    },
+    {
+      "reason": "timed",
+      "start_unix": 1792687302.8197305,
+      "end_unix": 1792687314.841154,
+      "duration_s": 12.021,
+      "start_t_armed": 200.0754747390747,
+      "lat": -35.3629684,
+      "lon": 149.1643009
+    }
+  ],
+  "packets_in": 36750,
+  "packets_written": 33885
+}

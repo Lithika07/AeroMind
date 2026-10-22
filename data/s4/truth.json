@@ -1,0 +1,28 @@
+{
+  "armed_unix": 1792687480.0081427,
+  "faults": {
+    "windows": [],
+    "zones": [
+      {
+        "min_x": -110.0,
+        "min_y": 50.0,
+        "max_x": -20.0,
+        "max_y": 92.0
+      }
+    ],
+    "loss_pct": 0.0
+  },
+  "outages": [
+    {
+      "reason": "zone",
+      "start_unix": 1792687595.9800146,
+      "end_unix": 1792687599.9951124,
+      "duration_s": 4.015,
+      "start_t_armed": 115.97187185287476,
+      "lat": -35.3624448,
+      "lon": 149.1642866
+    }
+  ],
+  "packets_in": 27554,
+  "packets_written": 27077
+}
