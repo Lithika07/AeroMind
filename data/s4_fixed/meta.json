@@ -1,0 +1,25 @@
+{
+  "scenario": "s4",
+  "title": "Combined (wind + fast + small battery + radio shadow)",
+  "speed_ms": 12.0,
+  "wind": {
+    "speed_ms": 10.0,
+    "from_deg": 90.0
+  },
+  "params_set": {
+    "BATT_CAPACITY": 2200.0
+  },
+  "mission_source": "outputs/s4/mission_fixed.waypoints",
+  "parent_run": "s4",
+  "armed_unix": 1792689516.744147,
+  "wind_applied_unix": 1792689523.1768785,
+  "wind_cleared_unix": 1792689789.567062,
+  "max_rel_alt_m": 30.026,
+  "disarmed_unix": 1792689796.9303563,
+  "duration_s": 280.2,
+  "tlogs": [
+    "2026-10-22_22-48-36.tlog",
+    "2026-10-22_22-50-47.tlog"
+  ],
+  "outages": 1
+}

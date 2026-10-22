@@ -9,6 +9,23 @@ metrics, a Verifier rejects any claim the data does not support, and nothing is 
 the drone. Results on the demo flights: [docs/RESULTS.md](docs/RESULTS.md). Design and build plan:
 [docs/PLAN.md](docs/PLAN.md); product requirements: [docs/AeroMind — Final PRD.pdf](docs/AeroMind%20—%20Final%20PRD.pdf).
 
+## Results on the demo flights
+
+Eight SITL flights (S0–S4 and re-flights of S1, S2, S4 with the fixed missions), agents on a local
+`qwen2.5:3b`. Full table: [docs/RESULTS.md](docs/RESULTS.md).
+
+- **Pass (8 of 10):** fault detection 4/4, root cause 4/4, both S3 dropouts located within 0.1 s,
+  no false alarms on S0, S2's fixed mission landed with 25 % (was 14 %), battery predictions within
+  7 points, risk S0 Low / S2 High / S4 High.
+- **Tracking improvement: fail (20 %, target 40 %).** S1's original cross-track was only 1.8 m
+  (Caution): in a 10 m/s crosswind the Hexa-X reaches its 30° tilt limit at about 9.5 m/s, so it never
+  flew the 12 m/s that would have driven it off track. Slowing to 6 m/s cut it to 1.44 m.
+- **Speed: fail with the local model (median 92 s, target 60 s).** The metrics take about 2 s; the
+  rest is six calls to a 3B model on a 4 GB laptop GPU (30–65 s in an earlier run). Claude via the API
+  is expected to be well inside the target but has not been measured here.
+- **Grounding:** the Verifier rejected 29 % of the small model's claims; each was replaced by the
+  rule-based result, so nothing unverified reached the dashboard.
+
 ## Run it
 
 ```bash

@@ -10,7 +10,6 @@ htmlcov/
 .env
 
 # Runtime output (simulation working dirs, analysis runs)
-outputs/
+outputs/_uploads/
 sim/run/
 data/.*.partial/
-history.json

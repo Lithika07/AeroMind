@@ -1,0 +1,22 @@
+{
+  "scenario": "s1",
+  "title": "Strong wind + fast flight",
+  "speed_ms": 12.0,
+  "wind": {
+    "speed_ms": 10.0,
+    "from_deg": 90.0
+  },
+  "params_set": {},
+  "mission_source": "outputs/s1/mission_fixed.waypoints",
+  "parent_run": "s1",
+  "armed_unix": 1792688855.3187177,
+  "wind_applied_unix": 1792688861.713189,
+  "wind_cleared_unix": 1792689130.115464,
+  "max_rel_alt_m": 30.029,
+  "disarmed_unix": 1792689137.3392086,
+  "duration_s": 282.0,
+  "tlogs": [
+    "2026-10-22_22-37-35.tlog"
+  ],
+  "outages": 0
+}

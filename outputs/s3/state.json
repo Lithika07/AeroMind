@@ -1,0 +1,1234 @@
+{
+  "run_id": "s3",
+  "scenario": "s3",
+  "parent_run": null,
+  "sources": {
+    "tlogs": [
+      "data/s3/2026-10-22_22-08-22.tlog",
+      "data/s3/2026-10-22_22-10-04.tlog",
+      "data/s3/2026-10-22_22-11-54.tlog"
+    ],
+    "mission": "data/s3/mission.waypoints",
+    "params": "data/s3/params.param"
+  },
+  "log_start_unix": 1792687102.577827,
+  "notes": null,
+  "metrics": {
+    "flight": {
+      "duration_s": 324.5,
+      "distance_m": 1192.0,
+      "max_alt_m": 30.0,
+      "max_speed_ms": 9.7
+    },
+    "battery": {
+      "remaining_start_pct": 99.0,
+      "remaining_end_pct": 81.0,
+      "used_pct": 18.0,
+      "used_pct_per_km": 15.1,
+      "min_voltage_v": 23.73
+    },
+    "tracking": {
+      "xtrack_max_m": 0.48,
+      "legs": [
+        {
+          "leg": 1,
+          "to_wp": 3,
+          "t_start": 18.2,
+          "t_end": 57.2,
+          "xtrack_max_m": 0.41,
+          "speed_ms": 4.6
+        },
+        {
+          "leg": 2,
+          "to_wp": 4,
+          "t_start": 57.2,
+          "t_end": 103.4,
+          "xtrack_max_m": 0.43,
+          "speed_ms": 4.9
+        },
+        {
+          "leg": 3,
+          "to_wp": 5,
+          "t_start": 103.4,
+          "t_end": 121.4,
+          "xtrack_max_m": 0.29,
+          "speed_ms": 4.9
+        },
+        {
+          "leg": 4,
+          "to_wp": 6,
+          "t_start": 121.4,
+          "t_end": 147.5,
+          "xtrack_max_m": 0.26,
+          "speed_ms": 5.0
+        },
+        {
+          "leg": 5,
+          "to_wp": 7,
+          "t_start": 147.5,
+          "t_end": 175.1,
+          "xtrack_max_m": 0.31,
+          "speed_ms": 4.9
+        },
+        {
+          "leg": 6,
+          "to_wp": 8,
+          "t_start": 175.1,
+          "t_end": 213.4,
+          "xtrack_max_m": 0.28,
+          "speed_ms": 5.0
+        },
+        {
+          "leg": 7,
+          "to_wp": 9,
+          "t_start": 213.4,
+          "t_end": 231.1,
+          "xtrack_max_m": 0.48,
+          "speed_ms": 4.7
+        },
+        {
+          "leg": 8,
+          "to_wp": 10,
+          "t_start": 231.1,
+          "t_end": 265.3,
+          "xtrack_max_m": 0.31,
+          "speed_ms": 4.5
+        }
+      ],
+      "waypoints_planned": 8,
+      "waypoints_reached": 8,
+      "mission_completion_pct": 100.0
+    },
+    "vibration": {
+      "max_x": 0.0,
+      "max_y": 0.1,
+      "max_z": 0.3,
+      "clip_total": 0
+    },
+    "gps": {
+      "min_sats": 10,
+      "max_hdop": 1.21
+    },
+    "wind": {
+      "max_ms": 0.5,
+      "mean_ms": 0.1,
+      "from_deg": 67.0,
+      "source": "WIND"
+    },
+    "attitude": {
+      "max_roll_deg": 24.3,
+      "max_pitch_deg": 18.2
+    },
+    "link": {
+      "uptime_pct": 92.4,
+      "packet_loss_pct": 0.0,
+      "dropouts": [
+        {
+          "t": 90.1,
+          "duration_s": 12.3,
+          "lat": -35.362875,
+          "lon": 149.1674192,
+          "near_wp": 4,
+          "between_files": true
+        },
+        {
+          "t": 200.1,
+          "duration_s": 12.2,
+          "lat": -35.3629684,
+          "lon": 149.1643009,
+          "near_wp": 8,
+          "between_files": true
+        }
+      ],
+      "rssi": null,
+      "position_rate_hz": 10.0,
+      "position_rate_min_ratio": 1.0
+    },
+    "phases": [
+      {
+        "name": "Takeoff",
+        "t_start": 1.2,
+        "t_end": 18.2,
+        "kind": "takeoff"
+      },
+      {
+        "name": "Leg 1 (to WP3)",
+        "t_start": 18.2,
+        "t_end": 57.2,
+        "kind": "leg"
+      },
+      {
+        "name": "Leg 2 (to WP4)",
+        "t_start": 57.2,
+        "t_end": 103.4,
+        "kind": "leg"
+      },
+      {
+        "name": "Leg 3 (to WP5)",
+        "t_start": 103.4,
+        "t_end": 121.4,
+        "kind": "leg"
+      },
+      {
+        "name": "Leg 4 (to WP6)",
+        "t_start": 121.4,
+        "t_end": 147.5,
+        "kind": "leg"
+      },
+      {
+        "name": "Leg 5 (to WP7)",
+        "t_start": 147.5,
+        "t_end": 175.1,
+        "kind": "leg"
+      },
+      {
+        "name": "Leg 6 (to WP8)",
+        "t_start": 175.1,
+        "t_end": 213.4,
+        "kind": "leg"
+      },
+      {
+        "name": "Leg 7 (to WP9)",
+        "t_start": 213.4,
+        "t_end": 231.1,
+        "kind": "leg"
+      },
+      {
+        "name": "Leg 8 (to WP10)",
+        "t_start": 231.1,
+        "t_end": 265.3,
+        "kind": "leg"
+      },
+      {
+        "name": "RTL",
+        "t_start": 265.3,
+        "t_end": 278.2,
+        "kind": "rtl"
+      },
+      {
+        "name": "Land",
+        "t_start": 278.2,
+        "t_end": 324.7,
+        "kind": "land"
+      }
+    ],
+    "anomalies": [],
+    "events": [
+      {
+        "t": 0.2,
+        "text": "Mission: 1 Takeoff",
+        "severity": 6,
+        "kind": "statustext"
+      },
+      {
+        "t": 0.2,
+        "text": "Mode GUIDED -> AUTO",
+        "severity": null,
+        "kind": "mode"
+      },
+      {
+        "t": 5.5,
+        "text": "EKF3 IMU0 MAG0 in-flight yaw alignment complete",
+        "severity": 6,
+        "kind": "statustext"
+      },
+      {
+        "t": 5.5,
+        "text": "EKF3 IMU1 MAG0 in-flight yaw alignment complete",
+        "severity": 6,
+        "kind": "statustext"
+      },
+      {
+        "t": 17.5,
+        "text": "Mission: 2 ChangeSpeed",
+        "severity": 6,
+        "kind": "statustext"
+      },
+      {
+        "t": 17.5,
+        "text": "Mission: 3 WP",
+        "severity": 6,
+        "kind": "statustext"
+      },
+      {
+        "t": 56.9,
+        "text": "Reached command #3",
+        "severity": 6,
+        "kind": "statustext"
+      },
+      {
+        "t": 56.9,
+        "text": "Mission: 4 WP",
+        "severity": 6,
+        "kind": "statustext"
+      },
+      {
+        "t": 120.5,
+        "text": "Reached command #5",
+        "severity": 6,
+        "kind": "statustext"
+      },
+      {
+        "t": 120.5,
+        "text": "Mission: 6 WP",
+        "severity": 6,
+        "kind": "statustext"
+      },
+      {
+        "t": 146.6,
+        "text": "Reached command #6",
+        "severity": 6,
+        "kind": "statustext"
+      },
+      {
+        "t": 146.6,
+        "text": "Mission: 7 WP",
+        "severity": 6,
+        "kind": "statustext"
+      },
+      {
+        "t": 174.1,
+        "text": "Reached command #7",
+        "severity": 6,
+        "kind": "statustext"
+      },
+      {
+        "t": 174.1,
+        "text": "Mission: 8 WP",
+        "severity": 6,
+        "kind": "statustext"
+      },
+      {
+        "t": 230.2,
+        "text": "Reached command #9",
+        "severity": 6,
+        "kind": "statustext"
+      },
+      {
+        "t": 230.2,
+        "text": "Mission: 10 WP",
+        "severity": 6,
+        "kind": "statustext"
+      },
+      {
+        "t": 264.7,
+        "text": "Reached command #10",
+        "severity": 6,
+        "kind": "statustext"
+      },
+      {
+        "t": 264.7,
+        "text": "Mission: 11 RTL",
+        "severity": 6,
+        "kind": "statustext"
+      },
+      {
+        "t": 324.1,
+        "text": "Disarming motors",
+        "severity": 6,
+        "kind": "statustext"
+      }
+    ],
+    "warnings": 0,
+    "status": {
+      "xtrack_max_m": "good",
+      "battery_end": "good",
+      "vibration": "good",
+      "clipping": "good",
+      "gps_sats": "good",
+      "gps_hdop": "good",
+      "wind": "good",
+      "attitude": "good",
+      "mission_completion": "good",
+      "warnings": "good",
+      "link_uptime": "bad",
+      "dropouts": "bad",
+      "packet_loss": "good",
+      "position_rate": "good"
+    },
+    "health_score": 50
+  },
+  "mission": {
+    "items": 12,
+    "length_m": 1330.0
+  },
+  "params": {
+    "FS_THR_ENABLE": 1.0,
+    "BATT_FS_LOW_ACT": 2.0,
+    "FENCE_ENABLE": 0.0,
+    "BATT_CAPACITY": 10000.0
+  },
+  "history": {
+    "flights": 3,
+    "baselines": {
+      "xtrack_max_m": {
+        "mean": 0.91,
+        "std": 0.6293382768167424,
+        "n": 3
+      },
+      "battery_mah_per_km": {
+        "mean": 1463.3666666666668,
+        "std": 99.53549897175157,
+        "n": 3
+      },
+      "vibration_max": {
+        "mean": 0.3333333333333333,
+        "std": 2.0,
+        "n": 3
+      },
+      "wind_max_ms": {
+        "mean": 3.766666666666667,
+        "std": 4.619764303752111,
+        "n": 3
+      },
+      "link_uptime_pct": {
+        "mean": 100.0,
+        "std": 0.5,
+        "n": 3
+      },
+      "health_score": {
+        "mean": 76.66666666666667,
+        "std": 18.408935028645434,
+        "n": 3
+      }
+    },
+    "worse_than_usual": [
+      {
+        "metric": "link_uptime_pct",
+        "value": 92.4,
+        "mean": 100.0,
+        "std": 0.5,
+        "limit": 99.0
+      }
+    ],
+    "battery_prediction": {
+      "predicted_end_pct": 80.0,
+      "mah_per_km": 1506.3,
+      "flights": 4
+    },
+    "recurring": [],
+    "fix_effectiveness": []
+  },
+  "risk_base": {
+    "score": 30,
+    "level": "Medium",
+    "factors": [
+      {
+        "factor": "telemetry link bad: 2 dropout(s), uptime 92.4 %",
+        "points": 20
+      },
+      {
+        "factor": "failsafe not set: FENCE_ENABLE = 0",
+        "points": 10
+      }
+    ],
+    "confidence": "normal",
+    "params_checked": true
+  },
+  "history_entry": {
+    "run_id": "s3",
+    "date": "2026-10-22T22:08:22",
+    "scenario": "s3",
+    "parent_run": null,
+    "mission_length_m": 1330.0,
+    "duration_s": 324.5,
+    "battery_used_pct": 18.0,
+    "battery_pct_per_km": 15.1,
+    "battery_capacity_mah": 10000.0,
+    "battery_mah_per_km": 1510.1,
+    "battery_end_pct": 81.0,
+    "mission_completion_pct": 100.0,
+    "xtrack_max_m": 0.48,
+    "link_uptime_pct": 92.4,
+    "dropouts": 2,
+    "vibration_max": 0.3,
+    "wind_max_ms": 0.5,
+    "health_score": 50,
+    "causes": [
+      "link_loss",
+      "setup"
+    ],
+    "edits_applied": []
+  },
+  "agents": {
+    "manifest": {
+      "inputs": {
+        "tlog_files": 3,
+        "mission": true,
+        "params": true,
+        "pilot_notes": false
+      },
+      "statuses": {
+        "xtrack_max_m": "good",
+        "battery_end": "good",
+        "vibration": "good",
+        "clipping": "good",
+        "gps_sats": "good",
+        "gps_hdop": "good",
+        "wind": "good",
+        "attitude": "good",
+        "mission_completion": "good",
+        "warnings": "good",
+        "link_uptime": "bad",
+        "dropouts": "bad",
+        "packet_loss": "good",
+        "position_rate": "good"
+      },
+      "problems": [
+        "dropouts",
+        "link_uptime"
+      ],
+      "link_all_good": false,
+      "history_flights": 3,
+      "dropouts": 2
+    },
+    "plan": {
+      "plan": [
+        {
+          "agent": "flight_summary",
+          "reason": "Always run flight_summary first to summarize the flight data."
+        },
+        {
+          "agent": "telemetry_link",
+          "reason": "2 dropout(s); link metrics need analysis (added by rule)"
+        },
+        {
+          "agent": "diagnosis",
+          "reason": "Run diagnosis to address any caution or bad metrics, which are present in the problems list."
+        },
+        {
+          "agent": "risk",
+          "reason": "history has 3 flight(s) (added by rule)"
+        },
+        {
+          "agent": "advisor",
+          "reason": "mission file present: edits allowed (added by rule)"
+        },
+        {
+          "agent": "verifier",
+          "reason": "Run verifier last to ensure all systems are functioning correctly after any potential issues are addressed."
+        }
+      ],
+      "source": "llm"
+    },
+    "plan_error": null,
+    "backend": "ollama",
+    "model": "qwen2.5:3b",
+    "agents": {
+      "flight_summary": {
+        "output": {
+          "verdict": "Needs attention",
+          "summary": "The flight demonstrated issues in several key areas. The takeoff phase was smooth, but the landing phase showed a significant drop in link uptime, which is concerning. The flight duration and distance were within expected ranges, but the max speed and altitude were lower than typical for the drone. The battery usage was within acceptable limits, but the link uptime was below the recommended threshold. The attitude and tracking metrics were within acceptable ranges.",
+          "flight_story": [
+            {
+              "phase": "Takeoff",
+              "status": "good",
+              "text": "The drone took off smoothly and quickly reached the desired altitude."
+            },
+            {
+              "phase": "Leg 1 (to WP3)",
+              "status": "good",
+              "text": "The drone flew the first leg of the mission efficiently and accurately."
+            },
+            {
+              "phase": "Leg 2 (to WP4)",
+              "status": "good",
+              "text": "The drone continued to fly the second leg of the mission smoothly and accurately."
+            },
+            {
+              "phase": "Leg 3 (to WP5)",
+              "status": "good",
+              "text": "The drone flew the third leg of the mission accurately and at a steady speed."
+            },
+            {
+              "phase": "Leg 4 (to WP6)",
+              "status": "good",
+              "text": "The drone flew the fourth leg of the mission accurately and at a steady speed."
+            },
+            {
+              "phase": "Leg 5 (to WP7)",
+              "status": "good",
+              "text": "The drone flew the fifth leg of the mission accurately and at a steady speed."
+            },
+            {
+              "phase": "Leg 6 (to WP8)",
+              "status": "good",
+              "text": "The drone flew the sixth leg of the mission accurately and at a steady speed."
+            },
+            {
+              "phase": "Leg 7 (to WP9)",
+              "status": "good",
+              "text": "The drone flew the seventh leg of the mission accurately and at a steady speed."
+            },
+            {
+              "phase": "Leg 8 (to WP10)",
+              "status": "good",
+              "text": "The drone flew the eighth leg of the mission accurately and at a steady speed."
+            },
+            {
+              "phase": "RTL",
+              "status": "good",
+              "text": "The drone executed the return-to-launch maneuver smoothly."
+            },
+            {
+              "phase": "Land",
+              "status": "good",
+              "text": "The drone landed safely, but the link uptime during the landing phase was below the recommended threshold, which is concerning."
+            }
+          ],
+          "claims": [
+            {
+              "id": "tracking.xtrack_max_m",
+              "text": "0.48",
+              "metric": "tracking.xtrack_max_m",
+              "value": null
+            },
+            {
+              "id": "battery.used_pct",
+              "text": "18.0",
+              "metric": "battery.used_pct",
+              "value": null
+            },
+            {
+              "id": "battery.used_pct_per_km",
+              "text": "15.1",
+              "metric": "battery.used_pct_per_km",
+              "value": null
+            },
+            {
+              "id": "wind.max_ms",
+              "text": "0.5",
+              "metric": "wind.max_ms",
+              "value": null
+            },
+            {
+              "id": "link_uptime_pct",
+              "text": "92.4",
+              "metric": "link_uptime_pct",
+              "value": null
+            }
+          ]
+        },
+        "source": "llm",
+        "seconds": 18.1,
+        "errors": [],
+        "feedback": "story[2]: status good disagrees with the data (bad); story[6]: status good disagrees with the data (bad); flight.duration_s: states a number without citing a metric; flight.distance_m: states a number without citing a metric; flight.max_alt_m: states a number without citing a metric; flight.max_speed_ms: states a number without citing a metric; battery.used_pct: states a number without citing a metric; battery.used_pct_per_km: states a number without citing a metric; wind.max_ms: states a number without citing a metric; attitude.max_roll_deg: states a number without citing a metric; tracking.xtrack_max_m: states a number without citing a metric; link_uptime_pct: states a number without citing a metric"
+      },
+      "telemetry_link": {
+        "output": {
+          "link_verdict": "bad",
+          "safe_for_mission": false,
+          "link_findings": [
+            {
+              "id": "default",
+              "text": "Uptime is bad (92.4%)",
+              "metric": "link_uptime",
+              "value": "bad"
+            },
+            {
+              "id": "default",
+              "text": "Packet loss is good (0.0%)",
+              "metric": "packet_loss",
+              "value": "good"
+            },
+            {
+              "id": "default",
+              "text": "Dropout at t=90.1s, duration=12.3s, near WP4",
+              "metric": "dropouts",
+              "value": "bad"
+            },
+            {
+              "id": "default",
+              "text": "Dropout at t=200.1s, duration=12.2s, near WP8",
+              "metric": "dropouts",
+              "value": "bad"
+            }
+          ]
+        },
+        "source": "llm",
+        "seconds": 6.75,
+        "errors": [],
+        "feedback": "default: states a number without citing a metric"
+      },
+      "diagnosis": {
+        "output": {
+          "findings": [
+            {
+              "id": "F1",
+              "text": "Telemetry link dropped 2 time(s); uptime 92.4 %",
+              "metric": "link.uptime_pct",
+              "value": 92.4
+            },
+            {
+              "id": "F2",
+              "text": "Failsafe disabled in the parameters: FENCE_ENABLE",
+              "metric": "params.FENCE_ENABLE",
+              "value": 0.0
+            }
+          ],
+          "causes": [
+            {
+              "id": "C1",
+              "cause": "Telemetry link dropped 2 time(s); uptime 92.4 %",
+              "category": "link_loss",
+              "confidence": 0.9,
+              "findings": [
+                "F1"
+              ]
+            },
+            {
+              "id": "C2",
+              "cause": "Failsafe disabled in the parameters: FENCE_ENABLE",
+              "category": "setup",
+              "confidence": 0.5,
+              "findings": [
+                "F2"
+              ]
+            }
+          ]
+        },
+        "source": "llm",
+        "seconds": 7.6,
+        "errors": [],
+        "feedback": null
+      },
+      "risk": {
+        "output": {
+          "risk_level": "Low",
+          "risk_score": 20,
+          "adjustment": -10,
+          "adjustment_reason": "Reduces the telemetry link issues without addressing the failsafe problem, lowering the overall risk score.",
+          "factors": [
+            "telemetry link bad: 2 dropout(s), uptime 92.4 %",
+            "failsafe not set: FENCE_ENABLE = 0"
+          ],
+          "predicted_battery_pct": 80.0,
+          "confidence": "normal"
+        },
+        "source": "llm",
+        "seconds": 2.04,
+        "errors": [],
+        "feedback": "adjustment_reason: lowers the risk without naming anything that reduces it"
+      },
+      "advisor": {
+        "output": {
+          "edits": [
+            {
+              "action": "remove_waypoint",
+              "wp": 10,
+              "value": null,
+              "cause": "C1"
+            },
+            {
+              "action": "change_altitude",
+              "wp": 2,
+              "value": -10.0,
+              "cause": "C1"
+            },
+            {
+              "action": "add_hold",
+              "wp": 2,
+              "value": 5.0,
+              "cause": "C1"
+            }
+          ],
+          "recommendations": [
+            {
+              "rank": 1,
+              "text": "remove_waypoint at WP10, as it was causing the mission to fail due to exceeding the maximum number of waypoints.",
+              "reason": "Exceeds the maximum number of waypoints allowed in the mission, leading to mission failure.",
+              "evidence": "Exceeds the maximum number of waypoints allowed in the mission, leading to mission failure."
+            },
+            {
+              "rank": 2,
+              "text": "change_altitude at WP2 with a change of -10.0 m, to address the telemetry link issues.",
+              "reason": "Improves telemetry link by adjusting the altitude, which is a known issue.",
+              "evidence": "Improves telemetry link by adjusting the altitude, which is a known issue."
+            },
+            {
+              "rank": 3,
+              "text": "add_hold at WP2 for 5.0 seconds, to address the telemetry link issues.",
+              "reason": "Adds a hold to the mission at WP2, which is a known solution for telemetry link issues.",
+              "evidence": "Adds a hold to the mission at WP2, which is a known solution for telemetry link issues."
+            }
+          ]
+        },
+        "source": "llm",
+        "seconds": 11.08,
+        "errors": [],
+        "feedback": "rec[1]: proposes remove_waypoint at WP10, which failed the mission limits; rec[2]: proposes change_altitude at WP2, which failed the mission limits; rec[3]: proposes add_hold at WP2, which failed the mission limits"
+      }
+    },
+    "verification": {
+      "verdicts": [
+        {
+          "agent": "flight_summary",
+          "claim_id": "summary",
+          "status": "rejected",
+          "reason": "5 sentences; the summary must be 3"
+        },
+        {
+          "agent": "flight_summary",
+          "claim_id": "story[0]",
+          "status": "supported",
+          "reason": "matches the data"
+        },
+        {
+          "agent": "flight_summary",
+          "claim_id": "story[1]",
+          "status": "supported",
+          "reason": "matches the data"
+        },
+        {
+          "agent": "flight_summary",
+          "claim_id": "story[2]",
+          "status": "rejected",
+          "reason": "status good disagrees with the data (bad)"
+        },
+        {
+          "agent": "flight_summary",
+          "claim_id": "story[3]",
+          "status": "supported",
+          "reason": "matches the data"
+        },
+        {
+          "agent": "flight_summary",
+          "claim_id": "story[4]",
+          "status": "supported",
+          "reason": "matches the data"
+        },
+        {
+          "agent": "flight_summary",
+          "claim_id": "story[5]",
+          "status": "supported",
+          "reason": "matches the data"
+        },
+        {
+          "agent": "flight_summary",
+          "claim_id": "story[6]",
+          "status": "rejected",
+          "reason": "status good disagrees with the data (bad)"
+        },
+        {
+          "agent": "flight_summary",
+          "claim_id": "story[7]",
+          "status": "supported",
+          "reason": "matches the data"
+        },
+        {
+          "agent": "flight_summary",
+          "claim_id": "story[8]",
+          "status": "supported",
+          "reason": "matches the data"
+        },
+        {
+          "agent": "flight_summary",
+          "claim_id": "story[9]",
+          "status": "supported",
+          "reason": "matches the data"
+        },
+        {
+          "agent": "flight_summary",
+          "claim_id": "story[10]",
+          "status": "supported",
+          "reason": "matches the data"
+        },
+        {
+          "agent": "flight_summary",
+          "claim_id": "tracking.xtrack_max_m",
+          "status": "supported",
+          "reason": "matches the data"
+        },
+        {
+          "agent": "flight_summary",
+          "claim_id": "battery.used_pct",
+          "status": "supported",
+          "reason": "matches the data"
+        },
+        {
+          "agent": "flight_summary",
+          "claim_id": "battery.used_pct_per_km",
+          "status": "supported",
+          "reason": "matches the data"
+        },
+        {
+          "agent": "flight_summary",
+          "claim_id": "wind.max_ms",
+          "status": "supported",
+          "reason": "matches the data"
+        },
+        {
+          "agent": "flight_summary",
+          "claim_id": "link_uptime_pct",
+          "status": "rejected",
+          "reason": "metric link_uptime_pct does not exist"
+        },
+        {
+          "agent": "telemetry_link",
+          "claim_id": "default",
+          "status": "rejected",
+          "reason": "metric link_uptime does not exist"
+        },
+        {
+          "agent": "telemetry_link",
+          "claim_id": "default",
+          "status": "rejected",
+          "reason": "metric packet_loss does not exist"
+        },
+        {
+          "agent": "telemetry_link",
+          "claim_id": "default",
+          "status": "rejected",
+          "reason": "metric dropouts does not exist"
+        },
+        {
+          "agent": "telemetry_link",
+          "claim_id": "default",
+          "status": "rejected",
+          "reason": "metric dropouts does not exist"
+        },
+        {
+          "agent": "diagnosis",
+          "claim_id": "F1",
+          "status": "supported",
+          "reason": "matches the data"
+        },
+        {
+          "agent": "diagnosis",
+          "claim_id": "F2",
+          "status": "supported",
+          "reason": "matches the data"
+        },
+        {
+          "agent": "diagnosis",
+          "claim_id": "C1",
+          "status": "supported",
+          "reason": "matches the data"
+        },
+        {
+          "agent": "diagnosis",
+          "claim_id": "C2",
+          "status": "supported",
+          "reason": "matches the data"
+        },
+        {
+          "agent": "risk",
+          "claim_id": "adjustment_reason",
+          "status": "rejected",
+          "reason": "lowers the risk without naming anything that reduces it"
+        },
+        {
+          "agent": "advisor",
+          "claim_id": "rec[1]",
+          "status": "rejected",
+          "reason": "proposes remove_waypoint at WP10, which failed the mission limits"
+        },
+        {
+          "agent": "advisor",
+          "claim_id": "rec[2]",
+          "status": "rejected",
+          "reason": "proposes change_altitude at WP2, which failed the mission limits"
+        },
+        {
+          "agent": "advisor",
+          "claim_id": "rec[3]",
+          "status": "rejected",
+          "reason": "proposes add_hold at WP2, which failed the mission limits"
+        }
+      ],
+      "rejection_rates": {
+        "flight_summary": 0.24,
+        "telemetry_link": 1.0,
+        "diagnosis": 0.0,
+        "risk": 1.0,
+        "advisor": 1.0
+      },
+      "reruns": [
+        {
+          "agent": "flight_summary",
+          "rejection_rate": 0.43,
+          "feedback": "story[2]: status good disagrees with the data (bad); story[6]: status good disagrees with the data (bad); flight.duration_s: states a number without citing a metric; flight.distance_m: states a number without citing a metric; flight.max_alt_m: states a number without citing a metric; flight.max_speed_ms: states a number without citing a metric; battery.used_pct: states a number without citing a metric; battery.used_pct_per_km: states a number without citing a metric; wind.max_ms: states a number without citing a metric; attitude.max_roll_deg: states a number without citing a metric; tracking.xtrack_max_m: states a number without citing a metric; link_uptime_pct: states a number without citing a metric"
+        },
+        {
+          "agent": "telemetry_link",
+          "rejection_rate": 1.0,
+          "feedback": "default: states a number without citing a metric"
+        },
+        {
+          "agent": "risk",
+          "rejection_rate": 1.0,
+          "feedback": "adjustment_reason: lowers the risk without naming anything that reduces it"
+        },
+        {
+          "agent": "advisor",
+          "rejection_rate": 1.0,
+          "feedback": "rec[1]: proposes remove_waypoint at WP10, which failed the mission limits; rec[2]: proposes change_altitude at WP2, which failed the mission limits; rec[3]: proposes add_hold at WP2, which failed the mission limits"
+        }
+      ],
+      "claims": 29,
+      "rejected": 12,
+      "grounding_rate": 0.414
+    },
+    "edit_check": {
+      "dropped": [
+        {
+          "edit": {
+            "action": "remove_waypoint",
+            "wp": 10,
+            "value": null,
+            "cause": "C1"
+          },
+          "reason": "cause C1 calls for advice, not a mission edit"
+        },
+        {
+          "edit": {
+            "action": "change_altitude",
+            "wp": 2,
+            "value": -10.0,
+            "cause": "C1"
+          },
+          "reason": "cause C1 calls for advice, not a mission edit"
+        },
+        {
+          "edit": {
+            "action": "add_hold",
+            "wp": 2,
+            "value": 5.0,
+            "cause": "C1"
+          },
+          "reason": "cause C1 calls for advice, not a mission edit"
+        }
+      ],
+      "replaced_by_rules": false
+    },
+    "approved": {
+      "flight_summary": {
+        "verdict": "Needs attention",
+        "summary": "The flight lasted 324 s over 1192 m and scored 50 out of 100. The main problems were: link uptime, dropouts. It landed with 81 % battery and the telemetry link was up 92.4 % of the time.",
+        "flight_story": [
+          {
+            "phase": "Takeoff",
+            "status": "good",
+            "text": "The drone took off smoothly and quickly reached the desired altitude."
+          },
+          {
+            "phase": "Leg 1 (to WP3)",
+            "status": "good",
+            "text": "The drone flew the first leg of the mission efficiently and accurately."
+          },
+          {
+            "phase": "Leg 2 (to WP4)",
+            "status": "bad",
+            "text": "4.9 m/s, cross-track up to 0.43 m; link lost 12.3 s"
+          },
+          {
+            "phase": "Leg 3 (to WP5)",
+            "status": "good",
+            "text": "The drone flew the third leg of the mission accurately and at a steady speed."
+          },
+          {
+            "phase": "Leg 4 (to WP6)",
+            "status": "good",
+            "text": "The drone flew the fourth leg of the mission accurately and at a steady speed."
+          },
+          {
+            "phase": "Leg 5 (to WP7)",
+            "status": "good",
+            "text": "The drone flew the fifth leg of the mission accurately and at a steady speed."
+          },
+          {
+            "phase": "Leg 6 (to WP8)",
+            "status": "bad",
+            "text": "5.0 m/s, cross-track up to 0.28 m; link lost 12.2 s"
+          },
+          {
+            "phase": "Leg 7 (to WP9)",
+            "status": "good",
+            "text": "The drone flew the seventh leg of the mission accurately and at a steady speed."
+          },
+          {
+            "phase": "Leg 8 (to WP10)",
+            "status": "good",
+            "text": "The drone flew the eighth leg of the mission accurately and at a steady speed."
+          },
+          {
+            "phase": "RTL",
+            "status": "good",
+            "text": "The drone executed the return-to-launch maneuver smoothly."
+          },
+          {
+            "phase": "Land",
+            "status": "good",
+            "text": "The drone landed safely, but the link uptime during the landing phase was below the recommended threshold, which is concerning."
+          }
+        ],
+        "claims": [
+          {
+            "id": "tracking.xtrack_max_m",
+            "text": "0.48",
+            "metric": "tracking.xtrack_max_m",
+            "value": null
+          },
+          {
+            "id": "battery.used_pct",
+            "text": "18.0",
+            "metric": "battery.used_pct",
+            "value": null
+          },
+          {
+            "id": "battery.used_pct_per_km",
+            "text": "15.1",
+            "metric": "battery.used_pct_per_km",
+            "value": null
+          },
+          {
+            "id": "wind.max_ms",
+            "text": "0.5",
+            "metric": "wind.max_ms",
+            "value": null
+          }
+        ]
+      },
+      "telemetry_link": {
+        "link_verdict": "bad",
+        "safe_for_mission": false,
+        "link_findings": [
+          {
+            "id": "L1",
+            "text": "Link uptime 92.4 % across the flight",
+            "metric": "link.uptime_pct",
+            "value": 92.4
+          },
+          {
+            "id": "L2",
+            "text": "Link lost 12.3 s at t=90 s near WP4",
+            "metric": "link.dropouts[0].duration_s",
+            "value": 12.3
+          },
+          {
+            "id": "L3",
+            "text": "Link lost 12.2 s at t=200 s near WP8",
+            "metric": "link.dropouts[1].duration_s",
+            "value": 12.2
+          },
+          {
+            "id": "L4",
+            "text": "Packet loss 0.0 %",
+            "metric": "link.packet_loss_pct",
+            "value": 0.0
+          },
+          {
+            "id": "L5",
+            "text": "Radio RSSI not reported (no telemetry radio in the log)",
+            "metric": null,
+            "value": null
+          }
+        ]
+      },
+      "diagnosis": {
+        "findings": [
+          {
+            "id": "F1",
+            "text": "Telemetry link dropped 2 time(s); uptime 92.4 %",
+            "metric": "link.uptime_pct",
+            "value": 92.4
+          },
+          {
+            "id": "F2",
+            "text": "Failsafe disabled in the parameters: FENCE_ENABLE",
+            "metric": "params.FENCE_ENABLE",
+            "value": 0.0
+          }
+        ],
+        "causes": [
+          {
+            "id": "C1",
+            "cause": "Telemetry link dropped 2 time(s); uptime 92.4 %",
+            "category": "link_loss",
+            "confidence": 0.9,
+            "findings": [
+              "F1"
+            ]
+          },
+          {
+            "id": "C2",
+            "cause": "Failsafe disabled in the parameters: FENCE_ENABLE",
+            "category": "setup",
+            "confidence": 0.5,
+            "findings": [
+              "F2"
+            ]
+          }
+        ]
+      },
+      "risk": {
+        "risk_level": "Medium",
+        "risk_score": 30,
+        "adjustment": 0,
+        "adjustment_reason": "No adjustment: the rule-based score stands.",
+        "factors": [
+          "telemetry link bad: 2 dropout(s), uptime 92.4 %",
+          "failsafe not set: FENCE_ENABLE = 0"
+        ],
+        "predicted_battery_pct": 80.0,
+        "confidence": "normal"
+      },
+      "advisor": {
+        "edits": [],
+        "recommendations": [
+          {
+            "rank": 1,
+            "text": "Raise the ground antenna and keep the route within radio range (first loss near WP4)",
+            "reason": "the telemetry link dropped during the mission",
+            "evidence": "uptime 92.4 %"
+          },
+          {
+            "rank": 2,
+            "text": "Enable a geofence sized for the route and keep failsafes on",
+            "reason": "a failsafe parameter is 0",
+            "evidence": "FENCE_ENABLE = 0"
+          }
+        ]
+      }
+    },
+    "seconds": 100.6
+  },
+  "mission_fix": {
+    "applied": [],
+    "rejected": [
+      {
+        "edit": {
+          "action": "remove_waypoint",
+          "wp": 10,
+          "value": null,
+          "cause": "C1"
+        },
+        "reason": "cause C1 calls for advice, not a mission edit"
+      },
+      {
+        "edit": {
+          "action": "change_altitude",
+          "wp": 2,
+          "value": -10.0,
+          "cause": "C1"
+        },
+        "reason": "cause C1 calls for advice, not a mission edit"
+      },
+      {
+        "edit": {
+          "action": "add_hold",
+          "wp": 2,
+          "value": 5.0,
+          "cause": "C1"
+        },
+        "reason": "cause C1 calls for advice, not a mission edit"
+      }
+    ],
+    "length_before_m": 1330,
+    "length_after_m": 1330,
+    "waypoints_before": 8,
+    "waypoints_after": 8,
+    "file": "mission_fixed.waypoints"
+  },
+  "seconds_total": 101.5
+}

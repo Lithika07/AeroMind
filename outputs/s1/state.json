@@ -1,0 +1,1093 @@
+{
+  "run_id": "s1",
+  "scenario": "s1",
+  "parent_run": null,
+  "sources": {
+    "tlogs": [
+      "data/s1/2026-10-22_21-56-50.tlog"
+    ],
+    "mission": "data/s1/mission.waypoints",
+    "params": "data/s1/params.param"
+  },
+  "log_start_unix": 1792686410.5887818,
+  "notes": null,
+  "metrics": {
+    "flight": {
+      "duration_s": 274.4,
+      "distance_m": 1206.0,
+      "max_alt_m": 30.1,
+      "max_speed_ms": 12.1
+    },
+    "battery": {
+      "remaining_start_pct": 99.0,
+      "remaining_end_pct": 83.0,
+      "used_pct": 16.0,
+      "used_pct_per_km": 13.3,
+      "min_voltage_v": 23.85
+    },
+    "tracking": {
+      "xtrack_max_m": 1.8,
+      "legs": [
+        {
+          "leg": 1,
+          "to_wp": 3,
+          "t_start": 19.9,
+          "t_end": 57.3,
+          "xtrack_max_m": 0.66,
+          "speed_ms": 5.1
+        },
+        {
+          "leg": 2,
+          "to_wp": 4,
+          "t_start": 57.3,
+          "t_end": 77.1,
+          "xtrack_max_m": 0.97,
+          "speed_ms": 9.4
+        },
+        {
+          "leg": 3,
+          "to_wp": 5,
+          "t_start": 77.1,
+          "t_end": 91.3,
+          "xtrack_max_m": 0.52,
+          "speed_ms": 9.7
+        },
+        {
+          "leg": 4,
+          "to_wp": 6,
+          "t_start": 91.3,
+          "t_end": 104.5,
+          "xtrack_max_m": 0.52,
+          "speed_ms": 10.1
+        },
+        {
+          "leg": 5,
+          "to_wp": 7,
+          "t_start": 104.5,
+          "t_end": 115.5,
+          "xtrack_max_m": 0.54,
+          "speed_ms": 9.2
+        },
+        {
+          "leg": 6,
+          "to_wp": 8,
+          "t_start": 115.5,
+          "t_end": 131.4,
+          "xtrack_max_m": 1.29,
+          "speed_ms": 8.7
+        },
+        {
+          "leg": 7,
+          "to_wp": 9,
+          "t_start": 131.4,
+          "t_end": 161.1,
+          "xtrack_max_m": 1.79,
+          "speed_ms": 9.2
+        },
+        {
+          "leg": 8,
+          "to_wp": 10,
+          "t_start": 161.1,
+          "t_end": 195.4,
+          "xtrack_max_m": 1.8,
+          "speed_ms": 5.0
+        }
+      ],
+      "waypoints_planned": 8,
+      "waypoints_reached": 8,
+      "mission_completion_pct": 100.0
+    },
+    "vibration": {
+      "max_x": 0.1,
+      "max_y": 0.5,
+      "max_z": 0.4,
+      "clip_total": 0
+    },
+    "gps": {
+      "min_sats": 10,
+      "max_hdop": 1.21
+    },
+    "wind": {
+      "max_ms": 10.3,
+      "mean_ms": 9.7,
+      "from_deg": 90.0,
+      "source": "WIND"
+    },
+    "attitude": {
+      "max_roll_deg": 30.0,
+      "max_pitch_deg": 30.1
+    },
+    "link": {
+      "uptime_pct": 100.0,
+      "packet_loss_pct": 0.0,
+      "dropouts": [],
+      "rssi": null,
+      "position_rate_hz": 10.0,
+      "position_rate_min_ratio": 0.99
+    },
+    "phases": [
+      {
+        "name": "Takeoff",
+        "t_start": 1.3,
+        "t_end": 19.9,
+        "kind": "takeoff"
+      },
+      {
+        "name": "Leg 1 (to WP3)",
+        "t_start": 19.9,
+        "t_end": 57.3,
+        "kind": "leg"
+      },
+      {
+        "name": "Leg 2 (to WP4)",
+        "t_start": 57.3,
+        "t_end": 77.1,
+        "kind": "leg"
+      },
+      {
+        "name": "Leg 3 (to WP5)",
+        "t_start": 77.1,
+        "t_end": 91.3,
+        "kind": "leg"
+      },
+      {
+        "name": "Leg 4 (to WP6)",
+        "t_start": 91.3,
+        "t_end": 104.5,
+        "kind": "leg"
+      },
+      {
+        "name": "Leg 5 (to WP7)",
+        "t_start": 104.5,
+        "t_end": 115.5,
+        "kind": "leg"
+      },
+      {
+        "name": "Leg 6 (to WP8)",
+        "t_start": 115.5,
+        "t_end": 131.4,
+        "kind": "leg"
+      },
+      {
+        "name": "Leg 7 (to WP9)",
+        "t_start": 131.4,
+        "t_end": 161.1,
+        "kind": "leg"
+      },
+      {
+        "name": "Leg 8 (to WP10)",
+        "t_start": 161.1,
+        "t_end": 195.4,
+        "kind": "leg"
+      },
+      {
+        "name": "RTL",
+        "t_start": 195.4,
+        "t_end": 267.7,
+        "kind": "rtl"
+      },
+      {
+        "name": "Land",
+        "t_start": 267.7,
+        "t_end": 274.7,
+        "kind": "land"
+      }
+    ],
+    "anomalies": [
+      {
+        "t": 171.1,
+        "signal": "current",
+        "value": 31.32,
+        "z": 3.2
+      }
+    ],
+    "events": [
+      {
+        "t": 0.3,
+        "text": "Mission: 1 Takeoff",
+        "severity": 6,
+        "kind": "statustext"
+      },
+      {
+        "t": 0.3,
+        "text": "Mode GUIDED -> AUTO",
+        "severity": null,
+        "kind": "mode"
+      },
+      {
+        "t": 5.7,
+        "text": "EKF3 IMU1 MAG0 in-flight yaw alignment complete",
+        "severity": 6,
+        "kind": "statustext"
+      },
+      {
+        "t": 5.7,
+        "text": "EKF3 IMU0 MAG0 in-flight yaw alignment complete",
+        "severity": 6,
+        "kind": "statustext"
+      },
+      {
+        "t": 19.1,
+        "text": "Mission: 2 ChangeSpeed",
+        "severity": 6,
+        "kind": "statustext"
+      },
+      {
+        "t": 19.1,
+        "text": "Mission: 3 WP",
+        "severity": 6,
+        "kind": "statustext"
+      },
+      {
+        "t": 56.3,
+        "text": "Reached command #3",
+        "severity": 6,
+        "kind": "statustext"
+      },
+      {
+        "t": 56.3,
+        "text": "Mission: 4 WP",
+        "severity": 6,
+        "kind": "statustext"
+      },
+      {
+        "t": 76.8,
+        "text": "Reached command #4",
+        "severity": 6,
+        "kind": "statustext"
+      },
+      {
+        "t": 76.8,
+        "text": "Mission: 5 WP",
+        "severity": 6,
+        "kind": "statustext"
+      },
+      {
+        "t": 90.6,
+        "text": "Reached command #5",
+        "severity": 6,
+        "kind": "statustext"
+      },
+      {
+        "t": 90.6,
+        "text": "Mission: 6 WP",
+        "severity": 6,
+        "kind": "statustext"
+      },
+      {
+        "t": 103.7,
+        "text": "Reached command #6",
+        "severity": 6,
+        "kind": "statustext"
+      },
+      {
+        "t": 103.7,
+        "text": "Mission: 7 WP",
+        "severity": 6,
+        "kind": "statustext"
+      },
+      {
+        "t": 115.0,
+        "text": "Reached command #7",
+        "severity": 6,
+        "kind": "statustext"
+      },
+      {
+        "t": 115.0,
+        "text": "Mission: 8 WP",
+        "severity": 6,
+        "kind": "statustext"
+      },
+      {
+        "t": 130.5,
+        "text": "Reached command #8",
+        "severity": 6,
+        "kind": "statustext"
+      },
+      {
+        "t": 130.5,
+        "text": "Mission: 9 WP",
+        "severity": 6,
+        "kind": "statustext"
+      },
+      {
+        "t": 160.0,
+        "text": "Reached command #9",
+        "severity": 6,
+        "kind": "statustext"
+      },
+      {
+        "t": 160.0,
+        "text": "Mission: 10 WP",
+        "severity": 6,
+        "kind": "statustext"
+      },
+      {
+        "t": 194.6,
+        "text": "Reached command #10",
+        "severity": 6,
+        "kind": "statustext"
+      },
+      {
+        "t": 194.6,
+        "text": "Mission: 11 RTL",
+        "severity": 6,
+        "kind": "statustext"
+      },
+      {
+        "t": 273.8,
+        "text": "Disarming motors",
+        "severity": 6,
+        "kind": "statustext"
+      }
+    ],
+    "warnings": 0,
+    "status": {
+      "xtrack_max_m": "caution",
+      "battery_end": "good",
+      "vibration": "good",
+      "clipping": "good",
+      "gps_sats": "good",
+      "gps_hdop": "good",
+      "wind": "bad",
+      "attitude": "caution",
+      "mission_completion": "good",
+      "warnings": "good",
+      "link_uptime": "good",
+      "dropouts": "good",
+      "packet_loss": "good",
+      "position_rate": "good"
+    },
+    "health_score": 55
+  },
+  "mission": {
+    "items": 12,
+    "length_m": 1330.0
+  },
+  "params": {
+    "FS_THR_ENABLE": 1.0,
+    "BATT_FS_LOW_ACT": 2.0,
+    "FENCE_ENABLE": 0.0,
+    "BATT_CAPACITY": 10000.0
+  },
+  "history": {
+    "flights": 1,
+    "baselines": {},
+    "worse_than_usual": [],
+    "battery_prediction": {
+      "predicted_end_pct": 81.2,
+      "mah_per_km": 1414.6,
+      "flights": 2
+    },
+    "recurring": [],
+    "fix_effectiveness": []
+  },
+  "risk_base": {
+    "score": 25,
+    "level": "Low",
+    "factors": [
+      {
+        "factor": "wind 10.3 m/s in the latest flight",
+        "points": 15
+      },
+      {
+        "factor": "failsafe not set: FENCE_ENABLE = 0",
+        "points": 10
+      }
+    ],
+    "confidence": "low",
+    "params_checked": true
+  },
+  "history_entry": {
+    "run_id": "s1",
+    "date": "2026-10-22T21:56:50",
+    "scenario": "s1",
+    "parent_run": null,
+    "mission_length_m": 1330.0,
+    "duration_s": 274.4,
+    "battery_used_pct": 16.0,
+    "battery_pct_per_km": 13.3,
+    "battery_capacity_mah": 10000.0,
+    "battery_mah_per_km": 1326.7,
+    "battery_end_pct": 83.0,
+    "mission_completion_pct": 100.0,
+    "xtrack_max_m": 1.8,
+    "link_uptime_pct": 100.0,
+    "dropouts": 0,
+    "vibration_max": 0.5,
+    "wind_max_ms": 10.3,
+    "health_score": 55,
+    "causes": [
+      "wind_drift"
+    ],
+    "edits_applied": [
+      "set_speed WP3 6 m/s (cause C1)"
+    ]
+  },
+  "agents": {
+    "manifest": {
+      "inputs": {
+        "tlog_files": 1,
+        "mission": true,
+        "params": true,
+        "pilot_notes": false
+      },
+      "statuses": {
+        "xtrack_max_m": "caution",
+        "battery_end": "good",
+        "vibration": "good",
+        "clipping": "good",
+        "gps_sats": "good",
+        "gps_hdop": "good",
+        "wind": "bad",
+        "attitude": "caution",
+        "mission_completion": "good",
+        "warnings": "good",
+        "link_uptime": "good",
+        "dropouts": "good",
+        "packet_loss": "good",
+        "position_rate": "good"
+      },
+      "problems": [
+        "attitude",
+        "wind",
+        "xtrack_max_m"
+      ],
+      "link_all_good": true,
+      "history_flights": 1,
+      "dropouts": 0
+    },
+    "plan": {
+      "plan": [
+        {
+          "agent": "flight_summary",
+          "reason": "Always run flight_summary first to summarize the flight data."
+        },
+        {
+          "agent": "telemetry_link",
+          "reason": "link healthy: one-line result (added by rule)"
+        },
+        {
+          "agent": "diagnosis",
+          "reason": "Run diagnosis to address any metrics that are caution or bad, as there are caution and bad metrics present."
+        },
+        {
+          "agent": "risk",
+          "reason": "Run risk after diagnosis to assess and mitigate risks based on the current flight conditions."
+        },
+        {
+          "agent": "advisor",
+          "reason": "Run advisor to provide recommendations based on the analysis performed by flight_summary, diagnosis, and risk."
+        },
+        {
+          "agent": "verifier",
+          "reason": "Always run verifier last to verify the correctness of the analysis and recommendations."
+        }
+      ],
+      "source": "llm"
+    },
+    "plan_error": null,
+    "backend": "ollama",
+    "model": "qwen2.5:3b",
+    "agents": {
+      "flight_summary": {
+        "output": {
+          "verdict": "Needs attention",
+          "summary": "The flight was generally good, but there were issues with the takeoff and landing phases. The takeoff phase had a caution status, which is unexpected given the data. The landing phase also had a caution status, which is unexpected given the data. The flight completed all legs as planned.",
+          "flight_story": [
+            {
+              "phase": "Takeoff",
+              "status": "caution",
+              "text": "The takeoff phase had a caution status, which is unexpected given the data. The takeoff phase was smooth but the caution status suggests there might be an issue with the takeoff procedure or data collection."
+            },
+            {
+              "phase": "Leg 1 (to WP3)",
+              "status": "good",
+              "text": "The first leg of the flight was completed successfully with a good status. The drone maintained a good speed and track, indicating a smooth flight."
+            },
+            {
+              "phase": "Leg 2 (to WP4)",
+              "status": "good",
+              "text": "The second leg of the flight was completed successfully with a good status. The drone maintained a good speed and track, indicating a smooth flight."
+            },
+            {
+              "phase": "Leg 3 (to WP5)",
+              "status": "good",
+              "text": "The third leg of the flight was completed successfully with a good status. The drone maintained a good speed and track, indicating a smooth flight."
+            },
+            {
+              "phase": "Leg 4 (to WP6)",
+              "status": "good",
+              "text": "The fourth leg of the flight was completed successfully with a good status. The drone maintained a good speed and track, indicating a smooth flight."
+            },
+            {
+              "phase": "Leg 5 (to WP7)",
+              "status": "good",
+              "text": "The fifth leg of the flight was completed successfully with a good status. The drone maintained a good speed and track, indicating a smooth flight."
+            },
+            {
+              "phase": "Leg 6 (to WP8)",
+              "status": "good",
+              "text": "The sixth leg of the flight was completed successfully with a good status. The drone maintained a good speed and track, indicating a smooth flight."
+            },
+            {
+              "phase": "Leg 7 (to WP9)",
+              "status": "good",
+              "text": "The seventh leg of the flight was completed successfully with a good status. The drone maintained a good speed and track, indicating a smooth flight."
+            },
+            {
+              "phase": "Leg 8 (to WP10)",
+              "status": "good",
+              "text": "The eighth leg of the flight was completed successfully with a good status. The drone maintained a good speed and track, indicating a smooth flight."
+            },
+            {
+              "phase": "RTL (Return to Launch)",
+              "status": "good",
+              "text": "The flight completed the return to launch phase successfully with a good status. The drone maintained a good speed and track, indicating a smooth flight."
+            },
+            {
+              "phase": "Land",
+              "status": "good",
+              "text": "The landing phase was completed successfully with a good status. The drone maintained a good speed and track, indicating a smooth flight."
+            }
+          ],
+          "claims": []
+        },
+        "source": "llm",
+        "seconds": 19.29,
+        "errors": [],
+        "feedback": "summary: 5 sentences; the summary must be 3; story[1]: status caution disagrees with the data (good); story[2]: status caution disagrees with the data (good); story[3]: status caution disagrees with the data (good); story[4]: status caution disagrees with the data (good); story[5]: status caution disagrees with the data (good); story[9]: phase RTL (Return to Launch) is not in this flight"
+      },
+      "telemetry_link": {
+        "output": {
+          "link_verdict": "good",
+          "safe_for_mission": true,
+          "link_findings": [
+            {
+              "id": "L1",
+              "text": "Link uptime 100.0 % across the flight",
+              "metric": "link.uptime_pct",
+              "value": 100.0
+            },
+            {
+              "id": "L2",
+              "text": "Packet loss 0.0 %",
+              "metric": "link.packet_loss_pct",
+              "value": 0.0
+            },
+            {
+              "id": "L3",
+              "text": "Radio RSSI not reported (no telemetry radio in the log)",
+              "metric": null,
+              "value": null
+            }
+          ]
+        },
+        "source": "rule",
+        "seconds": 0.0,
+        "errors": [],
+        "feedback": null
+      },
+      "diagnosis": {
+        "output": {
+          "findings": [
+            {
+              "id": "F1",
+              "text": "Crosswind of 10.3 m/s pushed the drone off its track while flying at up to 10.1 m/s",
+              "metric": "wind.max_ms",
+              "value": 10.3
+            },
+            {
+              "id": "F2",
+              "text": "Crosswind of 10.3 m/s pushed the drone off its track while flying at up to 10.1 m/s",
+              "metric": "tracking.xtrack_max_m",
+              "value": 1.8
+            },
+            {
+              "id": "F3",
+              "text": "Crosswind of 10.3 m/s pushed the drone off its track while flying at up to 10.1 m/s",
+              "metric": "attitude.max_roll_deg",
+              "value": 30.0
+            }
+          ],
+          "causes": [
+            {
+              "id": "C1",
+              "cause": "Crosswind of 10.3 m/s pushed the drone off its track while flying at up to 10.1 m/s",
+              "category": "wind_drift",
+              "confidence": 0.8,
+              "findings": [
+                "F1",
+                "F2",
+                "F3"
+              ]
+            }
+          ]
+        },
+        "source": "llm",
+        "seconds": 9.3,
+        "errors": [],
+        "feedback": null
+      },
+      "risk": {
+        "output": {
+          "risk_level": "Medium",
+          "risk_score": 35,
+          "adjustment": 10,
+          "adjustment_reason": "Increased risk score due to crosswind and unscheduled failsafe condition",
+          "factors": [
+            "wind 10.3 m/s in the latest flight",
+            "failsafe not set: FENCE_ENABLE = 0"
+          ],
+          "predicted_battery_pct": 81.2,
+          "confidence": "low"
+        },
+        "source": "llm",
+        "seconds": 4.04,
+        "errors": [],
+        "feedback": null
+      },
+      "advisor": {
+        "output": {
+          "edits": [
+            {
+              "action": "remove_waypoint",
+              "wp": 1,
+              "value": null,
+              "cause": "C1"
+            },
+            {
+              "action": "remove_waypoint",
+              "wp": 1,
+              "value": null,
+              "cause": "C1"
+            },
+            {
+              "action": "change_altitude",
+              "wp": 3,
+              "value": -15.0,
+              "cause": "C1"
+            }
+          ],
+          "recommendations": [
+            {
+              "rank": 1,
+              "text": "Remove WP1 and WP1, and reduce altitude at WP3 by 15 meters. This addresses the crosswind issue by reducing the drone's speed and altitude, aligning with the findings of the crosswind causing the drone to drift off track.",
+              "reason": "F1, F2, F3",
+              "evidence": "F1, F2, F3"
+            },
+            {
+              "rank": 2,
+              "text": "Reduce speed at WP3 to 6 m/s. This addresses the crosswind issue by reducing the drone's speed, aligning with the findings of the crosswind causing the drone to drift off track.",
+              "reason": "F1, F2, F3",
+              "evidence": "F1, F2, F3"
+            },
+            {
+              "rank": 3,
+              "text": "Reduce altitude at WP3 by 15 meters. This addresses the crosswind issue by reducing the drone's altitude, aligning with the findings of the crosswind causing the drone to drift off track.",
+              "reason": "F1, F2, F3",
+              "evidence": "F1, F2, F3"
+            }
+          ]
+        },
+        "source": "llm",
+        "seconds": 10.36,
+        "errors": [],
+        "feedback": "rec[1]: proposes remove_waypoint at WP1, which failed the mission limits; rec[2]: proposes remove_waypoint at WP1, which failed the mission limits; rec[3]: proposes change_altitude at WP3, which failed the mission limits"
+      }
+    },
+    "verification": {
+      "verdicts": [
+        {
+          "agent": "flight_summary",
+          "claim_id": "summary",
+          "status": "rejected",
+          "reason": "4 sentences; the summary must be 3"
+        },
+        {
+          "agent": "flight_summary",
+          "claim_id": "story[0]",
+          "status": "rejected",
+          "reason": "status caution disagrees with the data (good)"
+        },
+        {
+          "agent": "flight_summary",
+          "claim_id": "story[1]",
+          "status": "supported",
+          "reason": "matches the data"
+        },
+        {
+          "agent": "flight_summary",
+          "claim_id": "story[2]",
+          "status": "supported",
+          "reason": "matches the data"
+        },
+        {
+          "agent": "flight_summary",
+          "claim_id": "story[3]",
+          "status": "supported",
+          "reason": "matches the data"
+        },
+        {
+          "agent": "flight_summary",
+          "claim_id": "story[4]",
+          "status": "supported",
+          "reason": "matches the data"
+        },
+        {
+          "agent": "flight_summary",
+          "claim_id": "story[5]",
+          "status": "supported",
+          "reason": "matches the data"
+        },
+        {
+          "agent": "flight_summary",
+          "claim_id": "story[6]",
+          "status": "rejected",
+          "reason": "status good disagrees with the data (caution)"
+        },
+        {
+          "agent": "flight_summary",
+          "claim_id": "story[7]",
+          "status": "rejected",
+          "reason": "status good disagrees with the data (caution)"
+        },
+        {
+          "agent": "flight_summary",
+          "claim_id": "story[8]",
+          "status": "rejected",
+          "reason": "status good disagrees with the data (caution)"
+        },
+        {
+          "agent": "flight_summary",
+          "claim_id": "story[9]",
+          "status": "rejected",
+          "reason": "phase RTL (Return to Launch) is not in this flight"
+        },
+        {
+          "agent": "flight_summary",
+          "claim_id": "story[10]",
+          "status": "supported",
+          "reason": "matches the data"
+        },
+        {
+          "agent": "telemetry_link",
+          "claim_id": "L1",
+          "status": "supported",
+          "reason": "matches the data"
+        },
+        {
+          "agent": "telemetry_link",
+          "claim_id": "L2",
+          "status": "supported",
+          "reason": "matches the data"
+        },
+        {
+          "agent": "telemetry_link",
+          "claim_id": "L3",
+          "status": "supported",
+          "reason": "matches the data"
+        },
+        {
+          "agent": "diagnosis",
+          "claim_id": "F1",
+          "status": "supported",
+          "reason": "matches the data"
+        },
+        {
+          "agent": "diagnosis",
+          "claim_id": "F2",
+          "status": "supported",
+          "reason": "matches the data"
+        },
+        {
+          "agent": "diagnosis",
+          "claim_id": "F3",
+          "status": "supported",
+          "reason": "matches the data"
+        },
+        {
+          "agent": "diagnosis",
+          "claim_id": "C1",
+          "status": "supported",
+          "reason": "matches the data"
+        },
+        {
+          "agent": "risk",
+          "claim_id": "adjustment_reason",
+          "status": "supported",
+          "reason": "matches the data"
+        },
+        {
+          "agent": "advisor",
+          "claim_id": "rec[1]",
+          "status": "rejected",
+          "reason": "'15 meters' is not in the flight data"
+        },
+        {
+          "agent": "advisor",
+          "claim_id": "rec[2]",
+          "status": "rejected",
+          "reason": "gives no number from the flight data as evidence"
+        },
+        {
+          "agent": "advisor",
+          "claim_id": "rec[3]",
+          "status": "rejected",
+          "reason": "'15 meters' is not in the flight data"
+        }
+      ],
+      "rejection_rates": {
+        "flight_summary": 0.5,
+        "telemetry_link": 0.0,
+        "diagnosis": 0.0,
+        "risk": 0.0,
+        "advisor": 1.0
+      },
+      "reruns": [
+        {
+          "agent": "flight_summary",
+          "rejection_rate": 0.58,
+          "feedback": "summary: 5 sentences; the summary must be 3; story[1]: status caution disagrees with the data (good); story[2]: status caution disagrees with the data (good); story[3]: status caution disagrees with the data (good); story[4]: status caution disagrees with the data (good); story[5]: status caution disagrees with the data (good); story[9]: phase RTL (Return to Launch) is not in this flight"
+        },
+        {
+          "agent": "advisor",
+          "rejection_rate": 1.0,
+          "feedback": "rec[1]: proposes remove_waypoint at WP1, which failed the mission limits; rec[2]: proposes remove_waypoint at WP1, which failed the mission limits; rec[3]: proposes change_altitude at WP3, which failed the mission limits"
+        }
+      ],
+      "claims": 23,
+      "rejected": 9,
+      "grounding_rate": 0.391
+    },
+    "edit_check": {
+      "dropped": [
+        {
+          "edit": {
+            "action": "remove_waypoint",
+            "wp": 1,
+            "value": null,
+            "cause": "C1"
+          },
+          "reason": "WP1 (NAV_TAKEOFF) cannot be edited"
+        },
+        {
+          "edit": {
+            "action": "remove_waypoint",
+            "wp": 1,
+            "value": null,
+            "cause": "C1"
+          },
+          "reason": "WP1 (NAV_TAKEOFF) cannot be edited"
+        },
+        {
+          "edit": {
+            "action": "change_altitude",
+            "wp": 3,
+            "value": -15.0,
+            "cause": "C1"
+          },
+          "reason": "altitude 15 m is outside 25-120 m"
+        }
+      ],
+      "replaced_by_rules": true
+    },
+    "approved": {
+      "flight_summary": {
+        "verdict": "Needs attention",
+        "summary": "The flight lasted 274 s over 1206 m and scored 55 out of 100. The main problems were: wind. It landed with 83 % battery and the telemetry link was up 100.0 % of the time.",
+        "flight_story": [
+          {
+            "phase": "Takeoff",
+            "status": "good",
+            "text": "climbed to 30.1 m in 19 s"
+          },
+          {
+            "phase": "Leg 1 (to WP3)",
+            "status": "good",
+            "text": "The first leg of the flight was completed successfully with a good status. The drone maintained a good speed and track, indicating a smooth flight."
+          },
+          {
+            "phase": "Leg 2 (to WP4)",
+            "status": "good",
+            "text": "The second leg of the flight was completed successfully with a good status. The drone maintained a good speed and track, indicating a smooth flight."
+          },
+          {
+            "phase": "Leg 3 (to WP5)",
+            "status": "good",
+            "text": "The third leg of the flight was completed successfully with a good status. The drone maintained a good speed and track, indicating a smooth flight."
+          },
+          {
+            "phase": "Leg 4 (to WP6)",
+            "status": "good",
+            "text": "The fourth leg of the flight was completed successfully with a good status. The drone maintained a good speed and track, indicating a smooth flight."
+          },
+          {
+            "phase": "Leg 5 (to WP7)",
+            "status": "good",
+            "text": "The fifth leg of the flight was completed successfully with a good status. The drone maintained a good speed and track, indicating a smooth flight."
+          },
+          {
+            "phase": "Leg 6 (to WP8)",
+            "status": "caution",
+            "text": "8.7 m/s, cross-track up to 1.29 m"
+          },
+          {
+            "phase": "Leg 7 (to WP9)",
+            "status": "caution",
+            "text": "9.2 m/s, cross-track up to 1.79 m"
+          },
+          {
+            "phase": "Leg 8 (to WP10)",
+            "status": "caution",
+            "text": "5.0 m/s, cross-track up to 1.8 m"
+          },
+          {
+            "phase": "Land",
+            "status": "good",
+            "text": "The landing phase was completed successfully with a good status. The drone maintained a good speed and track, indicating a smooth flight."
+          }
+        ],
+        "claims": []
+      },
+      "telemetry_link": {
+        "link_verdict": "good",
+        "safe_for_mission": true,
+        "link_findings": [
+          {
+            "id": "L1",
+            "text": "Link uptime 100.0 % across the flight",
+            "metric": "link.uptime_pct",
+            "value": 100.0
+          },
+          {
+            "id": "L2",
+            "text": "Packet loss 0.0 %",
+            "metric": "link.packet_loss_pct",
+            "value": 0.0
+          },
+          {
+            "id": "L3",
+            "text": "Radio RSSI not reported (no telemetry radio in the log)",
+            "metric": null,
+            "value": null
+          }
+        ]
+      },
+      "diagnosis": {
+        "findings": [
+          {
+            "id": "F1",
+            "text": "Crosswind of 10.3 m/s pushed the drone off its track while flying at up to 10.1 m/s",
+            "metric": "wind.max_ms",
+            "value": 10.3
+          },
+          {
+            "id": "F2",
+            "text": "Crosswind of 10.3 m/s pushed the drone off its track while flying at up to 10.1 m/s",
+            "metric": "tracking.xtrack_max_m",
+            "value": 1.8
+          },
+          {
+            "id": "F3",
+            "text": "Crosswind of 10.3 m/s pushed the drone off its track while flying at up to 10.1 m/s",
+            "metric": "attitude.max_roll_deg",
+            "value": 30.0
+          }
+        ],
+        "causes": [
+          {
+            "id": "C1",
+            "cause": "Crosswind of 10.3 m/s pushed the drone off its track while flying at up to 10.1 m/s",
+            "category": "wind_drift",
+            "confidence": 0.8,
+            "findings": [
+              "F1",
+              "F2",
+              "F3"
+            ]
+          }
+        ]
+      },
+      "risk": {
+        "risk_level": "Medium",
+        "risk_score": 35,
+        "adjustment": 10,
+        "adjustment_reason": "Increased risk score due to crosswind and unscheduled failsafe condition",
+        "factors": [
+          "wind 10.3 m/s in the latest flight",
+          "failsafe not set: FENCE_ENABLE = 0"
+        ],
+        "predicted_battery_pct": 81.2,
+        "confidence": "low"
+      },
+      "advisor": {
+        "edits": [
+          {
+            "action": "set_speed",
+            "wp": 3,
+            "value": 6.0,
+            "cause": "C1"
+          }
+        ],
+        "recommendations": [
+          {
+            "rank": 1,
+            "text": "Fly the legs at 6 m/s in strong wind",
+            "reason": "cross-track grew with wind",
+            "evidence": "wind 10.3 m/s, cross-track 1.8 m"
+          }
+        ]
+      }
+    },
+    "seconds": 77.1
+  },
+  "mission_fix": {
+    "applied": [
+      {
+        "edit": {
+          "action": "set_speed",
+          "wp": 3,
+          "value": 6.0,
+          "cause": "C1"
+        },
+        "text": "set_speed WP3 6 m/s (cause C1)"
+      }
+    ],
+    "rejected": [
+      {
+        "edit": {
+          "action": "remove_waypoint",
+          "wp": 1,
+          "value": null,
+          "cause": "C1"
+        },
+        "reason": "WP1 (NAV_TAKEOFF) cannot be edited"
+      },
+      {
+        "edit": {
+          "action": "remove_waypoint",
+          "wp": 1,
+          "value": null,
+          "cause": "C1"
+        },
+        "reason": "WP1 (NAV_TAKEOFF) cannot be edited"
+      },
+      {
+        "edit": {
+          "action": "change_altitude",
+          "wp": 3,
+          "value": -15.0,
+          "cause": "C1"
+        },
+        "reason": "altitude 15 m is outside 25-120 m"
+      }
+    ],
+    "length_before_m": 1330,
+    "length_after_m": 1330,
+    "waypoints_before": 8,
+    "waypoints_after": 8,
+    "file": "mission_fixed.waypoints"
+  },
+  "seconds_total": 77.8
+}
