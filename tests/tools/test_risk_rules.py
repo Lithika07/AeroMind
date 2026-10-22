@@ -51,3 +51,9 @@ def test_score_is_capped_at_100():
 
 def test_levels():
     assert [risk_rules.level(s) for s in (0, 29, 30, 59, 60, 100)] == ["Low", "Low", "Medium", "Medium", "High", "High"]
+
+
+def test_predicted_battery_below_ten_percent_is_high_on_its_own_with_one_more_factor():
+    m = metrics(battery={"remaining_end_pct": 14}, status={"battery_end": "bad"})
+    result = risk_rules.base_score(m, SAFE_PARAMS, 8.0, [], 5)
+    assert result["score"] == 45 + 15 and result["level"] == "High"

@@ -1,7 +1,8 @@
 """Base risk score for the next mission, from fixed rules so it is repeatable (PRD "Risk scoring").
 
 The Risk agent may move the result by at most 10 points and must say why. Points:
-  predicted battery at landing < 20 % / 20-30 %            +30 / +15
+  predicted battery at landing < 10 % / < 20 % / 20-30 %   +45 / +30 / +15
+      (below 10 % the battery failsafe would abort the mission: an AeroMind addition)
   battery at landing Bad in the latest flight              +15  (AeroMind addition, like wind)
   telemetry dropouts Bad / Caution                         +20 / +10
   GPS Bad / Caution                                        +20 / +10
@@ -16,7 +17,7 @@ from typing import Optional
 
 from agents.schemas import Metrics
 
-BATTERY_BAD_PCT, BATTERY_CAUTION_PCT = 20.0, 30.0
+BATTERY_ABORT_PCT, BATTERY_BAD_PCT, BATTERY_CAUTION_PCT = 10.0, 20.0, 30.0
 FAILSAFE_PARAMS = ("FS_THR_ENABLE", "BATT_FS_LOW_ACT", "FENCE_ENABLE")
 MEDIUM_FROM, HIGH_FROM = 30, 60
 MAX_SCORE = 100
@@ -45,7 +46,9 @@ def base_score(metrics: Metrics, params: Optional[dict], predicted_battery_pct: 
     if battery is None:
         battery, source = metrics.battery.remaining_end_pct, "this flight's"
     if battery is not None:
-        if battery < BATTERY_BAD_PCT:
+        if battery < BATTERY_ABORT_PCT:
+            add(45, f"{source} battery at landing {battery:.0f} % (< 10 %: the battery failsafe would end the mission)")
+        elif battery < BATTERY_BAD_PCT:
             add(30, f"{source} battery at landing {battery:.0f} % (< 20 %)")
         elif battery <= BATTERY_CAUTION_PCT:
             add(15, f"{source} battery at landing {battery:.0f} % (20-30 %)")
