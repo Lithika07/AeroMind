@@ -1,0 +1,970 @@
+<?xml version="1.0"?>
+<!--
+  AeroMind's airframe: the Aero Sense Hexa-X hexacopter (ArduPilot Hexa-X, FRAME_CLASS 2 / TYPE 1),
+  copied from its generated model with the camera, depth, thermal and payload IMU/baro sensors
+  removed, since AeroMind only analyses telemetry. Rotor aerodynamics (LiftDrag per blade,
+  velocity-controlled joints) are the stock ArduPilot iris's, six of them; rotor_<i>_joint is
+  ArduPilot motor i+1. Horizontal drag is linear, 0.9 N per m/s (Hydrodynamics xU/yV below).
+-->
+<sdf version="1.9">
+  <model name="aeromind_hexa">
+    <!-- ================= airframe ================= -->
+    <link name="base_link">
+      <inertial>
+        <mass>2.2</mass>
+        <inertia><ixx>0.038</ixx><iyy>0.038</iyy><izz>0.05</izz></inertia>
+      </inertial>
+      <!-- The frame, from its CAD: plates, arms, motor mounts and landing gear in one mesh. -->
+      <visual name="frame">
+        <geometry><mesh><uri>model://aeromind_hexa/meshes/hexacopter_frame.glb</uri></mesh></geometry>
+      </visual>
+      <collision name="plates_collision">
+        <geometry><box><size>0.402 0.435 0.1</size></box></geometry>
+      </collision>
+      <!-- The skids' end caps are what touch the ground: aero_sense_bringup/worlds.py
+           GEAR_HEIGHT_M is their depth below base_link (tested there). -->
+      <collision name="skid_0_collision">
+        <pose>0 0.1969 -0.5669 0 1.5707963 0</pose>
+        <geometry><cylinder><radius>0.0156</radius><length>0.531</length></cylinder></geometry>
+        <surface><friction><ode><mu>1.0</mu><mu2>1.0</mu2></ode></friction></surface>
+      </collision>
+      <collision name="skid_1_collision">
+        <pose>0 -0.1969 -0.5669 0 1.5707963 0</pose>
+        <geometry><cylinder><radius>0.0156</radius><length>0.531</length></cylinder></geometry>
+        <surface><friction><ode><mu>1.0</mu><mu2>1.0</mu2></ode></friction></surface>
+      </collision>
+      <!-- Parts without CAD (render.layout): labelled boxes at their published sizes, the battery
+           straps, the camera tray hung from the bottom plate, and the wiring. -->
+      <visual name="battery">
+        <pose>0.0 0.0 -0.0815 0 0 0.0</pose>
+        <geometry><mesh><uri>model://aeromind_hexa/meshes/battery.glb</uri></mesh></geometry>
+      </visual>
+      <visual name="flight_controller">
+        <pose>0.035 0.0 -0.019250000000000003 0 0 0.0</pose>
+        <geometry><mesh><uri>model://aeromind_hexa/meshes/flight_controller.glb</uri></mesh></geometry>
+      </visual>
+      <visual name="companion_computer">
+        <pose>-0.062 0.0 -0.03 0 0 0.0</pose>
+        <geometry><mesh><uri>model://aeromind_hexa/meshes/companion_computer.glb</uri></mesh></geometry>
+      </visual>
+      <visual name="pdb">
+        <pose>0.035 0.0 -0.038 0 0 0.0</pose>
+        <geometry><mesh><uri>model://aeromind_hexa/meshes/pdb.glb</uri></mesh></geometry>
+      </visual>
+      <visual name="esc_1">
+        <pose>1.8369701987210297e-17 -0.3 -0.017 0 0 -1.5707963267948966</pose>
+        <geometry><mesh><uri>model://aeromind_hexa/meshes/esc.glb</uri></mesh></geometry>
+      </visual>
+      <visual name="esc_2">
+        <pose>1.8369701987210297e-17 0.3 -0.017 0 0 1.5707963267948966</pose>
+        <geometry><mesh><uri>model://aeromind_hexa/meshes/esc.glb</uri></mesh></geometry>
+      </visual>
+      <visual name="esc_3">
+        <pose>0.2598076211353316 0.14999999999999997 -0.017 0 0 0.5235987755982988</pose>
+        <geometry><mesh><uri>model://aeromind_hexa/meshes/esc.glb</uri></mesh></geometry>
+      </visual>
+      <visual name="esc_4">
+        <pose>-0.2598076211353316 -0.14999999999999997 -0.017 0 0 -2.6179938779914944</pose>
+        <geometry><mesh><uri>model://aeromind_hexa/meshes/esc.glb</uri></mesh></geometry>
+      </visual>
+      <visual name="esc_5">
+        <pose>0.2598076211353316 -0.14999999999999997 -0.017 0 0 -0.5235987755982988</pose>
+        <geometry><mesh><uri>model://aeromind_hexa/meshes/esc.glb</uri></mesh></geometry>
+      </visual>
+      <visual name="esc_6">
+        <pose>-0.2598076211353316 0.14999999999999997 -0.017 0 0 2.6179938779914944</pose>
+        <geometry><mesh><uri>model://aeromind_hexa/meshes/esc.glb</uri></mesh></geometry>
+      </visual>
+      <visual name="gps_label">
+        <pose>-0.155 0.0 0.22015 0 0 0.0</pose>
+        <geometry><mesh><uri>model://aeromind_hexa/meshes/gps_label.glb</uri></mesh></geometry>
+      </visual>
+      <visual name="camera_tray">
+        <pose>0.0 0.0 -0.117 0 0 0</pose>
+        <geometry><box><size>0.06 0.14 0.004</size></box></geometry>
+        <material><diffuse>0.12 0.12 0.13 1</diffuse></material>
+      </visual>
+      <visual name="lepton_carrier">
+        <pose>0.0 0.058 -0.12695 0 0 0</pose>
+        <geometry><box><size>0.03 0.022 0.0159</size></box></geometry>
+        <material><diffuse>0.05 0.3 0.12 1</diffuse></material>
+      </visual>
+      <visual name="camera_hanger_left">
+        <pose>0.0 0.07150000000000001 -0.0845 0 0 0</pose>
+        <geometry><box><size>0.06 0.003 0.069</size></box></geometry>
+        <material><diffuse>0.12 0.12 0.13 1</diffuse></material>
+      </visual>
+      <visual name="camera_hanger_right">
+        <pose>0.0 -0.07150000000000001 -0.0845 0 0 0</pose>
+        <geometry><box><size>0.06 0.003 0.069</size></box></geometry>
+        <material><diffuse>0.12 0.12 0.13 1</diffuse></material>
+      </visual>
+      <visual name="strap_0_under">
+        <pose>-0.07 0.0 -0.114 0 0 0</pose>
+        <geometry><box><size>0.02 0.081 0.002</size></box></geometry>
+        <material><diffuse>0.45 0.05 0.05 1</diffuse></material>
+      </visual>
+      <visual name="strap_0_left">
+        <pose>-0.07 0.0395 -0.0825 0 0 0</pose>
+        <geometry><box><size>0.02 0.002 0.065</size></box></geometry>
+        <material><diffuse>0.45 0.05 0.05 1</diffuse></material>
+      </visual>
+      <visual name="strap_0_right">
+        <pose>-0.07 -0.0395 -0.0825 0 0 0</pose>
+        <geometry><box><size>0.02 0.002 0.065</size></box></geometry>
+        <material><diffuse>0.45 0.05 0.05 1</diffuse></material>
+      </visual>
+      <visual name="strap_1_under">
+        <pose>0.07 0.0 -0.114 0 0 0</pose>
+        <geometry><box><size>0.02 0.081 0.002</size></box></geometry>
+        <material><diffuse>0.45 0.05 0.05 1</diffuse></material>
+      </visual>
+      <visual name="strap_1_left">
+        <pose>0.07 0.0395 -0.0825 0 0 0</pose>
+        <geometry><box><size>0.02 0.002 0.065</size></box></geometry>
+        <material><diffuse>0.45 0.05 0.05 1</diffuse></material>
+      </visual>
+      <visual name="strap_1_right">
+        <pose>0.07 -0.0395 -0.0825 0 0 0</pose>
+        <geometry><box><size>0.02 0.002 0.065</size></box></geometry>
+        <material><diffuse>0.45 0.05 0.05 1</diffuse></material>
+      </visual>
+      <visual name="gps_mast_base">
+        <pose>-0.155 0.0 0.0575 0 0 0</pose>
+        <geometry><box><size>0.026 0.026 0.015</size></box></geometry>
+        <material><diffuse>0.12 0.12 0.13 1</diffuse></material>
+      </visual>
+      <visual name="wire_fc_standoff_0_0">
+        <pose>0.049 0.013999999999999999 -0.032 0.0 0.0 0.0</pose>
+        <geometry><cylinder><radius>0.0018</radius><length>0.008</length></cylinder></geometry>
+        <material><diffuse>0.75 0.76 0.78 1</diffuse></material>
+      </visual>
+      <visual name="wire_fc_standoff_1_0">
+        <pose>0.049 -0.013999999999999999 -0.032 0.0 0.0 0.0</pose>
+        <geometry><cylinder><radius>0.0018</radius><length>0.008</length></cylinder></geometry>
+        <material><diffuse>0.75 0.76 0.78 1</diffuse></material>
+      </visual>
+      <visual name="wire_fc_standoff_2_0">
+        <pose>0.021000000000000005 0.013999999999999999 -0.032 0.0 0.0 0.0</pose>
+        <geometry><cylinder><radius>0.0018</radius><length>0.008</length></cylinder></geometry>
+        <material><diffuse>0.75 0.76 0.78 1</diffuse></material>
+      </visual>
+      <visual name="wire_fc_standoff_3_0">
+        <pose>0.021000000000000005 -0.013999999999999999 -0.032 0.0 0.0 0.0</pose>
+        <geometry><cylinder><radius>0.0018</radius><length>0.008</length></cylinder></geometry>
+        <material><diffuse>0.75 0.76 0.78 1</diffuse></material>
+      </visual>
+      <visual name="wire_esc_1_power_0">
+        <pose>0.017500000000000005 -0.074 -0.0385 0.0 1.5707963267948966 -1.873681195169868</pose>
+        <geometry><cylinder><radius>0.0015</radius><length>0.11734138229968148</length></cylinder></geometry>
+        <material><diffuse>0.7 0.05 0.05 1</diffuse></material>
+      </visual>
+      <visual name="wire_esc_1_power_1">
+        <pose>1.0103336092965665e-17 -0.165 -0.027 0.0 1.2533375915402656 -1.5707963267948966</pose>
+        <geometry><cylinder><radius>0.0015</radius><length>0.07368174807915459</length></cylinder></geometry>
+        <material><diffuse>0.7 0.05 0.05 1</diffuse></material>
+      </visual>
+      <visual name="wire_esc_1_power_2">
+        <pose>1.487180456714567e-17 -0.242875 -0.0155 0.0 1.5707963267948966 -1.5707963267948966</pose>
+        <geometry><cylinder><radius>0.0015</radius><length>0.08574999999999999</length></cylinder></geometry>
+        <material><diffuse>0.7 0.05 0.05 1</diffuse></material>
+      </visual>
+      <visual name="wire_motor_1_phase_0">
+        <pose>2.606201469435461e-17 -0.4256249999999999 -0.0155 0.0 1.5707963267948966 -1.5707963267948966</pose>
+        <geometry><cylinder><radius>0.0015</radius><length>0.22274999999999995</length></cylinder></geometry>
+        <material><diffuse>0.03 0.03 0.03 1</diffuse></material>
+      </visual>
+      <visual name="wire_esc_2_power_0">
+        <pose>0.017500000000000005 0.074 -0.0385 0.0 1.5707963267948966 1.873681195169868</pose>
+        <geometry><cylinder><radius>0.0015</radius><length>0.11734138229968148</length></cylinder></geometry>
+        <material><diffuse>0.7 0.05 0.05 1</diffuse></material>
+      </visual>
+      <visual name="wire_esc_2_power_1">
+        <pose>1.0103336092965665e-17 0.165 -0.027 0.0 1.2533375915402656 1.5707963267948966</pose>
+        <geometry><cylinder><radius>0.0015</radius><length>0.07368174807915459</length></cylinder></geometry>
+        <material><diffuse>0.7 0.05 0.05 1</diffuse></material>
+      </visual>
+      <visual name="wire_esc_2_power_2">
+        <pose>1.487180456714567e-17 0.242875 -0.0155 0.0 1.5707963267948966 1.5707963267948966</pose>
+        <geometry><cylinder><radius>0.0015</radius><length>0.08574999999999999</length></cylinder></geometry>
+        <material><diffuse>0.7 0.05 0.05 1</diffuse></material>
+      </visual>
+      <visual name="wire_motor_2_phase_0">
+        <pose>2.606201469435461e-17 0.4256249999999999 -0.0155 0.0 1.5707963267948966 1.5707963267948966</pose>
+        <geometry><cylinder><radius>0.0015</radius><length>0.22274999999999995</length></cylinder></geometry>
+        <material><diffuse>0.03 0.03 0.03 1</diffuse></material>
+      </visual>
+      <visual name="wire_esc_3_power_0">
+        <pose>0.08158587988004846 0.03699999999999999 -0.0385 0.0 1.5707963267948966 0.7346358176030914</pose>
+        <geometry><cylinder><radius>0.0015</radius><length>0.08354256899527332</length></cylinder></geometry>
+        <material><diffuse>0.7 0.05 0.05 1</diffuse></material>
+      </visual>
+      <visual name="wire_esc_3_power_1">
+        <pose>0.1428941916244324 0.08249999999999999 -0.027 0.0 1.2533375915402656 0.5235987755982986</pose>
+        <geometry><cylinder><radius>0.0015</radius><length>0.07368174807915459</length></cylinder></geometry>
+        <material><diffuse>0.7 0.05 0.05 1</diffuse></material>
+      </visual>
+      <visual name="wire_esc_3_power_2">
+        <pose>0.21033591994414558 0.12143749999999998 -0.0155 0.0 1.5707963267948966 0.5235987755982988</pose>
+        <geometry><cylinder><radius>0.0015</radius><length>0.08574999999999999</length></cylinder></geometry>
+        <material><diffuse>0.7 0.05 0.05 1</diffuse></material>
+      </visual>
+      <visual name="wire_motor_3_phase_0">
+        <pose>0.36860206248575167 0.21281249999999993 -0.0155 0.0 1.5707963267948966 0.5235987755982987</pose>
+        <geometry><cylinder><radius>0.0015</radius><length>0.22274999999999995</length></cylinder></geometry>
+        <material><diffuse>0.03 0.03 0.03 1</diffuse></material>
+      </visual>
+      <visual name="wire_esc_4_power_0">
+        <pose>-0.04658587988004846 -0.03699999999999999 -0.0385 0.0 1.5707963267948966 -2.7403498138739666</pose>
+        <geometry><cylinder><radius>0.0015</radius><length>0.14338284125260597</length></cylinder></geometry>
+        <material><diffuse>0.7 0.05 0.05 1</diffuse></material>
+      </visual>
+      <visual name="wire_esc_4_power_1">
+        <pose>-0.1428941916244324 -0.08249999999999999 -0.027 0.0 1.2533375915402656 -2.6179938779914944</pose>
+        <geometry><cylinder><radius>0.0015</radius><length>0.07368174807915459</length></cylinder></geometry>
+        <material><diffuse>0.7 0.05 0.05 1</diffuse></material>
+      </visual>
+      <visual name="wire_esc_4_power_2">
+        <pose>-0.21033591994414558 -0.12143749999999998 -0.0155 0.0 1.5707963267948966 -2.6179938779914944</pose>
+        <geometry><cylinder><radius>0.0015</radius><length>0.08574999999999999</length></cylinder></geometry>
+        <material><diffuse>0.7 0.05 0.05 1</diffuse></material>
+      </visual>
+      <visual name="wire_motor_4_phase_0">
+        <pose>-0.36860206248575167 -0.21281249999999993 -0.0155 0.0 1.5707963267948966 -2.6179938779914944</pose>
+        <geometry><cylinder><radius>0.0015</radius><length>0.22274999999999995</length></cylinder></geometry>
+        <material><diffuse>0.03 0.03 0.03 1</diffuse></material>
+      </visual>
+      <visual name="wire_esc_5_power_0">
+        <pose>0.08158587988004846 -0.03699999999999999 -0.0385 0.0 1.5707963267948966 -0.7346358176030914</pose>
+        <geometry><cylinder><radius>0.0015</radius><length>0.08354256899527332</length></cylinder></geometry>
+        <material><diffuse>0.7 0.05 0.05 1</diffuse></material>
+      </visual>
+      <visual name="wire_esc_5_power_1">
+        <pose>0.1428941916244324 -0.08249999999999999 -0.027 0.0 1.2533375915402656 -0.5235987755982986</pose>
+        <geometry><cylinder><radius>0.0015</radius><length>0.07368174807915459</length></cylinder></geometry>
+        <material><diffuse>0.7 0.05 0.05 1</diffuse></material>
+      </visual>
+      <visual name="wire_esc_5_power_2">
+        <pose>0.21033591994414558 -0.12143749999999998 -0.0155 0.0 1.5707963267948966 -0.5235987755982988</pose>
+        <geometry><cylinder><radius>0.0015</radius><length>0.08574999999999999</length></cylinder></geometry>
+        <material><diffuse>0.7 0.05 0.05 1</diffuse></material>
+      </visual>
+      <visual name="wire_motor_5_phase_0">
+        <pose>0.36860206248575167 -0.21281249999999993 -0.0155 0.0 1.5707963267948966 -0.5235987755982987</pose>
+        <geometry><cylinder><radius>0.0015</radius><length>0.22274999999999995</length></cylinder></geometry>
+        <material><diffuse>0.03 0.03 0.03 1</diffuse></material>
+      </visual>
+      <visual name="wire_esc_6_power_0">
+        <pose>-0.04658587988004846 0.03699999999999999 -0.0385 0.0 1.5707963267948966 2.7403498138739666</pose>
+        <geometry><cylinder><radius>0.0015</radius><length>0.14338284125260597</length></cylinder></geometry>
+        <material><diffuse>0.7 0.05 0.05 1</diffuse></material>
+      </visual>
+      <visual name="wire_esc_6_power_1">
+        <pose>-0.1428941916244324 0.08249999999999999 -0.027 0.0 1.2533375915402656 2.6179938779914944</pose>
+        <geometry><cylinder><radius>0.0015</radius><length>0.07368174807915459</length></cylinder></geometry>
+        <material><diffuse>0.7 0.05 0.05 1</diffuse></material>
+      </visual>
+      <visual name="wire_esc_6_power_2">
+        <pose>-0.21033591994414558 0.12143749999999998 -0.0155 0.0 1.5707963267948966 2.6179938779914944</pose>
+        <geometry><cylinder><radius>0.0015</radius><length>0.08574999999999999</length></cylinder></geometry>
+        <material><diffuse>0.7 0.05 0.05 1</diffuse></material>
+      </visual>
+      <visual name="wire_motor_6_phase_0">
+        <pose>-0.36860206248575167 0.21281249999999993 -0.0155 0.0 1.5707963267948966 2.6179938779914944</pose>
+        <geometry><cylinder><radius>0.0015</radius><length>0.22274999999999995</length></cylinder></geometry>
+        <material><diffuse>0.03 0.03 0.03 1</diffuse></material>
+      </visual>
+      <visual name="wire_fc_to_rb5_0">
+        <pose>-0.005824999999999997 0.01 -0.024625 0.0 1.9452996164618441 3.141592653589793</pose>
+        <geometry><cylinder><radius>0.0012</radius><length>0.029386816772151415</length></cylinder></geometry>
+        <material><diffuse>0.45 0.45 0.47 1</diffuse></material>
+      </visual>
+      <visual name="wire_battery_lead_0">
+        <pose>0.115 0.0 -0.0815 0.0 1.5707963267948966 0.0</pose>
+        <geometry><cylinder><radius>0.002</radius><length>0.03</length></cylinder></geometry>
+        <material><diffuse>0.7 0.05 0.05 1</diffuse></material>
+      </visual>
+      <visual name="wire_battery_lead_1">
+        <pose>0.13 0.0 -0.05975 0.0 0.0 0.0</pose>
+        <geometry><cylinder><radius>0.002</radius><length>0.043500000000000004</length></cylinder></geometry>
+        <material><diffuse>0.7 0.05 0.05 1</diffuse></material>
+      </visual>
+      <visual name="wire_battery_lead_2">
+        <pose>0.0915 0.0 -0.038 0.0 1.5707963267948966 3.141592653589793</pose>
+        <geometry><cylinder><radius>0.002</radius><length>0.077</length></cylinder></geometry>
+        <material><diffuse>0.7 0.05 0.05 1</diffuse></material>
+      </visual>
+      <visual name="wire_rb5_to_oak_usb_0">
+        <pose>-0.041999999999999996 -0.051250000000000004 -0.033 0.0 1.6659478177348426 -0.8811496562932151</pose>
+        <geometry><cylinder><radius>0.0015</radius><length>0.06315259297922772</length></cylinder></geometry>
+        <material><diffuse>0.1 0.25 0.7 1</diffuse></material>
+      </visual>
+      <visual name="wire_rb5_to_oak_usb_1">
+        <pose>-0.022 -0.07550000000000001 -0.07650000000000001 0.0 3.141592653589793 0.0</pose>
+        <geometry><cylinder><radius>0.0015</radius><length>0.081</length></cylinder></geometry>
+        <material><diffuse>0.1 0.25 0.7 1</diffuse></material>
+      </visual>
+      <visual name="wire_rb5_to_oak_usb_2">
+        <pose>-0.011 -0.052750000000000005 -0.11950000000000001 0.0 1.6694077837667494 1.1204222744782653</pose>
+        <geometry><cylinder><radius>0.0015</radius><length>0.05078631705489187</length></cylinder></geometry>
+        <material><diffuse>0.1 0.25 0.7 1</diffuse></material>
+      </visual>
+      <visual name="wire_rb5_to_lepton_0">
+        <pose>-0.041999999999999996 0.051250000000000004 -0.033 0.0 1.6659478177348426 0.8811496562932151</pose>
+        <geometry><cylinder><radius>0.0015</radius><length>0.06315259297922772</length></cylinder></geometry>
+        <material><diffuse>0.85 0.7 0.1 1</diffuse></material>
+      </visual>
+      <visual name="wire_rb5_to_lepton_1">
+        <pose>-0.022 0.07550000000000001 -0.07650000000000001 0.0 3.141592653589793 0.0</pose>
+        <geometry><cylinder><radius>0.0015</radius><length>0.081</length></cylinder></geometry>
+        <material><diffuse>0.85 0.7 0.1 1</diffuse></material>
+      </visual>
+      <visual name="wire_rb5_to_lepton_2">
+        <pose>-0.011 0.06675 -0.11950000000000001 0.0 1.7468194114190363 -0.6719631715902322</pose>
+        <geometry><cylinder><radius>0.0015</radius><length>0.028552583070538474</length></cylinder></geometry>
+        <material><diffuse>0.85 0.7 0.1 1</diffuse></material>
+      </visual>
+      <visual name="wire_gps_mast_0">
+        <pose>-0.155 0.0 0.135 0.0 0.0 0.0</pose>
+        <geometry><cylinder><radius>0.005</radius><length>0.14</length></cylinder></geometry>
+        <material><diffuse>0.06 0.06 0.06 1</diffuse></material>
+      </visual>
+      <visual name="wire_gps_puck_0">
+        <pose>-0.155 0.0 0.2122 0.0 0.0 0.0</pose>
+        <geometry><cylinder><radius>0.025</radius><length>0.014399999999999996</length></cylinder></geometry>
+        <material><diffuse>0.93 0.93 0.93 1</diffuse></material>
+      </visual>
+      <visual name="wire_gps_led_ring_0">
+        <pose>-0.155 0.0 0.21050000000000002 0.0 0.0 0.0</pose>
+        <geometry><cylinder><radius>0.0258</radius><length>0.0030000000000000027</length></cylinder></geometry>
+        <material><diffuse>0.15 0.45 1.0 1</diffuse></material>
+      </visual>
+      <visual name="wire_gps_to_fc_0">
+        <pose>-0.12625 0.0235 0.0512 0.0 1.5707963267948966 0.7773983340575621</pose>
+        <geometry><cylinder><radius>0.0012</radius><length>0.044195588015094885</length></cylinder></geometry>
+        <material><diffuse>0.45 0.45 0.47 1</diffuse></material>
+      </visual>
+      <visual name="wire_gps_to_fc_1">
+        <pose>-0.11050000000000001 0.039 0.006200000000000001 0.0 3.141592653589793 0.0</pose>
+        <geometry><cylinder><radius>0.0012</radius><length>0.09</length></cylinder></geometry>
+        <material><diffuse>0.45 0.45 0.47 1</diffuse></material>
+      </visual>
+      <visual name="wire_gps_to_fc_2">
+        <pose>-0.05132500000000001 0.039 -0.0388 0.0 1.5707963267948966 0.0</pose>
+        <geometry><cylinder><radius>0.0012</radius><length>0.11835000000000001</length></cylinder></geometry>
+        <material><diffuse>0.45 0.45 0.47 1</diffuse></material>
+      </visual>
+      <visual name="wire_gps_to_fc_3">
+        <pose>0.007850000000000003 0.025500000000000002 -0.029025000000000002 0.0 0.9440953174191066 -1.5707963267948966</pose>
+        <geometry><cylinder><radius>0.0012</radius><length>0.03333470413848006</length></cylinder></geometry>
+        <material><diffuse>0.45 0.45 0.47 1</diffuse></material>
+      </visual>
+      <!-- Generic outrunner motors on the frame's motor mounts: stator base, bell, silver band. -->
+      <visual name="motor_0_stator">
+        <pose>3.471873675582746e-17 -0.567 0.0276 0 0 0</pose>
+        <geometry><cylinder><radius>0.02352</radius><length>0.008</length></cylinder></geometry>
+        <material><diffuse>0.22 0.22 0.24 1</diffuse><specular>0.6 0.6 0.6 1</specular></material>
+      </visual>
+      <visual name="motor_0_bell">
+        <pose>3.471873675582746e-17 -0.567 0.0436 0 0 0</pose>
+        <geometry><cylinder><radius>0.028</radius><length>0.024</length></cylinder></geometry>
+        <material><diffuse>0.04 0.04 0.05 1</diffuse><specular>0.5 0.5 0.5 1</specular></material>
+      </visual>
+      <visual name="motor_0_band">
+        <pose>3.471873675582746e-17 -0.567 0.0506 0 0 0</pose>
+        <geometry><cylinder><radius>0.0285</radius><length>0.004</length></cylinder></geometry>
+        <material><diffuse>0.75 0.76 0.78 1</diffuse><specular>1 1 1 1</specular></material>
+      </visual>
+      <visual name="motor_0_adapter">
+        <pose>3.471873675582746e-17 -0.567 0.060599999999999994 0 0 0</pose>
+        <geometry><cylinder><radius>0.009</radius><length>0.010</length></cylinder></geometry>
+        <material><diffuse>0.7 0.71 0.73 1</diffuse><specular>1 1 1 1</specular></material>
+      </visual>
+      <visual name="motor_1_stator">
+        <pose>3.471873675582746e-17 0.567 0.0276 0 0 0</pose>
+        <geometry><cylinder><radius>0.02352</radius><length>0.008</length></cylinder></geometry>
+        <material><diffuse>0.22 0.22 0.24 1</diffuse><specular>0.6 0.6 0.6 1</specular></material>
+      </visual>
+      <visual name="motor_1_bell">
+        <pose>3.471873675582746e-17 0.567 0.0436 0 0 0</pose>
+        <geometry><cylinder><radius>0.028</radius><length>0.024</length></cylinder></geometry>
+        <material><diffuse>0.04 0.04 0.05 1</diffuse><specular>0.5 0.5 0.5 1</specular></material>
+      </visual>
+      <visual name="motor_1_band">
+        <pose>3.471873675582746e-17 0.567 0.0506 0 0 0</pose>
+        <geometry><cylinder><radius>0.0285</radius><length>0.004</length></cylinder></geometry>
+        <material><diffuse>0.75 0.76 0.78 1</diffuse><specular>1 1 1 1</specular></material>
+      </visual>
+      <visual name="motor_1_adapter">
+        <pose>3.471873675582746e-17 0.567 0.060599999999999994 0 0 0</pose>
+        <geometry><cylinder><radius>0.009</radius><length>0.010</length></cylinder></geometry>
+        <material><diffuse>0.7 0.71 0.73 1</diffuse><specular>1 1 1 1</specular></material>
+      </visual>
+      <visual name="motor_2_stator">
+        <pose>0.4910364039457767 0.2834999999999999 0.0276 0 0 0</pose>
+        <geometry><cylinder><radius>0.02352</radius><length>0.008</length></cylinder></geometry>
+        <material><diffuse>0.22 0.22 0.24 1</diffuse><specular>0.6 0.6 0.6 1</specular></material>
+      </visual>
+      <visual name="motor_2_bell">
+        <pose>0.4910364039457767 0.2834999999999999 0.0436 0 0 0</pose>
+        <geometry><cylinder><radius>0.028</radius><length>0.024</length></cylinder></geometry>
+        <material><diffuse>0.04 0.04 0.05 1</diffuse><specular>0.5 0.5 0.5 1</specular></material>
+      </visual>
+      <visual name="motor_2_band">
+        <pose>0.4910364039457767 0.2834999999999999 0.0506 0 0 0</pose>
+        <geometry><cylinder><radius>0.0285</radius><length>0.004</length></cylinder></geometry>
+        <material><diffuse>0.75 0.76 0.78 1</diffuse><specular>1 1 1 1</specular></material>
+      </visual>
+      <visual name="motor_2_adapter">
+        <pose>0.4910364039457767 0.2834999999999999 0.060599999999999994 0 0 0</pose>
+        <geometry><cylinder><radius>0.009</radius><length>0.010</length></cylinder></geometry>
+        <material><diffuse>0.7 0.71 0.73 1</diffuse><specular>1 1 1 1</specular></material>
+      </visual>
+      <visual name="motor_3_stator">
+        <pose>-0.4910364039457767 -0.2834999999999999 0.0276 0 0 0</pose>
+        <geometry><cylinder><radius>0.02352</radius><length>0.008</length></cylinder></geometry>
+        <material><diffuse>0.22 0.22 0.24 1</diffuse><specular>0.6 0.6 0.6 1</specular></material>
+      </visual>
+      <visual name="motor_3_bell">
+        <pose>-0.4910364039457767 -0.2834999999999999 0.0436 0 0 0</pose>
+        <geometry><cylinder><radius>0.028</radius><length>0.024</length></cylinder></geometry>
+        <material><diffuse>0.04 0.04 0.05 1</diffuse><specular>0.5 0.5 0.5 1</specular></material>
+      </visual>
+      <visual name="motor_3_band">
+        <pose>-0.4910364039457767 -0.2834999999999999 0.0506 0 0 0</pose>
+        <geometry><cylinder><radius>0.0285</radius><length>0.004</length></cylinder></geometry>
+        <material><diffuse>0.75 0.76 0.78 1</diffuse><specular>1 1 1 1</specular></material>
+      </visual>
+      <visual name="motor_3_adapter">
+        <pose>-0.4910364039457767 -0.2834999999999999 0.060599999999999994 0 0 0</pose>
+        <geometry><cylinder><radius>0.009</radius><length>0.010</length></cylinder></geometry>
+        <material><diffuse>0.7 0.71 0.73 1</diffuse><specular>1 1 1 1</specular></material>
+      </visual>
+      <visual name="motor_4_stator">
+        <pose>0.4910364039457767 -0.2834999999999999 0.0276 0 0 0</pose>
+        <geometry><cylinder><radius>0.02352</radius><length>0.008</length></cylinder></geometry>
+        <material><diffuse>0.22 0.22 0.24 1</diffuse><specular>0.6 0.6 0.6 1</specular></material>
+      </visual>
+      <visual name="motor_4_bell">
+        <pose>0.4910364039457767 -0.2834999999999999 0.0436 0 0 0</pose>
+        <geometry><cylinder><radius>0.028</radius><length>0.024</length></cylinder></geometry>
+        <material><diffuse>0.04 0.04 0.05 1</diffuse><specular>0.5 0.5 0.5 1</specular></material>
+      </visual>
+      <visual name="motor_4_band">
+        <pose>0.4910364039457767 -0.2834999999999999 0.0506 0 0 0</pose>
+        <geometry><cylinder><radius>0.0285</radius><length>0.004</length></cylinder></geometry>
+        <material><diffuse>0.75 0.76 0.78 1</diffuse><specular>1 1 1 1</specular></material>
+      </visual>
+      <visual name="motor_4_adapter">
+        <pose>0.4910364039457767 -0.2834999999999999 0.060599999999999994 0 0 0</pose>
+        <geometry><cylinder><radius>0.009</radius><length>0.010</length></cylinder></geometry>
+        <material><diffuse>0.7 0.71 0.73 1</diffuse><specular>1 1 1 1</specular></material>
+      </visual>
+      <visual name="motor_5_stator">
+        <pose>-0.4910364039457767 0.2834999999999999 0.0276 0 0 0</pose>
+        <geometry><cylinder><radius>0.02352</radius><length>0.008</length></cylinder></geometry>
+        <material><diffuse>0.22 0.22 0.24 1</diffuse><specular>0.6 0.6 0.6 1</specular></material>
+      </visual>
+      <visual name="motor_5_bell">
+        <pose>-0.4910364039457767 0.2834999999999999 0.0436 0 0 0</pose>
+        <geometry><cylinder><radius>0.028</radius><length>0.024</length></cylinder></geometry>
+        <material><diffuse>0.04 0.04 0.05 1</diffuse><specular>0.5 0.5 0.5 1</specular></material>
+      </visual>
+      <visual name="motor_5_band">
+        <pose>-0.4910364039457767 0.2834999999999999 0.0506 0 0 0</pose>
+        <geometry><cylinder><radius>0.0285</radius><length>0.004</length></cylinder></geometry>
+        <material><diffuse>0.75 0.76 0.78 1</diffuse><specular>1 1 1 1</specular></material>
+      </visual>
+      <visual name="motor_5_adapter">
+        <pose>-0.4910364039457767 0.2834999999999999 0.060599999999999994 0 0 0</pose>
+        <geometry><cylinder><radius>0.009</radius><length>0.010</length></cylinder></geometry>
+        <material><diffuse>0.7 0.71 0.73 1</diffuse><specular>1 1 1 1</specular></material>
+      </visual>
+      <!-- Obstacle-avoidance rangefinders: one beam out of each side (config/sensors.yaml).
+           A single-return gpu_lidar is what the part is: one distance along its beam. -->
+      <visual name="rangefinder_front">
+        <pose>0.1800 0.0000 0.0000 0 0 0.0000</pose>
+        <geometry><mesh><uri>model://aeromind_hexa/meshes/tfmini_plus.glb</uri></mesh></geometry>
+      </visual>
+      <visual name="rangefinder_left">
+        <pose>0.0000 0.1800 0.0000 0 0 1.5708</pose>
+        <geometry><mesh><uri>model://aeromind_hexa/meshes/tfmini_s.glb</uri></mesh></geometry>
+      </visual>
+      <visual name="rangefinder_back">
+        <pose>-0.1800 0.0000 0.0000 0 0 3.1416</pose>
+        <geometry><mesh><uri>model://aeromind_hexa/meshes/tfmini_s.glb</uri></mesh></geometry>
+      </visual>
+      <visual name="rangefinder_right">
+        <pose>0.0000 -0.1800 0.0000 0 0 -1.5708</pose>
+        <geometry><mesh><uri>model://aeromind_hexa/meshes/tfmini_s.glb</uri></mesh></geometry>
+      </visual>
+    </link>
+
+    <!-- Flight IMU, read by ArduPilot SITL (noise-free: SITL adds its own sensor model). -->
+    <link name="flight_imu_link">
+      <inertial>
+        <mass>0.15</mass>
+        <inertia><ixx>0.00001</ixx><iyy>0.00002</iyy><izz>0.00002</izz></inertia>
+      </inertial>
+      <sensor name="imu_sensor" type="imu">
+        <pose degrees="true">0 0 0 180 0 0</pose>
+        <always_on>1</always_on>
+        <update_rate>1000.0</update_rate>
+      </sensor>
+    </link>
+    <joint name="flight_imu_joint" type="revolute">
+      <child>flight_imu_link</child>
+      <parent>base_link</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit><lower>0</lower><upper>0</upper><effort>0</effort><velocity>0</velocity></limit>
+        <dynamics><damping>1.0</damping></dynamics>
+      </axis>
+    </joint>
+
+    <link name="rotor_0">
+      <pose>3.471873675582746e-17 -0.567 0.061599999999999995 0 0 0</pose>
+      <inertial>
+        <mass>0.025</mass>
+        <inertia><ixx>9.75e-06</ixx><iyy>0.000166704</iyy><izz>0.000167604</izz></inertia>
+      </inertial>
+      <collision name="collision">
+        <geometry><cylinder><radius>0.1</radius><length>0.005</length></cylinder></geometry>
+      </collision>
+      <!-- motor 1, cw -->
+      <visual name="prop">
+        <geometry>
+          <mesh>
+            <uri>model://aeromind_hexa/meshes/iris_prop_cw.dae</uri>
+            <scale>1.65 1.65 1</scale>
+          </mesh>
+        </geometry>
+        <material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.05 0.05 0.05 1</diffuse></material>
+      </visual>
+    </link>
+    <joint name="rotor_0_joint" type="revolute">
+      <child>rotor_0</child>
+      <parent>base_link</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit><lower>-1e+16</lower><upper>1e+16</upper></limit>
+        <dynamics><damping>0.004</damping></dynamics>
+      </axis>
+    </joint>
+    <plugin filename="gz-sim-lift-drag-system" name="gz::sim::systems::LiftDrag">
+      <a0>0.3</a0><alpha_stall>1.4</alpha_stall><cla>4.2500</cla><cda>0.10</cda><cma>0.0</cma>
+      <cla_stall>-0.025</cla_stall><cda_stall>0.0</cda_stall><cma_stall>0.0</cma_stall>
+      <area>0.002</area><air_density>1.2041</air_density>
+      <cp>0.084 0 0</cp>
+      <forward>0 -1 0</forward>
+      <upward>0 0 1</upward>
+      <link_name>rotor_0</link_name>
+    </plugin>
+    <plugin filename="gz-sim-lift-drag-system" name="gz::sim::systems::LiftDrag">
+      <a0>0.3</a0><alpha_stall>1.4</alpha_stall><cla>4.2500</cla><cda>0.10</cda><cma>0.0</cma>
+      <cla_stall>-0.025</cla_stall><cda_stall>0.0</cda_stall><cma_stall>0.0</cma_stall>
+      <area>0.002</area><air_density>1.2041</air_density>
+      <cp>-0.084 0 0</cp>
+      <forward>0 1 0</forward>
+      <upward>0 0 1</upward>
+      <link_name>rotor_0</link_name>
+    </plugin>
+    <plugin filename="gz-sim-apply-joint-force-system" name="gz::sim::systems::ApplyJointForce">
+      <joint_name>rotor_0_joint</joint_name>
+    </plugin>
+    <link name="rotor_1">
+      <pose>3.471873675582746e-17 0.567 0.061599999999999995 0 0 0</pose>
+      <inertial>
+        <mass>0.025</mass>
+        <inertia><ixx>9.75e-06</ixx><iyy>0.000166704</iyy><izz>0.000167604</izz></inertia>
+      </inertial>
+      <collision name="collision">
+        <geometry><cylinder><radius>0.1</radius><length>0.005</length></cylinder></geometry>
+      </collision>
+      <!-- motor 2, ccw -->
+      <visual name="prop">
+        <geometry>
+          <mesh>
+            <uri>model://aeromind_hexa/meshes/iris_prop_ccw.dae</uri>
+            <scale>1.65 1.65 1</scale>
+          </mesh>
+        </geometry>
+        <material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.05 0.05 0.05 1</diffuse></material>
+      </visual>
+    </link>
+    <joint name="rotor_1_joint" type="revolute">
+      <child>rotor_1</child>
+      <parent>base_link</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit><lower>-1e+16</lower><upper>1e+16</upper></limit>
+        <dynamics><damping>0.004</damping></dynamics>
+      </axis>
+    </joint>
+    <plugin filename="gz-sim-lift-drag-system" name="gz::sim::systems::LiftDrag">
+      <a0>0.3</a0><alpha_stall>1.4</alpha_stall><cla>4.2500</cla><cda>0.10</cda><cma>0.0</cma>
+      <cla_stall>-0.025</cla_stall><cda_stall>0.0</cda_stall><cma_stall>0.0</cma_stall>
+      <area>0.002</area><air_density>1.2041</air_density>
+      <cp>0.084 0 0</cp>
+      <forward>0 1 0</forward>
+      <upward>0 0 1</upward>
+      <link_name>rotor_1</link_name>
+    </plugin>
+    <plugin filename="gz-sim-lift-drag-system" name="gz::sim::systems::LiftDrag">
+      <a0>0.3</a0><alpha_stall>1.4</alpha_stall><cla>4.2500</cla><cda>0.10</cda><cma>0.0</cma>
+      <cla_stall>-0.025</cla_stall><cda_stall>0.0</cda_stall><cma_stall>0.0</cma_stall>
+      <area>0.002</area><air_density>1.2041</air_density>
+      <cp>-0.084 0 0</cp>
+      <forward>0 -1 0</forward>
+      <upward>0 0 1</upward>
+      <link_name>rotor_1</link_name>
+    </plugin>
+    <plugin filename="gz-sim-apply-joint-force-system" name="gz::sim::systems::ApplyJointForce">
+      <joint_name>rotor_1_joint</joint_name>
+    </plugin>
+    <link name="rotor_2">
+      <pose>0.4910364039457767 0.2834999999999999 0.061599999999999995 0 0 0</pose>
+      <inertial>
+        <mass>0.025</mass>
+        <inertia><ixx>9.75e-06</ixx><iyy>0.000166704</iyy><izz>0.000167604</izz></inertia>
+      </inertial>
+      <collision name="collision">
+        <geometry><cylinder><radius>0.1</radius><length>0.005</length></cylinder></geometry>
+      </collision>
+      <!-- motor 3, cw -->
+      <visual name="prop">
+        <geometry>
+          <mesh>
+            <uri>model://aeromind_hexa/meshes/iris_prop_cw.dae</uri>
+            <scale>1.65 1.65 1</scale>
+          </mesh>
+        </geometry>
+        <material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.05 0.05 0.05 1</diffuse></material>
+      </visual>
+    </link>
+    <joint name="rotor_2_joint" type="revolute">
+      <child>rotor_2</child>
+      <parent>base_link</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit><lower>-1e+16</lower><upper>1e+16</upper></limit>
+        <dynamics><damping>0.004</damping></dynamics>
+      </axis>
+    </joint>
+    <plugin filename="gz-sim-lift-drag-system" name="gz::sim::systems::LiftDrag">
+      <a0>0.3</a0><alpha_stall>1.4</alpha_stall><cla>4.2500</cla><cda>0.10</cda><cma>0.0</cma>
+      <cla_stall>-0.025</cla_stall><cda_stall>0.0</cda_stall><cma_stall>0.0</cma_stall>
+      <area>0.002</area><air_density>1.2041</air_density>
+      <cp>0.084 0 0</cp>
+      <forward>0 -1 0</forward>
+      <upward>0 0 1</upward>
+      <link_name>rotor_2</link_name>
+    </plugin>
+    <plugin filename="gz-sim-lift-drag-system" name="gz::sim::systems::LiftDrag">
+      <a0>0.3</a0><alpha_stall>1.4</alpha_stall><cla>4.2500</cla><cda>0.10</cda><cma>0.0</cma>
+      <cla_stall>-0.025</cla_stall><cda_stall>0.0</cda_stall><cma_stall>0.0</cma_stall>
+      <area>0.002</area><air_density>1.2041</air_density>
+      <cp>-0.084 0 0</cp>
+      <forward>0 1 0</forward>
+      <upward>0 0 1</upward>
+      <link_name>rotor_2</link_name>
+    </plugin>
+    <plugin filename="gz-sim-apply-joint-force-system" name="gz::sim::systems::ApplyJointForce">
+      <joint_name>rotor_2_joint</joint_name>
+    </plugin>
+    <link name="rotor_3">
+      <pose>-0.4910364039457767 -0.2834999999999999 0.061599999999999995 0 0 0</pose>
+      <inertial>
+        <mass>0.025</mass>
+        <inertia><ixx>9.75e-06</ixx><iyy>0.000166704</iyy><izz>0.000167604</izz></inertia>
+      </inertial>
+      <collision name="collision">
+        <geometry><cylinder><radius>0.1</radius><length>0.005</length></cylinder></geometry>
+      </collision>
+      <!-- motor 4, ccw -->
+      <visual name="prop">
+        <geometry>
+          <mesh>
+            <uri>model://aeromind_hexa/meshes/iris_prop_ccw.dae</uri>
+            <scale>1.65 1.65 1</scale>
+          </mesh>
+        </geometry>
+        <material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.05 0.05 0.05 1</diffuse></material>
+      </visual>
+    </link>
+    <joint name="rotor_3_joint" type="revolute">
+      <child>rotor_3</child>
+      <parent>base_link</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit><lower>-1e+16</lower><upper>1e+16</upper></limit>
+        <dynamics><damping>0.004</damping></dynamics>
+      </axis>
+    </joint>
+    <plugin filename="gz-sim-lift-drag-system" name="gz::sim::systems::LiftDrag">
+      <a0>0.3</a0><alpha_stall>1.4</alpha_stall><cla>4.2500</cla><cda>0.10</cda><cma>0.0</cma>
+      <cla_stall>-0.025</cla_stall><cda_stall>0.0</cda_stall><cma_stall>0.0</cma_stall>
+      <area>0.002</area><air_density>1.2041</air_density>
+      <cp>0.084 0 0</cp>
+      <forward>0 1 0</forward>
+      <upward>0 0 1</upward>
+      <link_name>rotor_3</link_name>
+    </plugin>
+    <plugin filename="gz-sim-lift-drag-system" name="gz::sim::systems::LiftDrag">
+      <a0>0.3</a0><alpha_stall>1.4</alpha_stall><cla>4.2500</cla><cda>0.10</cda><cma>0.0</cma>
+      <cla_stall>-0.025</cla_stall><cda_stall>0.0</cda_stall><cma_stall>0.0</cma_stall>
+      <area>0.002</area><air_density>1.2041</air_density>
+      <cp>-0.084 0 0</cp>
+      <forward>0 -1 0</forward>
+      <upward>0 0 1</upward>
+      <link_name>rotor_3</link_name>
+    </plugin>
+    <plugin filename="gz-sim-apply-joint-force-system" name="gz::sim::systems::ApplyJointForce">
+      <joint_name>rotor_3_joint</joint_name>
+    </plugin>
+    <link name="rotor_4">
+      <pose>0.4910364039457767 -0.2834999999999999 0.061599999999999995 0 0 0</pose>
+      <inertial>
+        <mass>0.025</mass>
+        <inertia><ixx>9.75e-06</ixx><iyy>0.000166704</iyy><izz>0.000167604</izz></inertia>
+      </inertial>
+      <collision name="collision">
+        <geometry><cylinder><radius>0.1</radius><length>0.005</length></cylinder></geometry>
+      </collision>
+      <!-- motor 5, ccw -->
+      <visual name="prop">
+        <geometry>
+          <mesh>
+            <uri>model://aeromind_hexa/meshes/iris_prop_ccw.dae</uri>
+            <scale>1.65 1.65 1</scale>
+          </mesh>
+        </geometry>
+        <material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.05 0.05 0.05 1</diffuse></material>
+      </visual>
+    </link>
+    <joint name="rotor_4_joint" type="revolute">
+      <child>rotor_4</child>
+      <parent>base_link</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit><lower>-1e+16</lower><upper>1e+16</upper></limit>
+        <dynamics><damping>0.004</damping></dynamics>
+      </axis>
+    </joint>
+    <plugin filename="gz-sim-lift-drag-system" name="gz::sim::systems::LiftDrag">
+      <a0>0.3</a0><alpha_stall>1.4</alpha_stall><cla>4.2500</cla><cda>0.10</cda><cma>0.0</cma>
+      <cla_stall>-0.025</cla_stall><cda_stall>0.0</cda_stall><cma_stall>0.0</cma_stall>
+      <area>0.002</area><air_density>1.2041</air_density>
+      <cp>0.084 0 0</cp>
+      <forward>0 1 0</forward>
+      <upward>0 0 1</upward>
+      <link_name>rotor_4</link_name>
+    </plugin>
+    <plugin filename="gz-sim-lift-drag-system" name="gz::sim::systems::LiftDrag">
+      <a0>0.3</a0><alpha_stall>1.4</alpha_stall><cla>4.2500</cla><cda>0.10</cda><cma>0.0</cma>
+      <cla_stall>-0.025</cla_stall><cda_stall>0.0</cda_stall><cma_stall>0.0</cma_stall>
+      <area>0.002</area><air_density>1.2041</air_density>
+      <cp>-0.084 0 0</cp>
+      <forward>0 -1 0</forward>
+      <upward>0 0 1</upward>
+      <link_name>rotor_4</link_name>
+    </plugin>
+    <plugin filename="gz-sim-apply-joint-force-system" name="gz::sim::systems::ApplyJointForce">
+      <joint_name>rotor_4_joint</joint_name>
+    </plugin>
+    <link name="rotor_5">
+      <pose>-0.4910364039457767 0.2834999999999999 0.061599999999999995 0 0 0</pose>
+      <inertial>
+        <mass>0.025</mass>
+        <inertia><ixx>9.75e-06</ixx><iyy>0.000166704</iyy><izz>0.000167604</izz></inertia>
+      </inertial>
+      <collision name="collision">
+        <geometry><cylinder><radius>0.1</radius><length>0.005</length></cylinder></geometry>
+      </collision>
+      <!-- motor 6, cw -->
+      <visual name="prop">
+        <geometry>
+          <mesh>
+            <uri>model://aeromind_hexa/meshes/iris_prop_cw.dae</uri>
+            <scale>1.65 1.65 1</scale>
+          </mesh>
+        </geometry>
+        <material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.05 0.05 0.05 1</diffuse></material>
+      </visual>
+    </link>
+    <joint name="rotor_5_joint" type="revolute">
+      <child>rotor_5</child>
+      <parent>base_link</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit><lower>-1e+16</lower><upper>1e+16</upper></limit>
+        <dynamics><damping>0.004</damping></dynamics>
+      </axis>
+    </joint>
+    <plugin filename="gz-sim-lift-drag-system" name="gz::sim::systems::LiftDrag">
+      <a0>0.3</a0><alpha_stall>1.4</alpha_stall><cla>4.2500</cla><cda>0.10</cda><cma>0.0</cma>
+      <cla_stall>-0.025</cla_stall><cda_stall>0.0</cda_stall><cma_stall>0.0</cma_stall>
+      <area>0.002</area><air_density>1.2041</air_density>
+      <cp>0.084 0 0</cp>
+      <forward>0 -1 0</forward>
+      <upward>0 0 1</upward>
+      <link_name>rotor_5</link_name>
+    </plugin>
+    <plugin filename="gz-sim-lift-drag-system" name="gz::sim::systems::LiftDrag">
+      <a0>0.3</a0><alpha_stall>1.4</alpha_stall><cla>4.2500</cla><cda>0.10</cda><cma>0.0</cma>
+      <cla_stall>-0.025</cla_stall><cda_stall>0.0</cda_stall><cma_stall>0.0</cma_stall>
+      <area>0.002</area><air_density>1.2041</air_density>
+      <cp>-0.084 0 0</cp>
+      <forward>0 1 0</forward>
+      <upward>0 0 1</upward>
+      <link_name>rotor_5</link_name>
+    </plugin>
+    <plugin filename="gz-sim-apply-joint-force-system" name="gz::sim::systems::ApplyJointForce">
+      <joint_name>rotor_5_joint</joint_name>
+    </plugin>
+
+    <!-- Air drag on the airframe, horizontal, linear in speed: a multirotor's is mostly rotor drag,
+         about 0.35 N per m/s for each kg (2.55 kg here). Without it nothing slowed the drone once it
+         stopped controlling position: an EKF failsafe landing with no GPS and no vision coasted
+         150 m. Gazebo has no plain body-drag system; Hydrodynamics' linear damping is exactly
+         this force (no added mass, no current, no buoyancy). -->
+    <plugin filename="gz-sim-hydrodynamics-system" name="gz::sim::systems::Hydrodynamics">
+      <link_name>base_link</link_name>
+      <water_density>1.2041</water_density>
+      <xU>-0.9</xU>
+      <yV>-0.9</yV>
+      <disable_coriolis>true</disable_coriolis>
+      <disable_added_mass>true</disable_added_mass>
+    </plugin>
+    <plugin filename="gz-sim-joint-state-publisher-system" name="gz::sim::systems::JointStatePublisher"/>
+    <!-- Ground truth for the simulator's own use (GPS jammer, drift scoring), not a drone sensor -->
+    <plugin filename="gz-sim-odometry-publisher-system" name="gz::sim::systems::OdometryPublisher">
+      <odom_topic>/aero_sense_drone/ground_truth</odom_topic>
+      <odom_frame>map</odom_frame>
+      <robot_base_frame>ground_truth</robot_base_frame>
+      <dimensions>3</dimensions>
+      <odom_publish_frequency>20</odom_publish_frequency>
+    </plugin>
+    <plugin name="ArduPilotPlugin" filename="ArduPilotPlugin">
+      <fdm_addr>127.0.0.1</fdm_addr>
+      <fdm_port_in>9002</fdm_port_in>
+      <connectionTimeoutMaxCount>5</connectionTimeoutMaxCount>
+      <lock_step>1</lock_step>
+      <no_time_sync>1</no_time_sync>
+      <have_32_channels>0</have_32_channels>
+      <modelXYZToAirplaneXForwardZDown degrees="true">0 0 0 180 0 0</modelXYZToAirplaneXForwardZDown>
+      <gazeboXYZToNED degrees="true">0 0 0 180 0 90</gazeboXYZToNED>
+      <imuName>flight_imu_link::imu_sensor</imuName>
+      <!-- motor 1 (cw): servo [0, 1] -> motor_max_rad_s, sign = spin direction -->
+      <control channel="0">
+        <jointName>rotor_0_joint</jointName>
+        <useForce>1</useForce>
+        <multiplier>-838</multiplier>
+        <offset>0</offset>
+        <servo_min>1100</servo_min>
+        <servo_max>1900</servo_max>
+        <type>VELOCITY</type>
+        <p_gain>0.20</p_gain><i_gain>0</i_gain><d_gain>0</d_gain><i_max>0</i_max><i_min>0</i_min>
+        <cmd_max>2.5</cmd_max><cmd_min>-2.5</cmd_min>
+        <controlVelocitySlowdownSim>1</controlVelocitySlowdownSim>
+      </control>
+      <!-- motor 2 (ccw): servo [0, 1] -> motor_max_rad_s, sign = spin direction -->
+      <control channel="1">
+        <jointName>rotor_1_joint</jointName>
+        <useForce>1</useForce>
+        <multiplier>838</multiplier>
+        <offset>0</offset>
+        <servo_min>1100</servo_min>
+        <servo_max>1900</servo_max>
+        <type>VELOCITY</type>
+        <p_gain>0.20</p_gain><i_gain>0</i_gain><d_gain>0</d_gain><i_max>0</i_max><i_min>0</i_min>
+        <cmd_max>2.5</cmd_max><cmd_min>-2.5</cmd_min>
+        <controlVelocitySlowdownSim>1</controlVelocitySlowdownSim>
+      </control>
+      <!-- motor 3 (cw): servo [0, 1] -> motor_max_rad_s, sign = spin direction -->
+      <control channel="2">
+        <jointName>rotor_2_joint</jointName>
+        <useForce>1</useForce>
+        <multiplier>-838</multiplier>
+        <offset>0</offset>
+        <servo_min>1100</servo_min>
+        <servo_max>1900</servo_max>
+        <type>VELOCITY</type>
+        <p_gain>0.20</p_gain><i_gain>0</i_gain><d_gain>0</d_gain><i_max>0</i_max><i_min>0</i_min>
+        <cmd_max>2.5</cmd_max><cmd_min>-2.5</cmd_min>
+        <controlVelocitySlowdownSim>1</controlVelocitySlowdownSim>
+      </control>
+      <!-- motor 4 (ccw): servo [0, 1] -> motor_max_rad_s, sign = spin direction -->
+      <control channel="3">
+        <jointName>rotor_3_joint</jointName>
+        <useForce>1</useForce>
+        <multiplier>838</multiplier>
+        <offset>0</offset>
+        <servo_min>1100</servo_min>
+        <servo_max>1900</servo_max>
+        <type>VELOCITY</type>
+        <p_gain>0.20</p_gain><i_gain>0</i_gain><d_gain>0</d_gain><i_max>0</i_max><i_min>0</i_min>
+        <cmd_max>2.5</cmd_max><cmd_min>-2.5</cmd_min>
+        <controlVelocitySlowdownSim>1</controlVelocitySlowdownSim>
+      </control>
+      <!-- motor 5 (ccw): servo [0, 1] -> motor_max_rad_s, sign = spin direction -->
+      <control channel="4">
+        <jointName>rotor_4_joint</jointName>
+        <useForce>1</useForce>
+        <multiplier>838</multiplier>
+        <offset>0</offset>
+        <servo_min>1100</servo_min>
+        <servo_max>1900</servo_max>
+        <type>VELOCITY</type>
+        <p_gain>0.20</p_gain><i_gain>0</i_gain><d_gain>0</d_gain><i_max>0</i_max><i_min>0</i_min>
+        <cmd_max>2.5</cmd_max><cmd_min>-2.5</cmd_min>
+        <controlVelocitySlowdownSim>1</controlVelocitySlowdownSim>
+      </control>
+      <!-- motor 6 (cw): servo [0, 1] -> motor_max_rad_s, sign = spin direction -->
+      <control channel="5">
+        <jointName>rotor_5_joint</jointName>
+        <useForce>1</useForce>
+        <multiplier>-838</multiplier>
+        <offset>0</offset>
+        <servo_min>1100</servo_min>
+        <servo_max>1900</servo_max>
+        <type>VELOCITY</type>
+        <p_gain>0.20</p_gain><i_gain>0</i_gain><d_gain>0</d_gain><i_max>0</i_max><i_min>0</i_min>
+        <cmd_max>2.5</cmd_max><cmd_min>-2.5</cmd_min>
+        <controlVelocitySlowdownSim>1</controlVelocitySlowdownSim>
+      </control>
+    </plugin>
+
+    <!-- ================= payload ================= -->
+
+    <link name="payload_link">
+      <pose>0.0 0.0 -0.1421 0 0 0</pose>
+      <inertial>
+        <mass>0.05</mass>
+        <inertia><ixx>1e-5</ixx><iyy>1e-5</iyy><izz>1e-5</izz></inertia>
+      </inertial>
+      <!-- The real cameras, from their manufacturers' CAD (hardware/cad, tools/step_to_mesh.py).
+           Each mesh's origin is the centre of its front face, looking along +X. The simulated
+           RGB, depth and thermal sensors below share one optical centre (perception fuses them
+           pixel for pixel); the Lepton mesh sits beside the OAK-D, 6 cm of parallax the real
+           build will calibrate out. -->
+      <visual name="oak_d_pro_w">
+        <pose>0 0 0 0 1.5708 0</pose>
+        <geometry><mesh><uri>model://aeromind_hexa/meshes/oak_d_pro_w.glb</uri></mesh></geometry>
+      </visual>
+      <visual name="flir_lepton_3_5">
+        <pose>0 0.058 0 0 1.5708 0</pose>
+        <geometry><mesh><uri>model://aeromind_hexa/meshes/flir_lepton_3_5.glb</uri></mesh></geometry>
+      </visual>
+
+      <!-- OAK-D Pro W stereo left (OV9282, global shutter mono): what VIO tracks -->
+
+      <!-- OAK-D Pro W stereo right (OV9282, global shutter mono): what VIO tracks -->
+    </link>
+
+    <joint name="payload_joint" type="fixed">
+      <parent>base_link</parent>
+      <child>payload_link</child>
+    </joint>
+  </model>
+</sdf>
