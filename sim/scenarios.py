@@ -6,7 +6,7 @@ from pathlib import Path
 
 import yaml
 
-from sim import geo
+from tools import geo
 from sim.link import LinkFaults
 from tools import waypoints as wp
 

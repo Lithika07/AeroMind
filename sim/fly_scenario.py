@@ -13,6 +13,7 @@ scenario's faults, flies the mission in AUTO until the vehicle disarms, and writ
 """
 import argparse
 import json
+import shutil
 import subprocess
 import sys
 import threading
@@ -28,6 +29,8 @@ ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = ROOT / "data"
 SIM_START_TIMEOUT_S = 120
 FLIGHT_TIMEOUT_S = 30 * 60
+#: Wind blows only above this height, like a ground boundary layer. A persistent push on a
+#: landed airframe kept ArduPilot's land detector from ever disarming it.
 WIND_ON_ALT_M = 3.0
 PROGRESS_EVERY_S = 30.0
 
@@ -66,7 +69,8 @@ def fly(vehicle: Vehicle, scenario: scenarios.Scenario) -> dict:
     """Start the uploaded mission and follow it until the vehicle disarms."""
     vehicle.start_mission()
     started = time.time()
-    outcome = {"armed_unix": started, "wind_applied_unix": None, "max_rel_alt_m": 0.0}
+    outcome = {"armed_unix": started, "wind_applied_unix": None, "wind_cleared_unix": None, "max_rel_alt_m": 0.0}
+    wind_on = False
     last_progress = 0.0
     seq = None
     while time.time() - started < FLIGHT_TIMEOUT_S:
@@ -77,10 +81,16 @@ def fly(vehicle: Vehicle, scenario: scenarios.Scenario) -> dict:
         if kind == "GLOBAL_POSITION_INT":
             alt = msg.relative_alt / 1000.0
             outcome["max_rel_alt_m"] = max(outcome["max_rel_alt_m"], alt)
-            if scenario.wind and outcome["wind_applied_unix"] is None and alt > WIND_ON_ALT_M:
+            if scenario.wind and not wind_on and alt > WIND_ON_ALT_M and outcome["wind_cleared_unix"] is None:
                 wind.apply(*scenario.wind.force_n())
+                wind_on = True
                 outcome["wind_applied_unix"] = time.time()
                 vehicle.log(f"  wind on: {scenario.wind.speed_ms} m/s from {scenario.wind.from_deg} deg")
+            elif wind_on and alt < WIND_ON_ALT_M:
+                wind.clear()
+                wind_on = False
+                outcome["wind_cleared_unix"] = time.time()
+                vehicle.log("  wind off (below boundary layer)")
         elif kind == "MISSION_CURRENT" and msg.seq != seq:
             seq = msg.seq
             vehicle.log(f"  mission item {seq}")
@@ -151,10 +161,14 @@ def main() -> int:
             if not args.force:
                 print(f"{out_dir} exists; skipping (use --force to replace)")
                 continue
-            import shutil
             shutil.rmtree(out_dir)
         print(f"== {scenario_id}: {table[scenario_id].title} -> {out_dir}", flush=True)
-        meta = run(table[scenario_id], out_dir, args.mission, args.parent)
+        try:
+            meta = run(table[scenario_id], out_dir, args.mission, args.parent)
+        except (Exception, KeyboardInterrupt) as error:
+            shutil.rmtree(out_dir, ignore_errors=True)
+            print(f"   {scenario_id} failed, partial data removed: {error!r}", flush=True)
+            return 1
         print(f"   done in {meta['duration_s']} s, {len(meta['tlogs'])} tlog(s), {meta['outages']} outage(s)",
               flush=True)
     return 0

@@ -1,6 +1,6 @@
 import pytest
 
-from sim import geo
+from tools import geo
 
 ORIGIN = (-35.363262, 149.165237)
 

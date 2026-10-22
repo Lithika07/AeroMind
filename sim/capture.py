@@ -17,7 +17,8 @@ from pathlib import Path
 
 from pymavlink.dialects.v20 import ardupilotmega as mavlink
 
-from sim import geo, link, world
+from sim import link, world
+from tools import geo
 from sim.tlog import TlogWriter
 
 LISTEN = ("127.0.0.1", 14560)
