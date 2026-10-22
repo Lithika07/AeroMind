@@ -1,0 +1,14 @@
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.coverage
+htmlcov/
+.venv/
+
+# Secrets
+.env
+
+# Runtime output (simulation working dirs, analysis runs)
+outputs/
+sim/run/
