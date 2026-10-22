@@ -1,0 +1,46 @@
+# AeroMind demo scenarios, flown in the disaster world by `python3 -m sim.fly_scenario <id>`.
+#
+# One route for all of them, so every flight is comparable and history baselines mean something.
+# World ENU metres from the world origin; the pad (home) is at (0, -110).
+#   - 30 m clears every structure but the 44 m radio mast at (-40, 60); the route stays >= 45 m
+#     from it (RTL climbs to 50 m before flying home).
+#   - The WP5 -> WP6 leg crosses the north-east no-network blocks (x -110..-20, y 50..92) at
+#     x = -85, which is where S4's radio shadow drops the link.
+route:
+  altitude_m: 30
+  waypoints:
+    - [180, -120]
+    - [200, 60]
+    - [130, 175]
+    - [0, 185]
+    - [-85, 140]
+    - [-85, 20]
+    - [-190, -60]
+    - [-60, -150]
+
+scenarios:
+  s0:
+    title: Baseline
+    speed_ms: 5
+  s1:
+    title: Strong wind + fast flight
+    speed_ms: 12
+    wind: {speed_ms: 10, from_deg: 90}
+  s2:
+    title: Undersized battery
+    speed_ms: 5
+    params: {BATT_CAPACITY: 2200}
+  s3:
+    title: Telemetry dropout
+    speed_ms: 5
+    link: {windows: [[90, 12], [200, 12]]}
+  s4:
+    title: Combined (wind + fast + small battery + radio shadow)
+    speed_ms: 12
+    wind: {speed_ms: 10, from_deg: 90}
+    params: {BATT_CAPACITY: 2200}
+    link: {zones: [north_east_blocks]}
+  s5:
+    title: Weak GPS (optional)
+    speed_ms: 5
+    params: {SIM_GPS1_NUMSATS: 5}

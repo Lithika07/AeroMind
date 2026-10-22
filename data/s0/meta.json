@@ -1,0 +1,18 @@
+{
+  "scenario": "s0",
+  "title": "Baseline",
+  "speed_ms": 5.0,
+  "wind": null,
+  "params_set": {},
+  "mission_source": "generated",
+  "parent_run": null,
+  "armed_unix": 1792685530.8316557,
+  "wind_applied_unix": null,
+  "max_rel_alt_m": 30.019,
+  "disarmed_unix": 1792685878.0018413,
+  "duration_s": 347.2,
+  "tlogs": [
+    "2026-10-22_21-42-10.tlog"
+  ],
+  "outages": 0
+}
