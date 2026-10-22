@@ -70,6 +70,8 @@ def _check(edit, by_seq: dict, nav_count: int, removed: int) -> str:
     item = by_seq.get(edit.wp)
     if item is None:
         return f"WP{edit.wp} is not in the mission"
+    if edit.wp == 0:
+        return "WP0 is home and cannot be edited"
     if edit.action == "set_speed":
         if edit.value is None or not SPEED_MIN_MS <= edit.value <= SPEED_MAX_MS:
             return f"speed must be {SPEED_MIN_MS:g}-{SPEED_MAX_MS:g} m/s"
@@ -135,7 +137,7 @@ def apply_edits(items: list, edits: list, cause_ids: set, advice_only_causes: se
             candidate = _apply_one(current, edit)
             if not wp.ends_with_return(candidate):
                 reason = "the mission would no longer end in RTL or LAND"
-            elif obstacle_conflicts(candidate) and not obstacle_conflicts(current):
+            elif len(obstacle_conflicts(candidate)) > len(obstacle_conflicts(current)):
                 reason = f"a leg would pass the {', '.join(obstacle_conflicts(candidate))} too low"
         if reason:
             rejected.append({"edit": edit.model_dump(), "reason": reason})

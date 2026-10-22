@@ -4,6 +4,7 @@ from pathlib import Path
 import streamlit as st
 
 from dashboard import charts, data
+from dashboard.text import plain
 
 DOT = {"good": ":green[●]", "caution": ":orange[●]", "bad": ":red[●]"}
 BANNER = {"Good": st.success, "Needs attention": st.warning, "Unsafe": st.error}
@@ -33,7 +34,7 @@ def key_numbers(state: dict) -> None:
 def improvements(state: dict) -> None:
     st.subheader("Top 3 improvements")
     for rec in state["agents"]["approved"]["advisor"]["recommendations"]:
-        st.markdown(f"**{rec['rank']}. {rec['text']}**  \n{rec['reason']} — _{rec['evidence']}_")
+        st.markdown(f"**{rec['rank']}. {plain(rec['text'])}**  \n{plain(rec['reason'])} — _{plain(rec['evidence'])}_")
 
 
 def risk_box(state: dict) -> None:
@@ -44,9 +45,9 @@ def risk_box(state: dict) -> None:
     battery = risk["predicted_battery_pct"]
     st.markdown(f"Predicted battery at landing: **{_fmt(battery, ' %', 0)}** · confidence {risk['confidence']}")
     for factor in risk["factors"][:4]:
-        st.markdown(f"- {factor}")
+        st.markdown(f"- {plain(factor)}")
     if risk["adjustment"]:
-        st.caption(f"Risk agent adjusted the rule score by {risk['adjustment']:+d}: {risk['adjustment_reason']}")
+        st.caption(f"Risk agent adjusted the rule score by {risk['adjustment']:+d}: {plain(risk['adjustment_reason'])}")
 
 
 def downloads(out_dir: Path) -> None:
@@ -63,13 +64,13 @@ def downloads(out_dir: Path) -> None:
 def render(state: dict, flight, out_dir: Path) -> None:
     summary = state["agents"]["approved"]["flight_summary"]
     BANNER[summary["verdict"]](f"**{summary['verdict']}** · health {state['metrics']['health_score']}/100\n\n"
-                               f"{summary['summary']}")
+                               f"{plain(summary['summary'])}")
     key_numbers(state)
     left, right = st.columns([3, 2])
     with left:
         st.subheader("Flight story")
         for line in summary["flight_story"]:
-            st.markdown(f"{DOT[line['status']]} **{line['phase']}** — {line['text']}")
+            st.markdown(f"{DOT[line['status']]} **{plain(line['phase'])}** — {plain(line['text'])}")
     with right:
         risk_box(state)
     st.subheader("Telemetry signal")

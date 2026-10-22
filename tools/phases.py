@@ -55,6 +55,8 @@ def _label(mode: str, seq, commands: dict) -> tuple:
 
 def landing_start(position: pd.DataFrame, vfr: pd.DataFrame, after: float, end: float) -> float:
     """When horizontal motion stopped for the final descent: the last moment above walking pace."""
+    if "groundspeed" not in vfr:
+        return after
     moving = vfr[(vfr["t"] >= after) & (vfr["t"] <= end) & (vfr["groundspeed"] > LANDING_SPEED_MS)]
     return float(moving["t"].iloc[-1]) if not moving.empty else after
 

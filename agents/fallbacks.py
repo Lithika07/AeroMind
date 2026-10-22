@@ -60,13 +60,15 @@ def flight_summary(state: dict) -> FlightSummaryOut:
     m = state["metrics"]
     flight = m["flight"]
     problems = [k.replace("_", " ") for k, v in m["status"].items() if v == "bad"]
-    first = (f"The flight lasted {flight['duration_s']:.0f} s over {flight['distance_m']:.0f} m "
-             f"and scored {m['health_score']} out of 100.")
+    duration = "an unknown time" if flight["duration_s"] is None else f"{flight['duration_s']:.0f} s"
+    distance = "an unknown distance" if flight["distance_m"] is None else f"{flight['distance_m']:.0f} m"
+    first = f"The flight lasted {duration} over {distance} and scored {m['health_score']} out of 100."
     second = (f"The main problems were: {', '.join(problems)}." if problems
               else "No metric was in the Bad band.")
     battery = m["battery"]["remaining_end_pct"]
-    third = (f"It landed with {battery:.0f} % battery and the telemetry link was up {m['link']['uptime_pct']} % "
-             f"of the time." if battery is not None else "Battery level was not reported.")
+    uptime = m["link"]["uptime_pct"]
+    third = (f"It landed with {battery:.0f} % battery" if battery is not None else "Battery level was not reported") + \
+        (f" and the telemetry link was up {uptime} % of the time." if uptime is not None else ".")
     claims = [Claim(id="S1", text="health score", metric="health_score", value=m["health_score"])]
     if battery is not None:
         claims.append(Claim(id="S2", text="battery at landing", metric="battery.remaining_end_pct", value=battery))

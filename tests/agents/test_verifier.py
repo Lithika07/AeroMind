@@ -27,11 +27,11 @@ def test_resolve(path, expected):
     ({"text": "RSSI not reported", "metric": None, "value": None}, True),
 ])
 def test_check_claim(claim, ok):
-    assert (verifier.check_claim(claim, METRICS) == "") is ok
+    assert (verifier.check_claim(claim, METRICS, verifier.pools(METRICS)) == "") is ok
 
 
 def test_numbers_in_text_must_be_in_the_data():
-    known = verifier.numbers(METRICS)
+    known = verifier.pools(METRICS)
     assert verifier.check_text("link lost 12.3 s, uptime 92.4 %", known) == ""
     assert "47 m" in verifier.check_text("drifted 47 m", known)
     assert verifier.check_text("Leg 3 near WP5", known) == ""          # no unit: not a measurement
@@ -53,7 +53,7 @@ def test_rule_based_outputs_always_pass(states):
                    "telemetry_link": fallbacks.telemetry_link(state).model_dump(),
                    "diagnosis": diagnosis.model_dump(), "risk": fallbacks.risk(state).model_dump(),
                    "advisor": fallbacks.advisor(state, mission, diagnosis).model_dump()}
-        result = verifier.verify(outputs, state, [fallbacks.SAFE_SPEED_MS])
+        result = verifier.verify(outputs, state, {"m/s": [fallbacks.SAFE_SPEED_MS]})
         rejected = [v for v in result.verdicts if v.status == "rejected"]
         assert rejected == [], (run, rejected)
 
@@ -84,3 +84,47 @@ def test_rejection_rates():
 ])
 def test_a_lower_risk_must_name_what_reduces_it(adjustment, reason, ok):
     assert (verifier.check_adjustment({"adjustment": adjustment, "adjustment_reason": reason}) == "") is ok
+
+
+def test_numbers_only_match_values_of_the_same_unit():
+    known = verifier.pools(METRICS)
+    assert "92.4 m/s" in verifier.check_text("flew at 92.4 m/s", known)      # 92.4 is a percentage
+    assert "1.8 %" in verifier.check_text("loss 1.8 %", known)               # 1.8 is metres
+
+
+@pytest.mark.parametrize("text", ["lost link for 45 seconds", "drifted 300 metres", "in 40 knot wind",
+                                  "a 2 minute gap", "drifted 0.3 km"])
+def test_word_units_are_checked_too(text):
+    assert verifier.check_text(text, verifier.pools(METRICS)) != ""
+
+
+def test_word_units_convert_before_comparing():
+    known = verifier.pools({"link": {"duration_s": 120.0}, "wind": {"max_ms": 5.144}})
+    assert verifier.check_text("a 2 minute gap in 10 knots", known) == ""
+
+
+def test_text_value_for_a_numeric_metric_is_rejected():
+    claim = {"text": "uptime", "metric": "link.uptime_pct", "value": "high"}
+    assert "text" in verifier.check_claim(claim, METRICS, {})
+    claim = {"text": "uptime", "metric": "link.uptime_pct", "value": "50"}
+    assert "does not match" in verifier.check_claim(claim, METRICS, {})
+
+
+def test_cause_on_a_rejected_finding_is_rejected(states):
+    state, _ = states.get("s2") or pytest.skip("s2 not flown")
+    diagnosis = {"findings": [{"id": "F1", "text": "battery", "metric": "battery.remaining_end_pct", "value": 97}],
+                 "causes": [{"id": "C1", "cause": "small battery", "category": "low_battery", "confidence": 0.9,
+                             "findings": ["F1"]}]}
+    verdicts = {v.claim_id: v for v in verifier.verify({"diagnosis": diagnosis}, state).verdicts}
+    assert verdicts["F1"].status == verdicts["C1"].status == "rejected"
+    assert "rejected findings" in verdicts["C1"].reason
+
+
+def test_invented_number_in_a_cause_is_rejected(states):
+    state, _ = states.get("s1") or pytest.skip("s1 not flown")
+    diagnosis = {"findings": [{"id": "F1", "text": "wind", "metric": "wind.max_ms",
+                               "value": state["metrics"]["wind"]["max_ms"]}],
+                 "causes": [{"id": "C1", "cause": "Motor 3 failing at 2400 rpm and 77 m/s gusts",
+                             "category": "other", "confidence": 0.5, "findings": ["F1"]}]}
+    verdicts = {v.claim_id: v for v in verifier.verify({"diagnosis": diagnosis}, state).verdicts}
+    assert verdicts["C1"].status == "rejected"

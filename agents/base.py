@@ -50,8 +50,8 @@ def guard(name: str, output: BaseModel, state: dict, has_mission: bool) -> BaseM
         from agents.fallbacks import verdict
         levels = ["Good", "Needs attention", "Unsafe"]
         rule = verdict(state["metrics"])
-        if abs(levels.index(output.verdict) - levels.index(rule)) > 1:
-            return output.model_copy(update={"verdict": rule})
+        if levels.index(output.verdict) < levels.index(rule) or levels.index(output.verdict) - levels.index(rule) > 1:
+            return output.model_copy(update={"verdict": rule})   # never milder than the data, at most one step harsher
     return output
 
 
@@ -71,6 +71,9 @@ def run_agent(name: str, state: dict, outputs: dict, backend, fallback, mission=
                 return AgentResult(name, output, "llm", round(time.monotonic() - started, 2), tuple(errors), feedback)
             except (LLMError, ValidationError) as error:
                 errors.append(str(error)[:300])
+            except Exception as error:  # an unexpected backend failure must not stop the analysis
+                errors.append(f"{type(error).__name__}: {str(error)[:280]}")
+                break
                 user += f"\nYour previous reply was invalid: {str(error)[:300]}. Reply again with valid JSON."
     output = guard(name, fallback(), state, bool(mission))
     return AgentResult(name, output, "fallback", round(time.monotonic() - started, 2), tuple(errors), feedback)

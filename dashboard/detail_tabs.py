@@ -4,6 +4,7 @@ import pandas as pd
 import streamlit as st
 
 from dashboard import ask, charts, data
+from dashboard.text import plain
 from tools import memory
 
 SNIPPET_S = 20.0
@@ -65,7 +66,7 @@ def anomalies(state, flight) -> None:
     causes = {c["category"]: c for c in state["agents"]["approved"].get("diagnosis", {}).get("causes", [])}
     for k, a in enumerate(found):
         cause = causes.get(CAUSE_FOR_SIGNAL.get(a["signal"]))
-        linked = f" · linked cause {cause['id']}: {cause['cause']}" if cause else ""
+        linked = f" · linked cause {cause['id']}: {plain(cause['cause'])}" if cause else ""
         st.markdown(f"**t={a['t']} s · {a['signal']} = {a['value']}** (z {a['z']}){linked}")
         if flight is not None:
             message, column = {"current": ("SYS_STATUS", "current_battery"), "vibration": ("VIBRATION", "vibration_z"),
@@ -152,11 +153,12 @@ def ask_tab(state, backend) -> None:
     history = st.session_state.setdefault(key, [])
     for turn in history:
         with st.chat_message(turn["role"]):
-            st.markdown(turn["text"])
+            st.markdown(turn["text"] if turn["role"] == "assistant" and turn.get("trusted") else plain(turn["text"]))
     question = st.chat_input("Ask about this flight, e.g. why did the link drop?")
     if question:
         reply = ask.answer(question, state, backend)
-        cites = f"\n\n_Sources: {', '.join(reply['citations'])}_" if reply["citations"] else ""
-        note = f"\n\n_{reply['note']}; answered from the approved results instead._" if reply["note"] else ""
-        history += [{"role": "user", "text": question}, {"role": "assistant", "text": reply["answer"] + cites + note}]
+        cites = f"\n\n_Sources: {plain(', '.join(reply['citations']))}_" if reply["citations"] else ""
+        note = f"\n\n_{plain(reply['note'])}; answered from the approved results instead._" if reply["note"] else ""
+        history += [{"role": "user", "text": question},
+                    {"role": "assistant", "text": plain(reply["answer"]) + cites + note, "trusted": True}]
         st.rerun()

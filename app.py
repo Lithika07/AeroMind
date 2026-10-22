@@ -18,6 +18,7 @@ load_dotenv(ROOT / ".env")
 import pipeline  # noqa: E402
 from agents import llm  # noqa: E402
 from dashboard import data, detail_tabs, summary_tab  # noqa: E402
+from dashboard.text import plain  # noqa: E402
 from tools.ingest import IngestError  # noqa: E402
 
 UPLOADS = pipeline.OUTPUTS / "_uploads"
@@ -33,7 +34,7 @@ def backend_for(choice: str):
 
 
 @st.cache_resource(show_spinner="Reading the flight logs…", max_entries=8)
-def flight_for(run_id: str, tlogs: tuple, mission: str):
+def flight_for(run_id: str, tlogs: tuple, mission: str, version: float):  # version: state.json mtime
     return data.load_flight({"tlogs": list(tlogs), "mission": mission})
 
 
@@ -49,8 +50,10 @@ def save_upload(folder: Path, upload, allowed: tuple) -> Path:
 
 
 def analyse_uploads(run_id, tlogs, mission, params, notes, backend) -> str:
-    if not RUN_ID.match(run_id):
-        raise IngestError("run name: letters, digits, - and _ only (max 40)")
+    if not RUN_ID.match(run_id) or run_id.startswith("_"):
+        raise IngestError("run name: letters, digits, - and _ only (max 40), not starting with _")
+    if (pipeline.OUTPUTS / run_id).exists() or (UPLOADS / run_id).exists():
+        raise IngestError(f"a run called {run_id} already exists; choose another name")
     if not tlogs:
         raise IngestError("upload at least one .tlog file")
     folder = UPLOADS / run_id
@@ -75,7 +78,8 @@ def sidebar():
         mission = st.file_uploader("Mission .waypoints (recommended)", type=["waypoints", "txt"])
         params = st.file_uploader("Parameters .param (optional)", type=["param", "parm"])
         notes = st.text_area("Pilot notes (optional)", placeholder="felt it drifting on leg 3", max_chars=2000)
-        run_id = st.text_input("Run name", value=f"upload_{len(runs) + 1}")
+        run_id = st.text_input("Run name", value=next(f"upload_{k}" for k in range(1, 10_000)
+                                                      if f"upload_{k}" not in runs))
         submitted = st.form_submit_button("Analyse", type="primary", width="stretch")
     if submitted:
         try:
@@ -102,10 +106,11 @@ def main() -> None:
         return
     state = data.load_state(pipeline.OUTPUTS, run_id)
     sources = state["sources"]
-    flight = flight_for(run_id, tuple(sources["tlogs"]), sources.get("mission") or "")
+    version = (pipeline.OUTPUTS / run_id / "state.json").stat().st_mtime
+    flight = flight_for(run_id, tuple(sources["tlogs"]), sources.get("mission") or "", version)
     st.title(f"Flight {run_id}" + (f" · scenario {state['scenario']}" if state.get("scenario") else ""))
     if state.get("notes"):
-        st.caption(f"Pilot notes: {state['notes']}")
+        st.caption(f"Pilot notes: {plain(state['notes'])}")
     tabs = st.tabs(TABS)
     out_dir = pipeline.OUTPUTS / run_id
     with tabs[0]:

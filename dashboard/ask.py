@@ -6,7 +6,6 @@ import json
 from pydantic import BaseModel
 
 from agents import verifier
-from agents.llm import LLMError
 
 MAX_QUESTION_CHARS = 500
 SYSTEM = ("You answer a pilot's question about one drone flight using only the JSON given. Cite the metric "
@@ -46,7 +45,7 @@ def _check(answer: AskOut, state: dict) -> str:
     if not answer.citations:
         return "no metric cited"
     # numbers in the answer must come from the metrics it cites, not from anywhere in the flight
-    known = [n for c in answer.citations for n in verifier.numbers(verifier.resolve(data, c)[1])]
+    known = verifier.merge(*(verifier.pools_at(data, c) for c in answer.citations))
     return verifier.check_text(answer.answer, known)
 
 
@@ -90,8 +89,8 @@ def answer(question: str, state: dict, backend) -> dict:
         for _ in range(2):
             try:
                 reply = backend.complete(SYSTEM, user, AskOut)
-            except LLMError as error:
-                note = f"LLM unavailable: {error}"
+            except Exception as error:  # LLMError or anything unexpected: answer from the rules
+                note = f"LLM unavailable: {str(error)[:200]}"
                 break
             problem = _check(reply, state)
             if not problem:

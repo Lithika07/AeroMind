@@ -146,17 +146,20 @@ fixtures are short slices of real S0–S4 tlogs, never hand-made data.
 | # | Phase | Work | Done when | Est. |
 |---|---|---|---|---|
 | 0 ✅ | **Sim spikes** (done 2026-10-22) | `launch_sim.py`, overlay world, Hexa-X, SITL + MAVProxy; `battery.lua`; wind wrench + EKF drag fusion; `capture.py` | One hand-flown hover shows: battery falling with current > 0; `WIND.speed` ≈ 10 under the wrench (or the attitude fallback agrees within 2 m/s); a 12 s gap in the recorded tlog | 4 h |
-| 1 | **Scenario runner + data** | `make_mission.py`, `base_loop.waypoints`, `scenarios.yaml`, `fly_scenario.py`; fly S0–S4 | Five filled `data/s*/` folders; S0 lands with 80–85 % battery; S2 below 20 %; truth.json for S3 has 2 drops | 3 h |
-| 2 | **Data contracts** | Pydantic models for `metrics.json`, plan, every agent output, `history.json` entry | Schemas validate the PRD examples; tests green | 1 h |
-| 3 | **Ingest + metrics** (PRD step 2) | `ingest.py` (merge tlogs, gap = dropout), `metrics.py` (flight + link, statuses, health), `phases.py`, `anomalies.py`. Packet loss is computed outside dropout windows, because sequence numbers wrap at 256 | S3 shows 2 dropouts within 3 s of truth.json, nearest WP correct; S0 health ≥ 80 with 0 Bad | 3 h |
-| 4 | **Memory + risk rules** (PRD step 3) | `memory.py` (baselines, mean + 2σ, battery % per km, recurring causes), `risk_rules.py` | `run.py --batch data/` stores 5 flights; S0 Low, S2/S4 High from rules alone | 1.5 h |
-| 5 | **Agents + orchestrator** (PRD step 4) | `base.py run_agent()` (JSON schema, one retry), `prompts.py` (6 prompts + cause hints), `orchestrator.py` (manifest → plan → validate → run → Verifier re-run at > 30 % rejected), LLM config | S1 → wind/speed cause + `set_speed` edit; no mission file → plan skips mission edits; Verifier rejects an injected false number | 4 h |
-| 6 | **Mission I/O** (PRD step 5) | `mission_io.py`: bounds checks (§5), apply edits, `mission_fixed.waypoints` + `changelog.md` | Fixed S1 mission uploads to SITL via `fly_scenario.py` and flies AUTO to RTL | 1.5 h |
-| 7 | **CLI** | `run.py` single / `--batch` / `--compare`; `outputs/<run_id>/state.json` cache | S4 end-to-end in < 60 s; `--compare` prints the results table | 1 h |
-| 8 | **Dashboard** (PRD step 6) | Streamlit: Summary tab first, then Track (plotly map on the world origin, path coloured by link), Telemetry, Anomalies, Power & attitude, History, Agents; "Use cached run" | Uploading S4 shows verdict, story, signal strip with the zone dropout near its WP, top 3, risk | 4 h |
+| 1 ✅ | **Scenario runner + data** | `make_mission.py`, `base_loop.waypoints`, `scenarios.yaml`, `fly_scenario.py`; fly S0–S4 | Five filled `data/s*/` folders; S0 lands with 80–85 % battery; S2 below 20 %; truth.json for S3 has 2 drops | 3 h |
+| 2 ✅ | **Data contracts** | Pydantic models for `metrics.json`, plan, every agent output, `history.json` entry | Schemas validate the PRD examples; tests green | 1 h |
+| 3 ✅ | **Ingest + metrics** (PRD step 2) | `ingest.py` (merge tlogs, gap = dropout), `metrics.py` (flight + link, statuses, health), `phases.py`, `anomalies.py`. Packet loss is computed outside dropout windows, because sequence numbers wrap at 256 | S3 shows 2 dropouts within 3 s of truth.json, nearest WP correct; S0 health ≥ 80 with 0 Bad | 3 h |
+| 4 ✅ | **Memory + risk rules** (PRD step 3) | `memory.py` (baselines, mean + 2σ, battery % per km, recurring causes), `risk_rules.py` | `run.py --batch data/` stores 5 flights; S0 Low, S2/S4 High from rules alone | 1.5 h |
+| 5 ✅ | **Agents + orchestrator** (PRD step 4) | `base.py run_agent()` (JSON schema, one retry), `prompts.py` (6 prompts + cause hints), `orchestrator.py` (manifest → plan → validate → run → Verifier re-run at > 30 % rejected), LLM config | S1 → wind/speed cause + `set_speed` edit; no mission file → plan skips mission edits; Verifier rejects an injected false number | 4 h |
+| 6 ✅ | **Mission I/O** (PRD step 5) | `mission_io.py`: bounds checks (§5), apply edits, `mission_fixed.waypoints` + `changelog.md` | Fixed S1 mission uploads to SITL via `fly_scenario.py` and flies AUTO to RTL | 1.5 h |
+| 7 ✅ | **CLI** | `run.py` single / `--batch` / `--compare`; `outputs/<run_id>/state.json` cache | S4 end-to-end in < 60 s; `--compare` prints the results table | 1 h |
+| 8 ✅ | **Dashboard** (PRD step 6) | Streamlit: Summary tab first, then Track (plotly map on the world origin, path coloured by link), Telemetry, Anomalies, Power & attitude, History, Agents; "Use cached run" | Uploading S4 shows verdict, story, signal strip with the zone dropout near its WP, top 3, risk | 4 h |
 | 9 | **Re-fly + compare** (PRD step 7) | Fly fixed S1, S2, S4 under the same faults; `--compare` | S1 cross-track ≥ 40 % lower; S2 fixed ≥ 25 % battery; battery prediction within 10 points | 1.5 h |
-| 10 | **Report + Ask** (PRD step 8) | Jinja2 `report.html`; Ask tab answering from state with citations | "Why did the link drop?" gets an answer citing `link.dropouts[0]` | 2 h |
+| 10 ✅ | **Report + Ask** (PRD step 8) | Jinja2 `report.html`; Ask tab answering from state with citations | "Why did the link drop?" gets an answer citing `link.dropouts[0]` | 2 h |
 | 11 | **Review + package** (PRD step 9) | Code + security review (API key in `.env`, upload validation); README with sim setup; results table; cached runs S0–S4 + re-flights; 6 slides; 2-min video | Fresh clone + README → demo runs from cache with no network | 2 h |
+
+Status 2026-10-22: phases 0-8 and 10 done; 9 (re-fly) and 11 (review, results, package) in progress.
+Measured results are in [RESULTS.md](RESULTS.md) once `python3 run.py --results` has run.
 
 About 29 hours in total. Phase 0 is the main risk, so do it first. If a spike fails, the
 fallbacks are in §6. The PRD's cut order still applies to Phases 8–11: Ask → HTML report →

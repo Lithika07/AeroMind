@@ -19,6 +19,7 @@ ROOT = Path(__file__).resolve().parent
 OUTPUTS = ROOT / "outputs"
 HISTORY = ROOT / "history.json"
 AUTO = "auto"
+OUTPUT_FILES = ("state.json", "report.html", "mission_fixed.waypoints", "changelog.md")
 
 
 def fix_mission(state: dict, mission: list, out_dir: Path) -> dict:
@@ -68,6 +69,8 @@ def analyse_flight(run_id: str, tlogs: list, mission=None, params=None, notes=No
     state["agents"] = orchestrator.run(state, chosen, items)
     out_dir = Path(out_root) / run_id
     out_dir.mkdir(parents=True, exist_ok=True)
+    for stale in OUTPUT_FILES:          # a re-analysis must not leave the previous run's files behind
+        (out_dir / stale).unlink(missing_ok=True)
     state["mission_fix"] = fix_mission(state, items, out_dir) if items else None
     record_outcome(state, history_path)
     state["seconds_total"] = round(time.monotonic() - started, 1)

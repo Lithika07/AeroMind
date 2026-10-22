@@ -5,6 +5,7 @@ otherwise Ollama when its server answers, otherwise none (every agent then uses 
 fallback). Each backend returns a validated instance of the requested Pydantic model or raises
 LLMError.
 """
+import http.client
 import json
 import os
 import time
@@ -42,6 +43,8 @@ class ClaudeBackend:
             raise LLMError(f"Claude unreachable: {error}") from error
         except self.anthropic.APIStatusError as error:
             raise LLMError(f"Claude API error {error.status_code}: {error.message}") from error
+        except self.anthropic.APIError as error:
+            raise LLMError(f"Claude API error: {error}") from error
         if response.stop_reason == "refusal":
             raise LLMError("Claude declined the request")
         if response.parsed_output is None:
@@ -62,7 +65,7 @@ class OllamaBackend:
         try:
             with urllib.request.urlopen(request, timeout=timeout) as response:
                 return json.load(response)
-        except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as error:
+        except (OSError, http.client.HTTPException, ValueError) as error:
             raise LLMError(f"Ollama at {self.url} failed: {error}") from error
 
     def complete(self, system: str, user: str, output: type[BaseModel]) -> BaseModel:
@@ -87,7 +90,7 @@ class OllamaBackend:
         try:
             with urllib.request.urlopen(f"{self.url}{path}", timeout=OLLAMA_PING_S) as response:
                 return json.load(response)
-        except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as error:
+        except (OSError, http.client.HTTPException, ValueError) as error:
             raise LLMError(str(error)) from error
 
 

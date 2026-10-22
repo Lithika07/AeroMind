@@ -10,7 +10,6 @@ import time
 from agents import fallbacks, prompts, verifier
 from tools import mission_io
 from agents.base import AgentResult, run_agent
-from agents.llm import LLMError
 from agents.schemas import (AdvisorOut, DiagnosisOut, FlightSummaryOut, Plan, PlanStep, RiskOut, TelemetryLinkOut)
 
 RERUN_ABOVE = 0.3
@@ -70,8 +69,8 @@ def plan_for(state: dict, backend) -> tuple:
     try:
         proposal = backend.complete(prompts.PLANNER, verifier_safe_json(man), Plan)
         return checked_plan(proposal, man), man, None
-    except (LLMError, ValueError) as error:
-        return default_plan(man), man, str(error)[:300]
+    except Exception as error:  # any planning failure: the rule-based plan runs
+        return default_plan(man), man, f"{type(error).__name__}: {str(error)[:280]}"
 
 
 def verifier_safe_json(data: dict) -> str:
@@ -144,10 +143,16 @@ def approve(outputs: dict, check, state: dict, mission) -> dict:
     return approved
 
 
-def edit_numbers(outputs: dict) -> list:
-    advisor = outputs.get("advisor") or {}
-    return [float(e["value"]) for e in advisor.get("edits", []) if e.get("value") is not None] + \
-        [float(e["wp"]) for e in advisor.get("edits", [])] + [fallbacks.SAFE_SPEED_MS]
+EDIT_UNITS = {"set_speed": "m/s", "change_altitude": "m", "add_hold": "s"}
+
+
+def edit_numbers(outputs: dict) -> dict:
+    """unit -> the values the Advisor's edits propose, which its recommendations may quote."""
+    proposed = {"m/s": [fallbacks.SAFE_SPEED_MS]}
+    for e in (outputs.get("advisor") or {}).get("edits", []):
+        if e.get("value") is not None and e["action"] in EDIT_UNITS:
+            proposed.setdefault(EDIT_UNITS[e["action"]], []).append(float(e["value"]))
+    return proposed
 
 
 def check_edits(outputs: dict, results: dict, state: dict, mission) -> dict:

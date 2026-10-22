@@ -26,6 +26,12 @@ DISTANCE_SAMPLE_S = 1.0
 TRANSIENT_S = 10.0
 
 
+def column(frame, name: str):
+    """The column, or an empty series when the message (and so the column) is missing."""
+    import pandas as pd
+    return frame[name] if name in frame else pd.Series(dtype=float)
+
+
 def _round(value, digits=1):
     return None if value is None or (isinstance(value, float) and math.isnan(value)) else round(float(value), digits)
 
@@ -74,8 +80,8 @@ def tracking(flight, flight_phases) -> Tracking:
     legs = []
     for phase in (p for p in flight_phases if p.kind == "leg"):
         window = (phase.t_start + flight.t0, phase.t_end + flight.t0)
-        xtrack = timeline.in_window(nav, window)["xtrack_error"].abs()
-        speed = timeline.in_window(vfr, window)["groundspeed"]
+        xtrack = column(timeline.in_window(nav, window), "xtrack_error").abs()
+        speed = column(timeline.in_window(vfr, window), "groundspeed")
         to_wp = int(phase.name.split("WP")[-1].rstrip(")"))
         legs.append(Leg(leg=len(legs) + 1, to_wp=to_wp, t_start=phase.t_start, t_end=phase.t_end,
                         xtrack_max_m=_round(xtrack.max(), 2) if not xtrack.empty else None,
