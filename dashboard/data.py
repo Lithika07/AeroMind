@@ -23,11 +23,12 @@ def load_state(outputs: Path, run_id: str) -> dict:
 
 def load_flight(sources: dict):
     """The flight's data again from the files the analysis read (None if they are gone)."""
-    tlogs = [Path(p) for p in sources["tlogs"]]
+    from pipeline import resolve
+    tlogs = [resolve(p) for p in sources["tlogs"]]
     if not tlogs or not all(p.exists() for p in tlogs):
         return None
-    mission = sources.get("mission")
-    return ingest.load_flight(tlogs, Path(mission) if mission and Path(mission).exists() else None)
+    mission = resolve(sources["mission"]) if sources.get("mission") else None
+    return ingest.load_flight(tlogs, mission if mission and mission.exists() else None)
 
 
 def series(flight, msg_type: str, columns: dict) -> pd.DataFrame:

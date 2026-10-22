@@ -45,6 +45,20 @@ def record_outcome(state: dict, history_path: Path) -> None:
     state["history_entry"] = entry.model_dump()
 
 
+def portable(path) -> str:
+    """Paths inside the project are stored relative to it, so saved runs open in any checkout."""
+    path = Path(path).resolve()
+    try:
+        return str(path.relative_to(ROOT))
+    except ValueError:
+        return str(path)
+
+
+def resolve(path: str) -> Path:
+    candidate = Path(path)
+    return candidate if candidate.is_absolute() else ROOT / candidate
+
+
 def analyse_flight(run_id: str, tlogs: list, mission=None, params=None, notes=None, scenario=None, parent=None,
                    history_path: Path = HISTORY, out_root: Path = OUTPUTS, backend=AUTO) -> dict:
     started = time.monotonic()
@@ -57,6 +71,9 @@ def analyse_flight(run_id: str, tlogs: list, mission=None, params=None, notes=No
     state["mission_fix"] = fix_mission(state, items, out_dir) if items else None
     record_outcome(state, history_path)
     state["seconds_total"] = round(time.monotonic() - started, 1)
+    state["sources"] = {"tlogs": [portable(p) for p in state["sources"]["tlogs"]],
+                        "mission": portable(state["sources"]["mission"]) if state["sources"]["mission"] else None,
+                        "params": portable(state["sources"]["params"]) if state["sources"]["params"] else None}
     (out_dir / "state.json").write_text(json.dumps(state, indent=2, default=str))
     (out_dir / "report.html").write_text(report.render(state, link_metrics.quality_per_second(flight)))
     return state

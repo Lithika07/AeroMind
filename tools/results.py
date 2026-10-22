@@ -83,7 +83,8 @@ def refly_rows(states: dict, history: list) -> list:
         if not fixed:
             continue
         before = [e for e in history if e.date < fixed["history_entry"]["date"] and not e.parent_run]
-        mission = wp.load(fixed["sources"]["mission"])
+        from pipeline import resolve
+        mission = wp.load(resolve(fixed["sources"]["mission"]))
         predicted = memory.predict_battery(before, mission_io.route_length_m(mission),
                                            fixed["history_entry"]["battery_capacity_mah"])["predicted_end_pct"]
         actual = fixed["metrics"]["battery"]["remaining_end_pct"]
