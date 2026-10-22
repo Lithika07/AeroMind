@@ -54,6 +54,7 @@ def analyse_with_flight(run_id: str, tlogs: list, history_path: Path, mission=No
         "scenario": scenario,
         "parent_run": parent,
         "sources": flight.sources,
+        "log_start_unix": flight.t0,
         "notes": flight.notes,
         "metrics": m.model_dump(),
         "mission": {"items": len(flight.mission), "length_m": entry.mission_length_m} if flight.mission else None,

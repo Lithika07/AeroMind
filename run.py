@@ -69,12 +69,19 @@ def main() -> int:
     parser.add_argument("--run-id", help="name for this analysis (default: the first log's folder)")
     parser.add_argument("--batch", type=Path, help="analyse every flight folder under this directory")
     parser.add_argument("--compare", nargs=2, type=Path, metavar=("BEFORE", "AFTER"), help="two outputs/<run> folders")
+    parser.add_argument("--results", action="store_true", help="success metrics and results table -> docs/RESULTS.md")
     parser.add_argument("--llm", choices=("anthropic", "ollama", "none"), help="LLM backend for the agents")
     parser.add_argument("--history", type=Path, default=pipeline.HISTORY)
     args = parser.parse_args()
     if args.llm:
         os.environ["AEROMIND_LLM"] = args.llm
     try:
+        if args.results:
+            from tools import results
+            text = results.build(pipeline.OUTPUTS, ROOT / "data", args.history)
+            (ROOT / "docs" / "RESULTS.md").write_text(text)
+            print(text)
+            return 0
         if args.compare:
             print_compare(*args.compare)
             return 0

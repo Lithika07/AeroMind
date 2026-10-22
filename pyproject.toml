@@ -1,9 +1,18 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "aeromind"
 version = "0.1.0"
 description = "Multi-agent post-flight analysis for ArduPilot drones"
 requires-python = ">=3.10"
-dependencies = ["pymavlink", "pandas", "numpy", "plotly", "streamlit", "jinja2", "python-dotenv", "pillow"]
+dependencies = ["pymavlink", "pandas", "numpy", "plotly>=6", "streamlit>=1.50", "jinja2", "python-dotenv",
+                "pydantic>=2", "anthropic", "pyyaml", "pillow"]
+
+[tool.setuptools]
+packages = ["agents", "tools", "dashboard", "sim"]
+py-modules = ["pipeline", "run"]
 
 [project.optional-dependencies]
 dev = ["pytest", "pytest-cov"]

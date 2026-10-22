@@ -7,6 +7,7 @@ Shared by the CLI (run.py) and the dashboard (app.py). Writes:
     report.html              the whole analysis as one printable page
 """
 import json
+import time
 from pathlib import Path
 
 from agents import llm, orchestrator
@@ -46,6 +47,7 @@ def record_outcome(state: dict, history_path: Path) -> None:
 
 def analyse_flight(run_id: str, tlogs: list, mission=None, params=None, notes=None, scenario=None, parent=None,
                    history_path: Path = HISTORY, out_root: Path = OUTPUTS, backend=AUTO) -> dict:
+    started = time.monotonic()
     state, flight = analysis.analyse_with_flight(run_id, tlogs, history_path, mission, params, notes, scenario, parent)
     items = wp.load(mission) if mission else None
     chosen = llm.get_backend() if backend == AUTO else backend
@@ -54,6 +56,7 @@ def analyse_flight(run_id: str, tlogs: list, mission=None, params=None, notes=No
     out_dir.mkdir(parents=True, exist_ok=True)
     state["mission_fix"] = fix_mission(state, items, out_dir) if items else None
     record_outcome(state, history_path)
+    state["seconds_total"] = round(time.monotonic() - started, 1)
     (out_dir / "state.json").write_text(json.dumps(state, indent=2, default=str))
     (out_dir / "report.html").write_text(report.render(state, link_metrics.quality_per_second(flight)))
     return state
