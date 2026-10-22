@@ -27,7 +27,7 @@ PRD_OUTPUTS = {
                        "link_findings": [{"id": "L1", "text": "Link lost 12.4 s near WP5",
                                           "metric": "link.dropouts[0].duration_s", "value": 12.4}]},
     "diagnosis": {"findings": [{"id": "F1", "text": "x", "metric": "tracking.xtrack_max_m", "value": 6.8}],
-                  "causes": [{"id": "C1", "cause": "Crosswind drift at high speed", "confidence": 0.8,
+                  "causes": [{"id": "C1", "cause": "Crosswind drift at high speed", "category": "wind_drift", "confidence": 0.8,
                               "findings": ["F1", "F3"]}]},
     "risk": {"risk_level": "High", "risk_score": 65, "adjustment": 0, "adjustment_reason": "none",
              "predicted_battery_pct": 16, "factors": ["battery < 20%", "telemetry dropout", "wind"],
@@ -62,7 +62,8 @@ def test_plan_validates():
 @pytest.mark.parametrize("model, data", [
     (schemas.RiskOut, {**PRD_OUTPUTS["risk"], "adjustment": 15}),
     (schemas.RiskOut, {**PRD_OUTPUTS["risk"], "risk_level": "Extreme"}),
-    (schemas.Cause, {"id": "C1", "cause": "x", "confidence": 1.5, "findings": []}),
+    (schemas.Cause, {"id": "C1", "cause": "x", "category": "other", "confidence": 1.5, "findings": []}),
+    (schemas.Cause, {"id": "C1", "cause": "x", "category": "aliens", "confidence": 0.5, "findings": []}),
     (schemas.Edit, {"action": "teleport", "wp": 1, "cause": "C1"}),
     (schemas.FlightSummaryOut, {**PRD_OUTPUTS["flight_summary"], "extra": 1}),
     (schemas.Metrics, {"health_score": 101}),

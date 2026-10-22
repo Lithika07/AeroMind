@@ -12,3 +12,5 @@ htmlcov/
 # Runtime output (simulation working dirs, analysis runs)
 outputs/
 sim/run/
+data/.*.partial/
+history.json

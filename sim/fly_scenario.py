@@ -109,7 +109,7 @@ def fly(vehicle: Vehicle, scenario: scenarios.Scenario) -> dict:
 def run(scenario: scenarios.Scenario, out_dir: Path, mission_path: Path = None, parent: str = None) -> dict:
     origin = world.origin(world.DEFAULT_WORLD)
     items = wp.load(mission_path) if mission_path else scenarios.mission(scenario, scenarios.load_route(), origin)
-    out_dir.mkdir(parents=True)
+    out_dir.mkdir(parents=True)     # the caller's .partial folder, renamed once the flight is complete
     wp.save(out_dir / "mission.waypoints", items)
     stop = threading.Event()
     capture = Capture(out_dir, scenario.link, origin[:2])
@@ -163,12 +163,15 @@ def main() -> int:
                 continue
             shutil.rmtree(out_dir)
         print(f"== {scenario_id}: {table[scenario_id].title} -> {out_dir}", flush=True)
+        partial = out_dir.with_name(f".{out_dir.name}.partial")
+        shutil.rmtree(partial, ignore_errors=True)
         try:
-            meta = run(table[scenario_id], out_dir, args.mission, args.parent)
+            meta = run(table[scenario_id], partial, args.mission, args.parent)
         except (Exception, KeyboardInterrupt) as error:
-            shutil.rmtree(out_dir, ignore_errors=True)
+            shutil.rmtree(partial, ignore_errors=True)
             print(f"   {scenario_id} failed, partial data removed: {error!r}", flush=True)
             return 1
+        partial.rename(out_dir)
         print(f"   done in {meta['duration_s']} s, {len(meta['tlogs'])} tlog(s), {meta['outages']} outage(s)",
               flush=True)
     return 0

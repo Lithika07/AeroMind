@@ -12,6 +12,10 @@ Verdict = Literal["Good", "Needs attention", "Unsafe"]
 RiskLevel = Literal["Low", "Medium", "High"]
 AGENT_NAMES = ("flight_summary", "telemetry_link", "diagnosis", "risk", "advisor", "verifier")
 AgentName = Literal["flight_summary", "telemetry_link", "diagnosis", "risk", "advisor", "verifier"]
+CAUSE_CATEGORIES = ("wind_drift", "speed_too_high", "low_battery", "link_loss", "gps_weak", "vibration",
+                    "setup", "other")
+CauseCategory = Literal["wind_drift", "speed_too_high", "low_battery", "link_loss", "gps_weak", "vibration",
+                        "setup", "other"]
 
 
 class Contract(BaseModel):
@@ -172,6 +176,7 @@ class TelemetryLinkOut(Contract):
 class Cause(Contract):
     id: str
     cause: str
+    category: CauseCategory
     confidence: float = Field(ge=0.0, le=1.0)
     findings: list[str]
 
@@ -254,7 +259,10 @@ class HistoryEntry(Contract):
     duration_s: Optional[float] = None
     battery_used_pct: Optional[float] = None
     battery_pct_per_km: Optional[float] = None
+    battery_capacity_mah: Optional[float] = None
+    battery_mah_per_km: Optional[float] = None
     battery_end_pct: Optional[float] = None
+    mission_completion_pct: Optional[float] = None
     xtrack_max_m: Optional[float] = None
     link_uptime_pct: Optional[float] = None
     dropouts: Optional[int] = None
