@@ -4,13 +4,14 @@ Shared by the CLI (run.py) and the dashboard (app.py). Writes:
     state.json               everything computed and every agent's output (replayable)
     mission_fixed.waypoints  the mission with the approved edits (only when a mission was given)
     changelog.md             which edits were applied or rejected, and why
+    report.html              the whole analysis as one printable page
 """
 import json
 from pathlib import Path
 
 from agents import llm, orchestrator
 from agents.schemas import Edit, HistoryEntry
-from tools import analysis, memory, mission_io
+from tools import analysis, link_metrics, memory, mission_io, report
 from tools import waypoints as wp
 
 ROOT = Path(__file__).resolve().parent
@@ -45,7 +46,7 @@ def record_outcome(state: dict, history_path: Path) -> None:
 
 def analyse_flight(run_id: str, tlogs: list, mission=None, params=None, notes=None, scenario=None, parent=None,
                    history_path: Path = HISTORY, out_root: Path = OUTPUTS, backend=AUTO) -> dict:
-    state = analysis.analyse(run_id, tlogs, history_path, mission, params, notes, scenario, parent)
+    state, flight = analysis.analyse_with_flight(run_id, tlogs, history_path, mission, params, notes, scenario, parent)
     items = wp.load(mission) if mission else None
     chosen = llm.get_backend() if backend == AUTO else backend
     state["agents"] = orchestrator.run(state, chosen, items)
@@ -54,6 +55,7 @@ def analyse_flight(run_id: str, tlogs: list, mission=None, params=None, notes=No
     state["mission_fix"] = fix_mission(state, items, out_dir) if items else None
     record_outcome(state, history_path)
     (out_dir / "state.json").write_text(json.dumps(state, indent=2, default=str))
+    (out_dir / "report.html").write_text(report.render(state, link_metrics.quality_per_second(flight)))
     return state
 
 

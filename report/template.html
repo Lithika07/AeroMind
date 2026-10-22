@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AeroMind report · {{ run_id }}</title>
+<style>
+  :root { --good: #2e9e5b; --caution: #e0a100; --bad: #d64545; --ink: #1d2733; --muted: #5b6b7f; --line: #dde3ea; --bg: #ffffff; }
+  @media (prefers-color-scheme: dark) { :root { --ink: #e6ebf0; --muted: #9aa8b8; --line: #34404d; --bg: #141a21; } }
+  body { font: 15px/1.5 system-ui, sans-serif; color: var(--ink); background: var(--bg); max-width: 960px; margin: 0 auto; padding: 24px 16px; }
+  h1 { margin: 0 0 4px; font-size: 24px; } h2 { font-size: 17px; margin: 28px 0 8px; border-bottom: 1px solid var(--line); padding-bottom: 4px; }
+  .muted { color: var(--muted); } .banner { border-left: 6px solid var(--{{ verdict_status }}); padding: 10px 14px; background: color-mix(in srgb, var(--{{ verdict_status }}) 10%, transparent); border-radius: 4px; }
+  .numbers { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; margin-top: 12px; }
+  .numbers div { border: 1px solid var(--line); border-radius: 6px; padding: 8px; } .numbers b { display: block; font-size: 18px; }
+  .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; }
+  .good { background: var(--good); } .caution { background: var(--caution); } .bad { background: var(--bad); }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; } td, th { border-bottom: 1px solid var(--line); padding: 5px 6px; text-align: left; vertical-align: top; }
+  ul { padding-left: 20px; } svg { width: 100%; height: auto; } .tag { font-size: 12px; padding: 1px 6px; border-radius: 8px; border: 1px solid var(--line); }
+  @media print { body { max-width: none; } h2 { break-after: avoid; } }
+</style>
+</head>
+<body>
+<h1>Flight {{ run_id }}{% if scenario %} · scenario {{ scenario }}{% endif %}</h1>
+<div class="muted">{{ date }} · {{ tlog_count }} log file(s){% if notes %} · pilot notes: “{{ notes }}”{% endif %}</div>
+
+<h2>Summary</h2>
+<div class="banner"><b>{{ summary.verdict }}</b> · health {{ m.health_score }}/100<br>{{ summary.summary }}</div>
+<div class="numbers">
+{% for label, value in numbers %}<div><span class="muted">{{ label }}</span><b>{{ value }}</b></div>{% endfor %}
+</div>
+{% if worse %}<p class="muted">Worse than your usual: {% for w in worse %}{{ w.metric }} {{ w.value }} (usual {{ w.mean }}){% if not loop.last %}, {% endif %}{% endfor %}</p>{% endif %}
+
+<h2>Flight story</h2>
+<ul>{% for line in summary.flight_story %}<li><span class="dot {{ line.status }}"></span><b>{{ line.phase }}</b> — {{ line.text }}</li>{% endfor %}</ul>
+
+<h2>Telemetry signal</h2>
+{% if strip_svg %}{{ strip_svg | safe }}{% else %}<p class="muted">Logs not available to draw the strip.</p>{% endif %}
+<p>Uptime {{ m.link.uptime_pct }} % · packet loss {{ m.link.packet_loss_pct }} % · RSSI {% if m.link.rssi %}reported{% else %}not reported (no telemetry radio in the log){% endif %}</p>
+{% if m.link.dropouts %}
+<table><tr><th>Start (s)</th><th>Duration (s)</th><th>Nearest waypoint</th><th>Position</th></tr>
+{% for d in m.link.dropouts %}<tr><td>{{ d.t }}</td><td>{{ d.duration_s }}</td><td>{% if d.near_wp is not none %}WP{{ d.near_wp }}{% endif %}</td><td>{% if d.lat %}{{ '%.6f' % d.lat }}, {{ '%.6f' % d.lon }}{% endif %}</td></tr>{% endfor %}
+</table>{% endif %}
+
+<h2>What went wrong, and why</h2>
+{% if causes %}<table><tr><th>Cause</th><th>Category</th><th>Confidence</th></tr>
+{% for c in causes %}<tr><td>{{ c.id }}: {{ c.cause }}</td><td><span class="tag">{{ c.category }}</span></td><td>{{ '%.0f' % (100 * c.confidence) }} %</td></tr>{% endfor %}
+</table>{% else %}<p>No metric was in the Caution or Bad band, so no root-cause analysis was needed.</p>{% endif %}
+
+<h2>Top 3 improvements</h2>
+<ol>{% for r in recommendations %}<li><b>{{ r.text }}</b><br><span class="muted">{{ r.reason }} — {{ r.evidence }}</span></li>{% endfor %}</ol>
+
+<h2>Next-mission risk</h2>
+<p><b>{{ risk.risk_level }}</b> · {{ risk.risk_score }}/100 · predicted battery at landing {% if risk.predicted_battery_pct is not none %}{{ '%.0f' % risk.predicted_battery_pct }} %{% else %}n/a{% endif %} · confidence {{ risk.confidence }}</p>
+<ul>{% for f in risk.factors %}<li>{{ f }}</li>{% endfor %}</ul>
+{% if risk.adjustment %}<p class="muted">Adjusted {{ '%+d' % risk.adjustment }} by the Risk agent: {{ risk.adjustment_reason }}</p>{% endif %}
+
+{% if fix %}
+<h2>Fixed mission</h2>
+<p>Route {{ fix.length_before_m }} m → {{ fix.length_after_m }} m, {{ fix.waypoints_before }} → {{ fix.waypoints_after }} waypoints. File: mission_fixed.waypoints (not uploaded to the vehicle).</p>
+<ul>{% for a in fix.applied %}<li>Applied: {{ a.text }}</li>{% endfor %}{% for r in fix.rejected %}<li class="muted">Rejected: {{ r.edit.action }} WP{{ r.edit.wp }} — {{ r.reason }}</li>{% endfor %}</ul>
+{% endif %}
+
+<h2>How this was produced</h2>
+<p class="muted">Metrics computed in Python from the logs; agents via {{ agents.backend }}{% if agents.model %} ({{ agents.model }}){% endif %}, plan from {{ agents.plan.source }};
+the Verifier rejected {{ agents.verification.rejected }} of {{ agents.verification.claims }} claims and rejected items were replaced by rule-based results.
+Agent sources: {% for name, a in agents.agents.items() %}{{ name }} {{ a.source }}{% if not loop.last %}, {% endif %}{% endfor %}.</p>
+</body>
+</html>

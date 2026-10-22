@@ -20,6 +20,8 @@ DROPOUT_GAP_S = 2.0
 SEQ_MODULO = 256
 RC_RSSI_UNKNOWN = 255
 RATE_WINDOW_S = 10.0
+STRIP_STEP_S = 1.0
+LOSS_CAUTION_PCT = 5.0
 DEG_E7 = 1e7
 
 
@@ -148,3 +150,25 @@ def compute(flight, window) -> LinkInfo:
                     packet_loss_pct=packet_loss_pct(flight.sequence, link_gaps(find_gaps(times), clock)),
                     dropouts=dropouts(flight, gaps), rssi=rssi(flight),
                     position_rate_hz=rate, position_rate_min_ratio=ratio)
+
+
+def quality_per_second(flight) -> pd.DataFrame:
+    """Link quality each second of the flight: bad in a dropout, caution with >5 % packet loss, else good."""
+    window = timeline.armed_window(flight.frame("HEARTBEAT"))
+    if window is None:
+        return pd.DataFrame(columns=["t", "link", "rate"])
+    seq = flight.sequence
+    times, numbers = seq["t"].to_numpy(), seq["seq"].to_numpy(dtype=int)
+    gaps = link_gaps(find_gaps(times), vehicle_clock(flight))
+    starts = np.arange(window[0], window[1], STRIP_STEP_S)
+    missing = (np.diff(numbers) - 1) % SEQ_MODULO
+    rows = []
+    for start in starts:
+        inside = (times[1:] >= start) & (times[1:] < start + STRIP_STEP_S)
+        received = int(inside.sum())
+        lost = int(missing[inside].sum()) if received else 0
+        in_gap = any(g <= start < g + d for g, d in gaps)
+        loss = 100.0 * lost / (lost + received) if received else 100.0
+        quality = "bad" if in_gap else "caution" if loss > LOSS_CAUTION_PCT else "good"
+        rows.append((start - flight.t0, quality, received / STRIP_STEP_S))
+    return pd.DataFrame(rows, columns=["t", "link", "rate"])

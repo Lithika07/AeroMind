@@ -32,6 +32,12 @@ def history_entry(run_id: str, m: Metrics, flight, scenario=None, parent=None, c
 def analyse(run_id: str, tlogs: list, history_path: Path, mission=None, params=None, notes=None,
             scenario=None, parent=None) -> dict:
     """Metrics, history context and base risk for one flight. Saves the flight to history."""
+    return analyse_with_flight(run_id, tlogs, history_path, mission, params, notes, scenario, parent)[0]
+
+
+def analyse_with_flight(run_id: str, tlogs: list, history_path: Path, mission=None, params=None, notes=None,
+                        scenario=None, parent=None) -> tuple:
+    """(state, FlightData): the state as analyse() returns it, and the parsed flight for charts."""
     flight = ingest.load_flight(tlogs, mission, params, notes)
     m = metrics.compute(flight)
     entry = history_entry(run_id, m, flight, scenario, parent)
@@ -58,4 +64,4 @@ def analyse(run_id: str, tlogs: list, history_path: Path, mission=None, params=N
                     "fix_effectiveness": memory.fix_effectiveness(entries)},
         "risk_base": risk,
         "history_entry": entry.model_dump(),
-    }
+    }, flight

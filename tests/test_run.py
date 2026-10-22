@@ -56,3 +56,13 @@ def test_compare_rows(s2_outputs):
             pipeline.compare(pipeline.load_state(out / "s0"), pipeline.load_state(out / "s2"))}
     assert rows["battery at landing (%)"][1] < rows["battery at landing (%)"][0]
     assert rows["battery at landing (%)"][2] < 0
+
+
+def test_report_is_written_and_escapes_user_text(s2_outputs):
+    from tools import report
+    out = s2_outputs / "outputs" / "s2"
+    html = (out / "report.html").read_text()
+    assert "Next-mission risk" in html and "<svg" in html and "Fixed mission" in html
+    state = json.loads((out / "state.json").read_text())
+    hostile = report.render({**state, "notes": "<script>alert(1)</script>"})
+    assert "<script>alert(1)</script>" not in hostile and "&lt;script&gt;" in hostile

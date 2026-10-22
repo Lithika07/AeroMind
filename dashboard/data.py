@@ -9,8 +9,6 @@ from tools import ingest, link_metrics, timeline
 from tools import waypoints as wp
 
 DEG_E7 = 1e7
-STRIP_STEP_S = 1.0
-LOSS_CAUTION_PCT = 5.0
 
 
 def saved_runs(outputs: Path) -> list:
@@ -57,25 +55,7 @@ def track(flight) -> pd.DataFrame:
 
 
 def link_strip(flight) -> pd.DataFrame:
-    """Link quality each second of the flight: bad in a dropout, caution with >5 % packet loss, else good."""
-    window = timeline.armed_window(flight.frame("HEARTBEAT"))
-    if window is None:
-        return pd.DataFrame(columns=["t", "link", "rate"])
-    seq = flight.sequence
-    times, numbers = seq["t"].to_numpy(), seq["seq"].to_numpy(dtype=int)
-    gaps = link_metrics.link_gaps(link_metrics.find_gaps(times), link_metrics.vehicle_clock(flight))
-    starts = np.arange(window[0], window[1], STRIP_STEP_S)
-    missing = (np.diff(numbers) - 1) % link_metrics.SEQ_MODULO
-    rows = []
-    for start in starts:
-        inside = (times[1:] >= start) & (times[1:] < start + STRIP_STEP_S)
-        received = int(inside.sum())
-        lost = int(missing[inside].sum()) if received else 0
-        in_gap = any(g <= start < g + d for g, d in gaps)
-        loss = 100.0 * lost / (lost + received) if received else 100.0
-        quality = "bad" if in_gap else "caution" if loss > LOSS_CAUTION_PCT else "good"
-        rows.append((start - flight.t0, quality, received / STRIP_STEP_S))
-    return pd.DataFrame(rows, columns=["t", "link", "rate"])
+    return link_metrics.quality_per_second(flight)
 
 
 def mission_points(mission) -> pd.DataFrame:
