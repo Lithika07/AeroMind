@@ -19,6 +19,22 @@ OLLAMA_URL = os.environ.get("AEROMIND_OLLAMA_URL", "http://127.0.0.1:11434")
 OLLAMA_MODEL = os.environ.get("AEROMIND_OLLAMA_MODEL", "qwen2.5:3b")
 MAX_OUTPUT_TOKENS = 4000
 OLLAMA_TIMEOUT_S = 120
+#: A small local model can loop while writing JSON; capping the reply makes that a quick, retried
+#: invalid answer instead of a two-minute timeout. Every agent's answer fits well within this.
+MAX_LOCAL_TOKENS = 1500
+#: A mild penalty on repeated tokens stops the looping that produced a 5,000-character summary.
+REPEAT_PENALTY = 1.1
+LENGTH_KEYS = ("maxLength", "minLength")
+
+
+def without_lengths(schema):
+    """The schema without string length limits: llama.cpp compiles them into a grammar repetition so slow
+    that generation stalls. Pydantic still enforces them on the reply, which is then retried."""
+    if isinstance(schema, dict):
+        return {k: without_lengths(v) for k, v in schema.items() if k not in LENGTH_KEYS}
+    if isinstance(schema, list):
+        return [without_lengths(v) for v in schema]
+    return schema
 #: After a connection failure or timeout, skip the backend this long: a dead server should cost one
 #: timeout, not one per agent per flight (a laptop resumed from suspend left Ollama's GPU unusable).
 BREAKER_S = 300
@@ -71,6 +87,9 @@ class OllamaBackend:
         try:
             with urllib.request.urlopen(request, timeout=timeout) as response:
                 return json.load(response)
+        except urllib.error.HTTPError as error:
+            # the server answered: one failed request, retried by the caller; the server is not down
+            raise LLMError(f"Ollama at {self.url} returned HTTP {error.code}") from error
         except (OSError, http.client.HTTPException) as error:
             self.down_until = time.monotonic() + BREAKER_S
             raise LLMError(f"Ollama at {self.url} failed: {error}") from error
@@ -78,8 +97,9 @@ class OllamaBackend:
             raise LLMError(f"Ollama at {self.url} returned invalid JSON: {error}") from error
 
     def complete(self, system: str, user: str, output: type[BaseModel]) -> BaseModel:
-        body = {"model": self.model, "stream": False, "format": output.model_json_schema(),
-                "options": {"temperature": 0}, "keep_alive": "10m",
+        body = {"model": self.model, "stream": False, "format": without_lengths(output.model_json_schema()),
+                "options": {"temperature": 0, "num_predict": MAX_LOCAL_TOKENS, "repeat_penalty": REPEAT_PENALTY},
+                "keep_alive": "10m",
                 "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}]}
         reply = self._post("/api/chat", body, OLLAMA_TIMEOUT_S)
         content = reply.get("message", {}).get("content", "")

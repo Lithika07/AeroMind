@@ -164,3 +164,24 @@ def changelog(run_id: str, original: list, fixed: list, applied: list, rejected:
     lines += ["", "Waypoint numbers above refer to the mission as flown; the fixed mission is renumbered.",
               "Nothing is uploaded to the vehicle: review the file in a ground station before flying it.", ""]
     return "\n".join(lines)
+
+
+def describe_changes(original: list, fixed: list) -> list:
+    """What differs between two versions of a mission, in waypoint numbers of the original."""
+    key = lambda i: (round(i.lat, 6), round(i.lon, 6))
+    fixed_nav = {key(i): i for i in wp.nav_waypoints(fixed)}
+    changes = []
+    removed = [i.seq for i in wp.nav_waypoints(original) if key(i) not in fixed_nav]
+    if removed:
+        changes.append("removed " + ", ".join(f"WP{seq}" for seq in removed))
+    speeds = lambda items: [i.param2 for i in items if i.command == wp.DO_CHANGE_SPEED]
+    if speeds(original) != speeds(fixed):
+        before, after = speeds(original), speeds(fixed)
+        changes.append(f"speed {before[0]:g} → {after[0]:g} m/s" if before and after else "speed changed")
+    for item in wp.nav_waypoints(original):
+        new = fixed_nav.get(key(item))
+        if new is not None and new.alt != item.alt:
+            changes.append(f"WP{item.seq} altitude {item.alt:g} → {new.alt:g} m")
+        if new is not None and new.param1 != item.param1:
+            changes.append(f"WP{item.seq} hold {new.param1:g} s")
+    return changes

@@ -442,23 +442,23 @@
       "plan": [
         {
           "agent": "flight_summary",
-          "reason": "Always run flight_summary first to summarize the flight data."
+          "reason": "Always run flight summary first as it provides an overview of the mission."
         },
         {
           "agent": "telemetry_link",
-          "reason": "All metrics are good, so telemetry_link can run next."
+          "reason": "Link uptime is good, so telemetry link can be checked next."
         },
         {
           "agent": "risk",
-          "reason": "No issues detected, so risk analysis is not necessary."
+          "reason": "Risk analysis is optional and does not have specific criteria to trigger it based on the provided data."
         },
         {
           "agent": "advisor",
-          "reason": "No issues detected, so advisor is not necessary."
+          "reason": "Advisor runs after all other agents and can provide recommendations based on the overall mission status."
         },
         {
           "agent": "verifier",
-          "reason": "All metrics are good and no issues were detected, so verifier runs last."
+          "reason": "Verifier runs last as per the requirement to ensure everything is correct before finalizing the analysis."
         }
       ],
       "source": "llm"
@@ -470,70 +470,70 @@
       "flight_summary": {
         "output": {
           "verdict": "Good",
-          "summary": "The flight was smooth and within expected parameters. The drone covered a total distance of 1198.0 meters, with a maximum altitude of 30.0 meters. The drone maintained a good average speed of 4.8 to 5.0 meters per second. The takeoff and landing phases were executed successfully, and the drone completed all legs of the mission without any issues. The drone's battery used 18% of its capacity, and the wind conditions were mild with a maximum speed of 0.5 meters per second. The drone's attitude and GPS data were stable throughout the flight. No warnings or health issues were reported.",
+          "summary": "The flight was executed smoothly with no issues reported throughout all phases. The drone maintained a good track and speed, adhering to the planned waypoints without deviation. Battery performance was within expected limits, and wind conditions were mild enough not to affect the flight significantly. Overall, this mission demonstrated excellent control and stability from takeoff until landing.",
           "flight_story": [
             {
               "phase": "Takeoff",
               "status": "good",
-              "text": "The drone took off smoothly from the ground within the expected time frame."
+              "text": "The drone took off successfully within the expected time frame."
             },
             {
               "phase": "Leg 1 (to WP3)",
               "status": "good",
-              "text": "The drone successfully completed the first leg of the mission, covering a distance of 476 meters."
+              "text": "During the first leg, the drone maintained a good track and speed as it headed towards waypoint 3."
             },
             {
               "phase": "Leg 2 (to WP4)",
               "status": "good",
-              "text": "The drone continued its mission by covering 422 meters in the second leg."
+              "text": "The second leg saw consistent performance with the drone tracking accurately and maintaining its speed during the journey to waypoint 4."
             },
             {
               "phase": "Leg 3 (to WP5)",
               "status": "good",
-              "text": "The drone successfully covered 312 meters in the third leg of the mission."
+              "text": "During this leg, the drone continued to perform well, keeping track within acceptable limits as it moved towards waypoint 5."
             },
             {
               "phase": "Leg 4 (to WP6)",
               "status": "good",
-              "text": "The drone completed the fourth leg of the mission, covering 276 meters."
+              "text": "The fourth leg was smooth with the drone maintaining good tracking and speed as it headed towards waypoint 6."
             },
             {
               "phase": "Leg 5 (to WP7)",
               "status": "good",
-              "text": "The drone covered 312 meters in the fifth leg of the mission."
+              "text": "In this leg, the drone continued to perform well, keeping track within acceptable limits as it moved towards waypoint 7."
             },
             {
               "phase": "Leg 6 (to WP8)",
               "status": "good",
-              "text": "The drone completed the sixth leg of the mission, covering 476 meters."
+              "text": "The sixth leg saw consistent performance with the drone tracking accurately and maintaining its speed during the journey to waypoint 8."
             },
             {
               "phase": "Leg 7 (to WP9)",
               "status": "good",
-              "text": "The drone covered 300 meters in the seventh leg of the mission."
+              "text": "During this leg, the drone continued to perform well, keeping track within acceptable limits as it moved towards waypoint 9."
             },
             {
               "phase": "Leg 8 (to WP10)",
               "status": "good",
-              "text": "The drone completed the final leg of the mission, covering 276 meters."
+              "text": "The eighth and final leg of the flight was smooth with the drone maintaining good tracking and speed as it headed towards waypoint 10."
             },
             {
               "phase": "RTL",
               "status": "good",
-              "text": "The drone returned to the takeoff point smoothly."
+              "text": "The return-to-launch maneuver was executed smoothly, ensuring a safe landing."
             },
             {
               "phase": "Land",
               "status": "good",
-              "text": "The drone landed safely at the end of the mission."
+              "text": "The drone landed safely within the expected time frame and parameters."
             }
           ],
           "claims": []
         },
         "source": "llm",
-        "seconds": 17.13,
+        "seconds": 17.31,
         "errors": [],
-        "feedback": "summary: 7 sentences; the summary must be 3; story[1]: '476 meters' is not in the flight data; story[2]: '422 meters' is not in the flight data; story[3]: '300 meters' is not in the flight data; story[4]: '276 meters' is not in the flight data; story[5]: '312 meters' is not in the flight data; story[6]: '312 meters' is not in the flight data; story[7]: '476 meters' is not in the flight data; story[8]: '300 meters' is not in the flight data"
+        "feedback": null
       },
       "telemetry_link": {
         "output": {
@@ -568,9 +568,9 @@
       "risk": {
         "output": {
           "risk_level": "Low",
-          "risk_score": 10,
-          "adjustment": 0,
-          "adjustment_reason": "The initial risk score is already at the minimum 'Low' level and no further adjustments are needed.",
+          "risk_score": 0,
+          "adjustment": -10,
+          "adjustment_reason": "Reduces the failsafe factor to a known default value, lowering overall mission risk.",
           "factors": [
             "failsafe not set: FENCE_ENABLE = 0"
           ],
@@ -578,57 +578,51 @@
           "confidence": "low"
         },
         "source": "llm",
-        "seconds": 2.1,
+        "seconds": 1.97,
         "errors": [],
-        "feedback": null
+        "feedback": "adjustment_reason: lowers the risk without naming anything that reduces it"
       },
       "advisor": {
         "output": {
           "edits": [
             {
               "action": "remove_waypoint",
-              "wp": 10,
+              "wp": 1,
               "value": null,
-              "cause": "WP10 removal is within the allowed limit of at most 30% of waypoints and does not affect mission completion."
-            },
-            {
-              "action": "change_altitude",
-              "wp": 2,
-              "value": -10.0,
-              "cause": "change_altitude"
+              "cause": "WP1"
             },
             {
               "action": "add_hold",
-              "wp": 2,
-              "value": 5.0,
-              "cause": "add_hold"
+              "wp": 4,
+              "value": null,
+              "cause": "WP4"
             }
           ],
           "recommendations": [
             {
               "rank": 1,
-              "text": "remove_waypoint at WP10, change_altitude at WP2, and add_hold at WP2. This improves the mission by reducing the number of waypoints and adding a hold to manage altitude changes, which can help in maintaining a consistent flight pattern and reducing the risk of exceeding altitude limits.",
-              "reason": "The removal of WP10 reduces the number of waypoints to 10, which is within the allowed limit. The change in altitude at WP2 and the addition of a hold at WP2 help in managing the flight path and ensuring a smooth transition between waypoints.",
-              "evidence": "The mission now has 10 waypoints, which is within the allowed limit. The change in altitude at WP2 and the addition of a hold at WP2 are within the allowed limits and can improve the mission execution."
+              "text": "remove_waypoint at WP1, add_hold at WP4",
+              "reason": "Both changes address the issues from previous missions. Removing WP1 reduces the number of waypoints and simplifies the mission flow without impacting performance or safety.",
+              "evidence": "The original mission had 11 waypoints, with WP1 being a takeoff point. Reducing to 10 waypoints is within the limit (at most 30% reduction). Adding a hold at WP4 provides a safe pause in the flight path for potential adjustments without affecting overall mission duration or performance."
             },
             {
               "rank": 2,
-              "text": "remove_waypoint at WP10, change_altitude at WP2, and add_hold at WP2. This edit reduces the number of waypoints and adds a hold to manage altitude changes, which can help in maintaining a consistent flight pattern and reducing the risk of exceeding altitude limits.",
-              "reason": "The removal of WP10 reduces the number of waypoints to 10, which is within the allowed limit. The change in altitude at WP2 and the addition of a hold at WP2 help in managing the flight path and ensuring a smooth transition between waypoints.",
-              "evidence": "The mission now has 10 waypoints, which is within the allowed limit. The change in altitude at WP2 and the addition of a hold at WP2 are within the allowed limits and can improve the mission execution."
+              "text": "remove_waypoint at WP1, add_hold at WP4",
+              "reason": "Both changes address the issues from previous missions. Removing WP1 simplifies the mission and reduces complexity, while adding a hold at WP4 ensures safety during the flight path.",
+              "evidence": "The original mission had 11 waypoints, with WP1 being a takeoff point. Reducing to 10 waypoints is within the limit (at most 30% reduction). Adding a hold at WP4 provides a safe pause in the flight path for potential adjustments without affecting overall mission duration or performance."
             },
             {
               "rank": 3,
-              "text": "remove_waypoint at WP10, change_altitude at WP2, and add_hold at WP2. This edit reduces the number of waypoints and adds a hold to manage altitude changes, which can help in maintaining a consistent flight pattern and reducing the risk of exceeding altitude limits.",
-              "reason": "The removal of WP10 reduces the number of waypoints to 10, which is within the allowed limit. The change in altitude at WP2 and the addition of a hold at WP2 help in managing the flight path and ensuring a smooth transition between waypoints.",
-              "evidence": "The mission now has 10 waypoints, which is within the allowed limit. The change in altitude at WP2 and the addition of a hold at WP2 are within the allowed limits and can improve the mission execution."
+              "text": "remove_waypoint at WP1, add_hold at WP4",
+              "reason": "Both changes address the issues from previous missions. Removing WP1 simplifies the mission and reduces complexity, while adding a hold at WP4 ensures safety during the flight path.",
+              "evidence": "The original mission had 11 waypoints, with WP1 being a takeoff point. Reducing to 10 waypoints is within the limit (at most 30% reduction). Adding a hold at WP4 provides a safe pause in the flight path for potential adjustments without affecting overall mission duration or performance."
             }
           ]
         },
         "source": "llm",
-        "seconds": 18.36,
+        "seconds": 13.76,
         "errors": [],
-        "feedback": "rec[1]: proposes remove_waypoint at WP10, which failed the mission limits; rec[2]: proposes remove_waypoint at WP10, which failed the mission limits; rec[3]: proposes remove_waypoint at WP10, which failed the mission limits"
+        "feedback": "rec[1]: proposes remove_waypoint at WP1, which failed the mission limits; rec[2]: proposes add_hold at WP4, which failed the mission limits; rec[3]: proposes remove_waypoint at WP1, which failed the mission limits"
       }
     },
     "verification": {
@@ -637,7 +631,7 @@
           "agent": "flight_summary",
           "claim_id": "summary",
           "status": "rejected",
-          "reason": "7 sentences; the summary must be 3"
+          "reason": "4 sentences; the summary must be 3"
         },
         {
           "agent": "flight_summary",
@@ -648,50 +642,50 @@
         {
           "agent": "flight_summary",
           "claim_id": "story[1]",
-          "status": "rejected",
-          "reason": "'476 meters' is not in the flight data"
+          "status": "supported",
+          "reason": "matches the data"
         },
         {
           "agent": "flight_summary",
           "claim_id": "story[2]",
-          "status": "rejected",
-          "reason": "'422 meters' is not in the flight data"
+          "status": "supported",
+          "reason": "matches the data"
         },
         {
           "agent": "flight_summary",
           "claim_id": "story[3]",
-          "status": "rejected",
-          "reason": "'312 meters' is not in the flight data"
+          "status": "supported",
+          "reason": "matches the data"
         },
         {
           "agent": "flight_summary",
           "claim_id": "story[4]",
-          "status": "rejected",
-          "reason": "'276 meters' is not in the flight data"
+          "status": "supported",
+          "reason": "matches the data"
         },
         {
           "agent": "flight_summary",
           "claim_id": "story[5]",
-          "status": "rejected",
-          "reason": "'312 meters' is not in the flight data"
+          "status": "supported",
+          "reason": "matches the data"
         },
         {
           "agent": "flight_summary",
           "claim_id": "story[6]",
-          "status": "rejected",
-          "reason": "'476 meters' is not in the flight data"
+          "status": "supported",
+          "reason": "matches the data"
         },
         {
           "agent": "flight_summary",
           "claim_id": "story[7]",
-          "status": "rejected",
-          "reason": "'300 meters' is not in the flight data"
+          "status": "supported",
+          "reason": "matches the data"
         },
         {
           "agent": "flight_summary",
           "claim_id": "story[8]",
-          "status": "rejected",
-          "reason": "'276 meters' is not in the flight data"
+          "status": "supported",
+          "reason": "matches the data"
         },
         {
           "agent": "flight_summary",
@@ -726,78 +720,69 @@
         {
           "agent": "risk",
           "claim_id": "adjustment_reason",
-          "status": "supported",
-          "reason": "matches the data"
+          "status": "rejected",
+          "reason": "lowers the risk without naming anything that reduces it"
         },
         {
           "agent": "advisor",
           "claim_id": "rec[1]",
           "status": "rejected",
-          "reason": "proposes remove_waypoint at WP10, which failed the mission limits"
+          "reason": "proposes remove_waypoint at WP1, which failed the mission limits"
         },
         {
           "agent": "advisor",
           "claim_id": "rec[2]",
           "status": "rejected",
-          "reason": "proposes remove_waypoint at WP10, which failed the mission limits"
+          "reason": "proposes remove_waypoint at WP1, which failed the mission limits"
         },
         {
           "agent": "advisor",
           "claim_id": "rec[3]",
           "status": "rejected",
-          "reason": "proposes remove_waypoint at WP10, which failed the mission limits"
+          "reason": "proposes remove_waypoint at WP1, which failed the mission limits"
         }
       ],
       "rejection_rates": {
-        "flight_summary": 0.75,
+        "flight_summary": 0.08,
         "telemetry_link": 0.0,
-        "risk": 0.0,
+        "risk": 1.0,
         "advisor": 1.0
       },
       "reruns": [
         {
-          "agent": "flight_summary",
-          "rejection_rate": 0.75,
-          "feedback": "summary: 7 sentences; the summary must be 3; story[1]: '476 meters' is not in the flight data; story[2]: '422 meters' is not in the flight data; story[3]: '300 meters' is not in the flight data; story[4]: '276 meters' is not in the flight data; story[5]: '312 meters' is not in the flight data; story[6]: '312 meters' is not in the flight data; story[7]: '476 meters' is not in the flight data; story[8]: '300 meters' is not in the flight data"
+          "agent": "risk",
+          "rejection_rate": 1.0,
+          "feedback": "adjustment_reason: lowers the risk without naming anything that reduces it"
         },
         {
           "agent": "advisor",
           "rejection_rate": 1.0,
-          "feedback": "rec[1]: proposes remove_waypoint at WP10, which failed the mission limits; rec[2]: proposes remove_waypoint at WP10, which failed the mission limits; rec[3]: proposes remove_waypoint at WP10, which failed the mission limits"
+          "feedback": "rec[1]: proposes remove_waypoint at WP1, which failed the mission limits; rec[2]: proposes add_hold at WP4, which failed the mission limits; rec[3]: proposes remove_waypoint at WP1, which failed the mission limits"
         }
       ],
       "claims": 19,
-      "rejected": 12,
-      "grounding_rate": 0.632
+      "rejected": 5,
+      "grounding_rate": 0.263
     },
     "edit_check": {
       "dropped": [
         {
           "edit": {
             "action": "remove_waypoint",
-            "wp": 10,
+            "wp": 1,
             "value": null,
-            "cause": "WP10 removal is within the allowed limit of at most 30% of waypoints and does not affect mission completion."
+            "cause": "WP1"
           },
-          "reason": "cause WP10 removal is within the allowed limit of at most 30% of waypoints and does not affect mission completion. was not diagnosed"
-        },
-        {
-          "edit": {
-            "action": "change_altitude",
-            "wp": 2,
-            "value": -10.0,
-            "cause": "change_altitude"
-          },
-          "reason": "cause change_altitude was not diagnosed"
+          "reason": "cause WP1 was not diagnosed"
         },
         {
           "edit": {
             "action": "add_hold",
-            "wp": 2,
-            "value": 5.0,
-            "cause": "add_hold"
+            "wp": 4,
+            "value": null,
+            "cause": "WP4"
           },
-          "reason": "cause add_hold was not diagnosed"
+          "reason": "cause WP4 was not diagnosed"
         }
       ],
       "replaced_by_rules": false
@@ -810,57 +795,57 @@
           {
             "phase": "Takeoff",
             "status": "good",
-            "text": "The drone took off smoothly from the ground within the expected time frame."
+            "text": "The drone took off successfully within the expected time frame."
           },
           {
             "phase": "Leg 1 (to WP3)",
             "status": "good",
-            "text": "4.6 m/s, cross-track up to 0.42 m"
+            "text": "During the first leg, the drone maintained a good track and speed as it headed towards waypoint 3."
           },
           {
             "phase": "Leg 2 (to WP4)",
             "status": "good",
-            "text": "4.9 m/s, cross-track up to 0.4 m"
+            "text": "The second leg saw consistent performance with the drone tracking accurately and maintaining its speed during the journey to waypoint 4."
           },
           {
             "phase": "Leg 3 (to WP5)",
             "status": "good",
-            "text": "5.0 m/s, cross-track up to 0.28 m"
+            "text": "During this leg, the drone continued to perform well, keeping track within acceptable limits as it moved towards waypoint 5."
           },
           {
             "phase": "Leg 4 (to WP6)",
             "status": "good",
-            "text": "5.0 m/s, cross-track up to 0.23 m"
+            "text": "The fourth leg was smooth with the drone maintaining good tracking and speed as it headed towards waypoint 6."
           },
           {
             "phase": "Leg 5 (to WP7)",
             "status": "good",
-            "text": "4.9 m/s, cross-track up to 0.32 m"
+            "text": "In this leg, the drone continued to perform well, keeping track within acceptable limits as it moved towards waypoint 7."
           },
           {
             "phase": "Leg 6 (to WP8)",
             "status": "good",
-            "text": "4.9 m/s, cross-track up to 0.32 m"
+            "text": "The sixth leg saw consistent performance with the drone tracking accurately and maintaining its speed during the journey to waypoint 8."
           },
           {
             "phase": "Leg 7 (to WP9)",
             "status": "good",
-            "text": "4.8 m/s, cross-track up to 0.47 m"
+            "text": "During this leg, the drone continued to perform well, keeping track within acceptable limits as it moved towards waypoint 9."
           },
           {
             "phase": "Leg 8 (to WP10)",
             "status": "good",
-            "text": "4.5 m/s, cross-track up to 0.28 m"
+            "text": "The eighth and final leg of the flight was smooth with the drone maintaining good tracking and speed as it headed towards waypoint 10."
           },
           {
             "phase": "RTL",
             "status": "good",
-            "text": "The drone returned to the takeoff point smoothly."
+            "text": "The return-to-launch maneuver was executed smoothly, ensuring a safe landing."
           },
           {
             "phase": "Land",
             "status": "good",
-            "text": "The drone landed safely at the end of the mission."
+            "text": "The drone landed safely within the expected time frame and parameters."
           }
         ],
         "claims": []
@@ -893,7 +878,7 @@
         "risk_level": "Low",
         "risk_score": 10,
         "adjustment": 0,
-        "adjustment_reason": "The initial risk score is already at the minimum 'Low' level and no further adjustments are needed.",
+        "adjustment_reason": "No adjustment: the rule-based score stands.",
         "factors": [
           "failsafe not set: FENCE_ENABLE = 0"
         ],
@@ -912,7 +897,7 @@
         ]
       }
     },
-    "seconds": 112.7
+    "seconds": 53.3
   },
   "mission_fix": {
     "applied": [],
@@ -920,29 +905,20 @@
       {
         "edit": {
           "action": "remove_waypoint",
-          "wp": 10,
+          "wp": 1,
           "value": null,
-          "cause": "WP10 removal is within the allowed limit of at most 30% of waypoints and does not affect mission completion."
+          "cause": "WP1"
         },
-        "reason": "cause WP10 removal is within the allowed limit of at most 30% of waypoints and does not affect mission completion. was not diagnosed"
-      },
-      {
-        "edit": {
-          "action": "change_altitude",
-          "wp": 2,
-          "value": -10.0,
-          "cause": "change_altitude"
-        },
-        "reason": "cause change_altitude was not diagnosed"
+        "reason": "cause WP1 was not diagnosed"
       },
       {
         "edit": {
           "action": "add_hold",
-          "wp": 2,
-          "value": 5.0,
-          "cause": "add_hold"
+          "wp": 4,
+          "value": null,
+          "cause": "WP4"
         },
-        "reason": "cause add_hold was not diagnosed"
+        "reason": "cause WP4 was not diagnosed"
       }
     ],
     "length_before_m": 1330,
@@ -951,5 +927,5 @@
     "waypoints_after": 8,
     "file": "mission_fixed.waypoints"
   },
-  "seconds_total": 113.6
+  "seconds_total": 54.2
 }

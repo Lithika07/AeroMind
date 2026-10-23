@@ -8,6 +8,10 @@ from typing import Literal, Optional
 from pydantic import BaseModel, ConfigDict, Field
 
 Status = Literal["good", "caution", "bad"]
+#: Length caps on agent free text. Constrained decoding enforces them, so a small model cannot loop inside
+#: a string until its output is cut off (a 5,440-character "3-sentence" summary did exactly that).
+SHORT_TEXT = 300
+SUMMARY_TEXT = 800
 Verdict = Literal["Good", "Needs attention", "Unsafe"]
 RiskLevel = Literal["Low", "Medium", "High"]
 AGENT_NAMES = ("flight_summary", "telemetry_link", "diagnosis", "risk", "advisor", "verifier")
@@ -149,7 +153,7 @@ class Metrics(Contract):
 class Claim(Contract):
     """A statement an agent makes about the flight, citing the metric that backs it."""
     id: str
-    text: str
+    text: str = Field(max_length=SHORT_TEXT)
     metric: Optional[str] = None             # dotted path into metrics.json, e.g. link.dropouts[0].duration_s
     value: Optional[float | str] = None      # the value the claim relies on
 
@@ -157,12 +161,12 @@ class Claim(Contract):
 class StoryLine(Contract):
     phase: str
     status: Status
-    text: str
+    text: str = Field(max_length=SHORT_TEXT)
 
 
 class FlightSummaryOut(Contract):
     verdict: Verdict
-    summary: str
+    summary: str = Field(max_length=SUMMARY_TEXT)
     flight_story: list[StoryLine]
     claims: list[Claim] = []
 
@@ -175,7 +179,7 @@ class TelemetryLinkOut(Contract):
 
 class Cause(Contract):
     id: str
-    cause: str
+    cause: str = Field(max_length=SHORT_TEXT)
     category: CauseCategory
     confidence: float = Field(ge=0.0, le=1.0)
     findings: list[str]
@@ -190,7 +194,7 @@ class RiskOut(Contract):
     risk_level: RiskLevel
     risk_score: int = Field(ge=0, le=100)
     adjustment: int = Field(ge=-10, le=10)
-    adjustment_reason: str
+    adjustment_reason: str = Field(max_length=SUMMARY_TEXT)
     factors: list[str]
     predicted_battery_pct: Optional[float] = None
     confidence: Literal["low", "normal"]
@@ -205,9 +209,9 @@ class Edit(Contract):
 
 class Recommendation(Contract):
     rank: int = Field(ge=1, le=3)
-    text: str
-    reason: str
-    evidence: str
+    text: str = Field(max_length=SHORT_TEXT)
+    reason: str = Field(max_length=SHORT_TEXT)
+    evidence: str = Field(max_length=SHORT_TEXT)
 
 
 class AdvisorOut(Contract):

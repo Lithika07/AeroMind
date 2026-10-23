@@ -42,7 +42,8 @@
       "wind_max_ms": 10.3,
       "health_score": 55,
       "causes": [
-        "wind_drift"
+        "wind_drift",
+        "setup"
       ],
       "edits_applied": [
         "set_speed WP3 6 m/s (cause C1)"
@@ -72,8 +73,7 @@
         "setup"
       ],
       "edits_applied": [
-        "remove_waypoint WP3 (cause C1)",
-        "remove_waypoint WP4 (cause C1)"
+        "remove_waypoint WP3 (cause C1)"
       ]
     },
     {
@@ -126,9 +126,8 @@
         "low_battery"
       ],
       "edits_applied": [
-        "set_speed WP3 6 m/s (cause C2)",
         "remove_waypoint WP3 (cause C3)",
-        "remove_waypoint WP4 (cause C3)"
+        "set_speed WP4 6 m/s (cause C2)"
       ]
     },
     {
@@ -182,7 +181,8 @@
         "setup"
       ],
       "edits_applied": [
-        "remove_waypoint WP3 (cause C1)"
+        "remove_waypoint WP4 (cause C2)",
+        "set_speed WP5 6 m/s (cause C2)"
       ]
     },
     {
@@ -210,8 +210,7 @@
         "low_battery"
       ],
       "edits_applied": [
-        "set_speed WP3 6 m/s (cause C2)",
-        "remove_waypoint WP3 (cause C3)"
+        "add_hold WP4 5 s (cause C2)"
       ]
     }
   ]

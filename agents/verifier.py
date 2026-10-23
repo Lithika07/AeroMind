@@ -214,7 +214,16 @@ def _summary(summary: dict, state: dict, data: dict, known: dict) -> list:
     return verdicts
 
 
-def _diagnosis(diagnosis: dict, data: dict, known: dict) -> list:
+MAX_CAUSES = 3
+
+
+def expected_causes(state: dict) -> list:
+    """The cause categories the data supports (deterministic hint rules), strongest first."""
+    from agents import hints
+    return [c[0] for c in hints.causes(state["metrics"], state.get("params"))][:MAX_CAUSES]
+
+
+def _diagnosis(diagnosis: dict, data: dict, known: dict, state: dict) -> list:
     verdicts, supported = [], set()
     for claim in diagnosis["findings"]:
         reason = check_claim(claim, data, known)
@@ -228,6 +237,10 @@ def _diagnosis(diagnosis: dict, data: dict, known: dict) -> list:
                   f"rests on rejected findings {unsupported}" if unsupported else
                   "cites no finding" if not cause["findings"] else check_text(cause["cause"], known))
         verdicts.append(_verdict("diagnosis", cause["id"], reason))
+    named = {c["category"] for c in diagnosis["causes"]}
+    missing = [c for c in expected_causes(state) if c not in named]
+    if missing:
+        verdicts.append(_verdict("diagnosis", "coverage", f"omits causes the data shows: {', '.join(missing)}"))
     return verdicts
 
 
@@ -244,7 +257,7 @@ def verify(outputs: dict, state: dict, extra: dict = None) -> VerifierOut:
         verdicts += [_verdict("telemetry_link", c["id"], check_claim(c, data, known))
                      for c in outputs["telemetry_link"]["link_findings"]]
     if outputs.get("diagnosis"):
-        verdicts += _diagnosis(outputs["diagnosis"], data, known)
+        verdicts += _diagnosis(outputs["diagnosis"], data, known, state)
     risk = outputs.get("risk")
     if risk:
         verdicts.append(_verdict("risk", "adjustment_reason",

@@ -103,6 +103,30 @@ def _rejected(result, agent: str) -> dict:
     return {v.claim_id: v.reason for v in result.verdicts if v.agent == agent and v.status == "rejected"}
 
 
+def complete_diagnosis(diagnosis: DiagnosisOut, state: dict) -> DiagnosisOut:
+    """Add any cause the data supports that the agent left out, with its findings, under new ids."""
+    named = {c.category for c in diagnosis.causes}
+    rule = fallbacks.diagnosis(state)
+    findings, causes = list(diagnosis.findings), list(diagnosis.causes)
+    for cause in rule.causes:
+        if cause.category in named or len(causes) >= verifier.MAX_CAUSES:
+            continue
+        ids = []
+        for fid in cause.findings:
+            finding = next(f for f in rule.findings if f.id == fid)
+            new_id = f"F{len(findings) + 1}"
+            while any(f.id == new_id for f in findings):
+                new_id = f"F{int(new_id[1:]) + 1}"
+            findings.append(finding.model_copy(update={"id": new_id}))
+            ids.append(new_id)
+        new_cause = f"C{len(causes) + 1}"
+        while any(c.id == new_cause for c in causes):
+            new_cause = f"C{int(new_cause[1:]) + 1}"
+        causes.append(cause.model_copy(update={"id": new_cause, "findings": ids}))
+    causes.sort(key=lambda c: -c.confidence)
+    return DiagnosisOut(findings=findings, causes=causes[:verifier.MAX_CAUSES])
+
+
 def final_edits(proposed: list, diagnosis: DiagnosisOut, diagnosis_from_rules: bool, state: dict, mission) -> list:
     """The edits that pass the limits against the approved diagnosis. When that diagnosis came from the
     rules, the LLM's cause ids mean nothing, so the rule-based edits are used; likewise when none of
@@ -142,6 +166,8 @@ def approve(outputs: dict, check, state: dict, mission) -> dict:
         causes = [c for c in out["causes"] if c["id"] not in bad]
         diagnosis = DiagnosisOut(findings=[f for f in out["findings"] if f["id"] not in bad], causes=causes) \
             if causes else fallbacks.diagnosis(state)
+        if causes:
+            diagnosis = complete_diagnosis(diagnosis, state)
         diagnosis_from_rules = not causes
         approved["diagnosis"] = diagnosis.model_dump()
     if "risk" in outputs:

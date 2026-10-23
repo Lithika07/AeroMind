@@ -91,3 +91,9 @@ def test_changelog_lists_both(mission):
                                                       {"C1"})
     text = mission_io.changelog("s1", mission, fixed, applied, rejected)
     assert "set_speed WP3 6 m/s (cause C1)" in text and "speed must be" in text
+
+
+def test_describe_changes_between_flown_missions(mission):
+    fixed, _, _ = mission_io.apply_edits(mission, [edit("set_speed", 3, 6), edit("remove_waypoint", 4)], {"C1"})
+    assert mission_io.describe_changes(mission, fixed) == ["removed WP4", "speed 12 → 6 m/s"]
+    assert mission_io.describe_changes(mission, mission) == []

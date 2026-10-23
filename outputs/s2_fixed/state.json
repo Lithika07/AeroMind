@@ -397,7 +397,9 @@
       {
         "run_id": "s2_fixed",
         "parent_run": "s2",
-        "edits": [],
+        "edits": [
+          "remove_waypoint WP3 (cause C1)"
+        ],
         "changes": {
           "xtrack_max_m": {
             "before": 0.46,
@@ -473,7 +475,8 @@
       "setup"
     ],
     "edits_applied": [
-      "remove_waypoint WP3 (cause C1)"
+      "remove_waypoint WP4 (cause C2)",
+      "set_speed WP5 6 m/s (cause C2)"
     ]
   },
   "agents": {
@@ -511,7 +514,7 @@
       "plan": [
         {
           "agent": "flight_summary",
-          "reason": "Always run flight_summary first to summarize the flight data."
+          "reason": "Always run flight summary first."
         },
         {
           "agent": "telemetry_link",
@@ -519,19 +522,19 @@
         },
         {
           "agent": "diagnosis",
-          "reason": "Run diagnosis to address the warning from the battery_end metric."
+          "reason": "Run diagnosis as there are problems (battery_end)."
         },
         {
           "agent": "risk",
-          "reason": "Run risk to assess and mitigate any potential risks identified during the flight."
+          "reason": "Run risk analysis after diagnosis to assess new risks."
         },
         {
           "agent": "advisor",
-          "reason": "Run advisor to provide recommendations based on the analysis and findings."
+          "reason": "Run advisor last in the sequence."
         },
         {
           "agent": "verifier",
-          "reason": "Run verifier last to ensure all systems are functioning correctly post-flight."
+          "reason": "Always run verifier at the end of the process."
         }
       ],
       "source": "llm"
@@ -543,7 +546,7 @@
       "flight_summary": {
         "output": {
           "verdict": "Good",
-          "summary": "The flight executed smoothly with no issues reported. The drone maintained a consistent speed and altitude, and the takeoff and landing phases were executed without any problems. The drone's performance was within expected parameters, and the GPS tracking was accurate. The pilot notes were not provided, but the flight metrics indicate a successful and safe operation.",
+          "summary": "The flight executed smoothly with no issues reported throughout all phases. The drone maintained optimal performance parameters, including a steady speed and altitude during the entire mission. The takeoff was smooth, followed by efficient leg transitions to each waypoint. The landing phase concluded without any complications, resulting in a successful and trouble-free flight experience.",
           "flight_story": [
             {
               "phase": "Takeoff",
@@ -553,48 +556,48 @@
             {
               "phase": "Leg 1 (to WP3)",
               "status": "good",
-              "text": "The drone flew the first leg to WP3 with a good track and maintained a steady speed."
+              "text": "During Leg 1, the drone maintained a steady speed and altitude as it transitioned to waypoint WP3."
             },
             {
               "phase": "Leg 2 (to WP4)",
               "status": "good",
-              "text": "The drone continued to WP4 with a good track and maintained a steady speed."
+              "text": "In Leg 2, the drone continued its efficient flight path towards WP4 with consistent performance metrics."
             },
             {
               "phase": "Leg 3 (to WP5)",
               "status": "good",
-              "text": "The drone flew the third leg to WP5 with a good track and maintained a steady speed."
+              "text": "During Leg 3, the drone maintained optimal speed and altitude as it headed to waypoint WP5."
             },
             {
               "phase": "Leg 4 (to WP6)",
               "status": "good",
-              "text": "The drone flew the fourth leg to WP6 with a good track and maintained a steady speed."
+              "text": "In Leg 4, the drone continued its smooth flight towards WP6 with consistent performance metrics."
             },
             {
               "phase": "Leg 5 (to WP7)",
               "status": "good",
-              "text": "The drone flew the fifth leg to WP7 with a good track and maintained a steady speed."
+              "text": "During Leg 5, the drone maintained a steady speed and altitude as it headed to waypoint WP7."
             },
             {
               "phase": "Leg 6 (to WP8)",
               "status": "good",
-              "text": "The drone flew the final leg to WP8 with a good track and maintained a steady speed."
+              "text": "In Leg 6, the drone continued its efficient flight towards WP8 with consistent performance metrics."
             },
             {
               "phase": "RTL",
               "status": "good",
-              "text": "The drone executed the return-to-launch maneuver smoothly."
+              "text": "The Return To Launch maneuver was executed smoothly without any issues."
             },
             {
               "phase": "Land",
               "status": "good",
-              "text": "The drone landed safely within the expected parameters."
+              "text": "The drone landed safely within the expected parameters, concluding a successful flight mission."
             }
           ],
           "claims": []
         },
         "source": "llm",
-        "seconds": 13.25,
+        "seconds": 14.02,
         "errors": [],
         "feedback": null
       },
@@ -633,56 +636,40 @@
           "findings": [
             {
               "id": "F1",
-              "text": "battery.remaining_end_pct is 25.0, indicating the battery was at landing Caution/Bad.",
+              "text": "battery.used_pct_per_km: 72.8; battery.remaining_end_pct: 25.0",
               "metric": null,
               "value": null
             },
             {
-              "id": "F2",
-              "text": "battery.used_pct_per_km is 72.8, suggesting the battery was used beyond its capacity.",
-              "metric": null,
-              "value": null
-            },
-            {
-              "id": "F3",
-              "text": "params.FENCE_ENABLE is 0.0, indicating Failsafe disabled in the parameters: FENCE_ENABLE.",
-              "metric": null,
+              "id": "C1",
+              "text": "category: setup, cause: Failsafe parameter FENCE_ENABLE is set to 0 in parameters, confidence: 0.9",
+              "metric": "params.FENCE_ENABLE",
               "value": null
             }
           ],
           "causes": [
             {
-              "id": "C1",
-              "cause": "Battery too small for this route: landed with 25 %, leading to battery at landing Caution/Bad.",
-              "category": "low_battery",
-              "confidence": 0.6,
-              "findings": [
-                "F1",
-                "F2"
-              ]
-            },
-            {
               "id": "C2",
-              "cause": "Failsafe disabled in the parameters: FENCE_ENABLE, leading to FENCE_ENABLE being 0.0.",
-              "category": "setup",
-              "confidence": 0.5,
+              "cause": "Battery too small for this route: landed with 25 % of remaining battery",
+              "category": "low_battery",
+              "confidence": 0.8,
               "findings": [
-                "F3"
+                "F1"
               ]
             }
           ]
         },
         "source": "llm",
-        "seconds": 7.44,
+        "seconds": 5.1,
         "errors": [],
-        "feedback": "F1: states a number without citing a metric; F4: states a number without citing a metric; F5: states a number without citing a metric; C1: rests on rejected findings ['F1', 'F4']; C2: rests on rejected findings ['F1', 'F4']"
+        "feedback": "F1: states a number without citing a metric; C1: rests on rejected findings ['F1']; C2: rests on rejected findings ['F1']"
       },
       "risk": {
         "output": {
           "risk_level": "Low",
           "risk_score": 10,
           "adjustment": -10,
-          "adjustment_reason": "Reduces the risk by lowering the points for failsafe not set and recurring issue: setup",
+          "adjustment_reason": "Reduces the recurring issue factor to account for known history and stable performance.",
           "factors": [
             "failsafe not set: FENCE_ENABLE = 0",
             "recurring issue: setup"
@@ -691,7 +678,7 @@
           "confidence": "normal"
         },
         "source": "llm",
-        "seconds": 2.2,
+        "seconds": 2.1,
         "errors": [],
         "feedback": "adjustment_reason: lowers the risk without naming anything that reduces it"
       },
@@ -700,48 +687,44 @@
           "edits": [
             {
               "action": "remove_waypoint",
-              "wp": 3,
+              "wp": 4,
               "value": null,
-              "cause": "C1"
+              "cause": "C2"
             },
             {
-              "action": "change_altitude",
-              "wp": 2,
-              "value": -15.0,
-              "cause": "C1"
-            },
-            {
-              "action": "change_altitude",
-              "wp": 8,
-              "value": -15.0,
-              "cause": "C1"
+              "action": "set_speed",
+              "wp": 5,
+              "value": 6.0,
+              "cause": "C2"
             }
           ],
           "recommendations": [
             {
               "rank": 1,
-              "text": "Remove waypoint WP3 and reduce altitude at WP2 and WP8 by 15 meters. This addresses the battery issue by reducing the distance and altitude, which can help conserve battery life.",
-              "reason": "The battery issue (C1) is the primary cause affecting the mission. Reducing the distance and altitude at WP2 and WP8 by 15 meters can help mitigate the battery drain, as the mission is already constrained by the battery level.",
-              "evidence": "The battery used 74% of its capacity, leading to a landing caution. Reducing altitude can help conserve battery life, as the aircraft will consume less power at lower altitudes."
+              "text": "Remove waypoint WP4: This action directly addresses the issue of low battery by reducing the distance flown, which aligns with the findings from previous runs where removing waypoints improved metrics such as health score and link uptime percentage.",
+              "reason": "The removal of WP4 reduces the total flight duration and conserves energy, which is critical given the low remaining battery. This action also improves the mission completion percentage to 100%, indicating a successful execution without any issues.",
+              "evidence": "duration_s: before=272.7, after=268.5; health_score: before=90, after=93; link_uptime_pct: before=100.0, after=100.0"
             },
             {
               "rank": 2,
-              "text": "Reduce altitude at WP2 and WP8 by 15 meters. This addresses the battery issue by reducing the distance and altitude, which can help conserve battery life.",
-              "reason": "The battery issue (C1) is the primary cause affecting the mission. Reducing the altitude at WP2 and WP8 by 15 meters can help mitigate the battery drain, as the mission is already constrained by the battery level.",
-              "evidence": "The battery used 74% of its capacity, leading to a landing caution. Reducing altitude can help conserve battery life, as the aircraft will consume less power at lower altitudes."
+              "text": "Set speed to 6 m/s at WP5: This action aims to optimize the remaining battery by maintaining a consistent and efficient flight speed, which is crucial given the low remaining battery percentage.",
+              "reason": "Setting a specific speed helps in managing energy consumption more effectively. The chosen speed of 6 m/s balances between maintaining optimal performance and conserving power, as evidenced by previous runs where setting speeds improved metrics like health score and link uptime percentage.",
+              "evidence": "speed_ms: before=4.9, after=5.0; battery_end_pct: before=25.0, after=31.7"
             },
             {
               "rank": 3,
-              "text": "Reduce altitude at WP2 by 15 meters. This addresses the battery issue by reducing the distance and altitude, which can help conserve battery life.",
-              "reason": "The battery issue (C1) is the primary cause affecting the mission. Reducing the altitude at WP2 by 15 meters can help mitigate the battery drain, as the mission is already constrained by the battery level.",
-              "evidence": "The battery used 74% of its capacity, leading to a landing caution. Reducing altitude can help conserve battery life, as the aircraft will consume less power at lower altitudes."
+              "text": "Set speed to 6 m/s at WP6: This action further optimizes the remaining battery by maintaining a consistent and efficient flight speed, ensuring that the mission can be completed with minimal risk of running out of power.",
+              "reason": "Setting a specific speed helps in managing energy consumption more effectively. The chosen speed of 6 m/s balances between maintaining optimal performance and conserving power, as evidenced by previous runs where setting speeds improved metrics like health score and link uptime percentage.",
+              "evidence": "speed_ms: before=4.8, after=5.0; battery_end_pct: before=25.0, after=31.7"
             }
           ]
         },
         "source": "llm",
-        "seconds": 16.19,
-        "errors": [],
-        "feedback": "rec[1]: proposes change_altitude at WP2, which failed the mission limits; rec[2]: proposes add_hold at WP2, which failed the mission limits; rec[3]: gives no number from the flight data as evidence"
+        "seconds": 30.64,
+        "errors": [
+          "invalid JSON from qwen2.5:3b: [{'type': 'string_too_long', 'loc': ('recommendations', 1, 'reason'), 'msg': 'String should have at most 300 characters', 'input': 'Setting a lower speed at WP5 helps in conserving energy and ensures that the aircraft does not exceed its maximum speed capacity, which is"
+        ],
+        "feedback": "rec[1]: proposes change_altitude at WP4, which failed the mission limits; rec[2]: proposes add_hold at WP5, which failed the mission limits; rec[3]: gives no number from the flight data as evidence"
       }
     },
     "verification": {
@@ -832,18 +815,6 @@
         },
         {
           "agent": "diagnosis",
-          "claim_id": "F2",
-          "status": "supported",
-          "reason": "matches the data"
-        },
-        {
-          "agent": "diagnosis",
-          "claim_id": "F3",
-          "status": "supported",
-          "reason": "matches the data"
-        },
-        {
-          "agent": "diagnosis",
           "claim_id": "C1",
           "status": "supported",
           "reason": "matches the data"
@@ -855,6 +826,12 @@
           "reason": "matches the data"
         },
         {
+          "agent": "diagnosis",
+          "claim_id": "coverage",
+          "status": "rejected",
+          "reason": "omits causes the data shows: setup"
+        },
+        {
           "agent": "risk",
           "claim_id": "adjustment_reason",
           "status": "rejected",
@@ -863,34 +840,34 @@
         {
           "agent": "advisor",
           "claim_id": "rec[1]",
-          "status": "rejected",
-          "reason": "'15 meters' is not in the flight data"
+          "status": "supported",
+          "reason": "matches the data"
         },
         {
           "agent": "advisor",
           "claim_id": "rec[2]",
-          "status": "rejected",
-          "reason": "'15 meters' is not in the flight data"
+          "status": "supported",
+          "reason": "matches the data"
         },
         {
           "agent": "advisor",
           "claim_id": "rec[3]",
-          "status": "rejected",
-          "reason": "'15 meters' is not in the flight data"
+          "status": "supported",
+          "reason": "matches the data"
         }
       ],
       "rejection_rates": {
         "flight_summary": 0.2,
         "telemetry_link": 0.0,
-        "diagnosis": 0.0,
+        "diagnosis": 0.25,
         "risk": 1.0,
-        "advisor": 1.0
+        "advisor": 0.0
       },
       "reruns": [
         {
           "agent": "diagnosis",
-          "rejection_rate": 0.71,
-          "feedback": "F1: states a number without citing a metric; F4: states a number without citing a metric; F5: states a number without citing a metric; C1: rests on rejected findings ['F1', 'F4']; C2: rests on rejected findings ['F1', 'F4']"
+          "rejection_rate": 0.75,
+          "feedback": "F1: states a number without citing a metric; C1: rests on rejected findings ['F1']; C2: rests on rejected findings ['F1']"
         },
         {
           "agent": "risk",
@@ -900,34 +877,15 @@
         {
           "agent": "advisor",
           "rejection_rate": 1.0,
-          "feedback": "rec[1]: proposes change_altitude at WP2, which failed the mission limits; rec[2]: proposes add_hold at WP2, which failed the mission limits; rec[3]: gives no number from the flight data as evidence"
+          "feedback": "rec[1]: proposes change_altitude at WP4, which failed the mission limits; rec[2]: proposes add_hold at WP5, which failed the mission limits; rec[3]: gives no number from the flight data as evidence"
         }
       ],
-      "claims": 22,
-      "rejected": 6,
-      "grounding_rate": 0.273
+      "claims": 21,
+      "rejected": 4,
+      "grounding_rate": 0.19
     },
     "edit_check": {
-      "dropped": [
-        {
-          "edit": {
-            "action": "change_altitude",
-            "wp": 2,
-            "value": -15.0,
-            "cause": "C1"
-          },
-          "reason": "WP2 (DO_CHANGE_SPEED) cannot be edited"
-        },
-        {
-          "edit": {
-            "action": "change_altitude",
-            "wp": 8,
-            "value": -15.0,
-            "cause": "C1"
-          },
-          "reason": "altitude 15 m is outside 25-120 m"
-        }
-      ],
+      "dropped": [],
       "replaced_by_rules": false
     },
     "approved": {
@@ -943,37 +901,37 @@
           {
             "phase": "Leg 1 (to WP3)",
             "status": "good",
-            "text": "The drone flew the first leg to WP3 with a good track and maintained a steady speed."
+            "text": "During Leg 1, the drone maintained a steady speed and altitude as it transitioned to waypoint WP3."
           },
           {
             "phase": "Leg 2 (to WP4)",
             "status": "good",
-            "text": "The drone continued to WP4 with a good track and maintained a steady speed."
+            "text": "In Leg 2, the drone continued its efficient flight path towards WP4 with consistent performance metrics."
           },
           {
             "phase": "Leg 3 (to WP5)",
             "status": "good",
-            "text": "The drone flew the third leg to WP5 with a good track and maintained a steady speed."
+            "text": "During Leg 3, the drone maintained optimal speed and altitude as it headed to waypoint WP5."
           },
           {
             "phase": "Leg 4 (to WP6)",
             "status": "good",
-            "text": "The drone flew the fourth leg to WP6 with a good track and maintained a steady speed."
+            "text": "In Leg 4, the drone continued its smooth flight towards WP6 with consistent performance metrics."
           },
           {
             "phase": "Leg 5 (to WP7)",
             "status": "good",
-            "text": "The drone flew the fifth leg to WP7 with a good track and maintained a steady speed."
+            "text": "During Leg 5, the drone maintained a steady speed and altitude as it headed to waypoint WP7."
           },
           {
             "phase": "Leg 6 (to WP8)",
             "status": "good",
-            "text": "The drone flew the final leg to WP8 with a good track and maintained a steady speed."
+            "text": "In Leg 6, the drone continued its efficient flight towards WP8 with consistent performance metrics."
           },
           {
             "phase": "RTL",
             "status": "good",
-            "text": "The drone executed the return-to-launch maneuver smoothly."
+            "text": "The Return To Launch maneuver was executed smoothly without any issues."
           },
           {
             "phase": "Land",
@@ -1011,37 +969,36 @@
         "findings": [
           {
             "id": "F1",
-            "text": "battery.remaining_end_pct is 25.0, indicating the battery was at landing Caution/Bad.",
+            "text": "battery.used_pct_per_km: 72.8; battery.remaining_end_pct: 25.0",
             "metric": null,
             "value": null
           },
           {
-            "id": "F2",
-            "text": "battery.used_pct_per_km is 72.8, suggesting the battery was used beyond its capacity.",
-            "metric": null,
+            "id": "C1",
+            "text": "category: setup, cause: Failsafe parameter FENCE_ENABLE is set to 0 in parameters, confidence: 0.9",
+            "metric": "params.FENCE_ENABLE",
             "value": null
           },
           {
             "id": "F3",
-            "text": "params.FENCE_ENABLE is 0.0, indicating Failsafe disabled in the parameters: FENCE_ENABLE.",
-            "metric": null,
-            "value": null
+            "text": "params.FENCE_ENABLE = 0.0",
+            "metric": "params.FENCE_ENABLE",
+            "value": 0.0
           }
         ],
         "causes": [
           {
-            "id": "C1",
-            "cause": "Battery too small for this route: landed with 25 %, leading to battery at landing Caution/Bad.",
+            "id": "C2",
+            "cause": "Battery too small for this route: landed with 25 % of remaining battery",
             "category": "low_battery",
-            "confidence": 0.6,
+            "confidence": 0.8,
             "findings": [
-              "F1",
-              "F2"
+              "F1"
             ]
           },
           {
-            "id": "C2",
-            "cause": "Failsafe disabled in the parameters: FENCE_ENABLE, leading to FENCE_ENABLE being 0.0.",
+            "id": "C3",
+            "cause": "Failsafe disabled in the parameters: FENCE_ENABLE",
             "category": "setup",
             "confidence": 0.5,
             "findings": [
@@ -1066,66 +1023,68 @@
         "edits": [
           {
             "action": "remove_waypoint",
-            "wp": 3,
+            "wp": 4,
             "value": null,
-            "cause": "C1"
+            "cause": "C2"
+          },
+          {
+            "action": "set_speed",
+            "wp": 5,
+            "value": 6.0,
+            "cause": "C2"
           }
         ],
         "recommendations": [
           {
             "rank": 1,
-            "text": "Shorten the route by removing WP3",
-            "reason": "the battery margin was too small",
-            "evidence": "landed with 25.0 % battery"
+            "text": "Remove waypoint WP4: This action directly addresses the issue of low battery by reducing the distance flown, which aligns with the findings from previous runs where removing waypoints improved metrics such as health score and link uptime percentage.",
+            "reason": "The removal of WP4 reduces the total flight duration and conserves energy, which is critical given the low remaining battery. This action also improves the mission completion percentage to 100%, indicating a successful execution without any issues.",
+            "evidence": "duration_s: before=272.7, after=268.5; health_score: before=90, after=93; link_uptime_pct: before=100.0, after=100.0"
           },
           {
             "rank": 2,
-            "text": "Enable a geofence sized for the route and keep failsafes on",
-            "reason": "a failsafe parameter is 0",
-            "evidence": "FENCE_ENABLE = 0"
+            "text": "Set speed to 6 m/s at WP5: This action aims to optimize the remaining battery by maintaining a consistent and efficient flight speed, which is crucial given the low remaining battery percentage.",
+            "reason": "Setting a specific speed helps in managing energy consumption more effectively. The chosen speed of 6 m/s balances between maintaining optimal performance and conserving power, as evidenced by previous runs where setting speeds improved metrics like health score and link uptime percentage.",
+            "evidence": "speed_ms: before=4.9, after=5.0; battery_end_pct: before=25.0, after=31.7"
+          },
+          {
+            "rank": 3,
+            "text": "Set speed to 6 m/s at WP6: This action further optimizes the remaining battery by maintaining a consistent and efficient flight speed, ensuring that the mission can be completed with minimal risk of running out of power.",
+            "reason": "Setting a specific speed helps in managing energy consumption more effectively. The chosen speed of 6 m/s balances between maintaining optimal performance and conserving power, as evidenced by previous runs where setting speeds improved metrics like health score and link uptime percentage.",
+            "evidence": "speed_ms: before=4.8, after=5.0; battery_end_pct: before=25.0, after=31.7"
           }
         ]
       }
     },
-    "seconds": 67.1
+    "seconds": 120.8
   },
   "mission_fix": {
     "applied": [
       {
         "edit": {
           "action": "remove_waypoint",
-          "wp": 3,
+          "wp": 4,
           "value": null,
-          "cause": "C1"
+          "cause": "C2"
         },
-        "text": "remove_waypoint WP3 (cause C1)"
-      }
-    ],
-    "rejected": [
-      {
-        "edit": {
-          "action": "change_altitude",
-          "wp": 2,
-          "value": -15.0,
-          "cause": "C1"
-        },
-        "reason": "WP2 (DO_CHANGE_SPEED) cannot be edited"
+        "text": "remove_waypoint WP4 (cause C2)"
       },
       {
         "edit": {
-          "action": "change_altitude",
-          "wp": 8,
-          "value": -15.0,
-          "cause": "C1"
+          "action": "set_speed",
+          "wp": 5,
+          "value": 6.0,
+          "cause": "C2"
         },
-        "reason": "altitude 15 m is outside 25-120 m"
+        "text": "set_speed WP5 6 m/s (cause C2)"
       }
     ],
+    "rejected": [],
     "length_before_m": 1016,
-    "length_after_m": 853,
+    "length_after_m": 1008,
     "waypoints_before": 6,
     "waypoints_after": 5,
     "file": "mission_fixed.waypoints"
   },
-  "seconds_total": 68.0
+  "seconds_total": 121.6
 }

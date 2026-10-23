@@ -115,3 +115,17 @@ def test_edits_follow_the_approved_diagnosis_not_the_rejected_one(states):
     approved = result["approved"]
     assert approved["diagnosis"]["causes"][0]["category"] == "low_battery"
     assert {e["action"] for e in approved["advisor"]["edits"]} == {"remove_waypoint"}
+
+
+def test_a_diagnosis_missing_a_supported_cause_is_completed(states):
+    state, mission = states.get("s1") or pytest.skip("s1 not flown")
+    fence = state["params"]["FENCE_ENABLE"]
+    diagnosis = {"findings": [{"id": "F1", "text": "fence", "metric": "params.FENCE_ENABLE", "value": fence}],
+                 "causes": [{"id": "C1", "cause": "Failsafe disabled", "category": "setup", "confidence": 0.5,
+                             "findings": ["F1"]}]}
+    result = orchestrator.run(state, FakeBackend({"DiagnosisOut": [diagnosis]}), mission)
+    coverage = [v for v in result["verification"]["verdicts"] if v["claim_id"] == "coverage"]
+    assert coverage and "wind_drift" in coverage[0]["reason"]
+    approved = result["approved"]
+    assert {c["category"] for c in approved["diagnosis"]["causes"]} >= {"wind_drift", "setup"}
+    assert any(e["action"] == "set_speed" for e in approved["advisor"]["edits"])

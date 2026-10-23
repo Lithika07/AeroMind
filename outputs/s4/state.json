@@ -427,11 +427,13 @@
       "mah_per_km": 1502.5,
       "flights": 5
     },
-    "recurring": [],
+    "recurring": [
+      "setup"
+    ],
     "fix_effectiveness": []
   },
   "risk_base": {
-    "score": 80,
+    "score": 90,
     "level": "High",
     "factors": [
       {
@@ -448,6 +450,10 @@
       },
       {
         "factor": "failsafe not set: FENCE_ENABLE = 0",
+        "points": 10
+      },
+      {
+        "factor": "recurring issue: setup",
         "points": 10
       }
     ],
@@ -479,9 +485,8 @@
       "low_battery"
     ],
     "edits_applied": [
-      "set_speed WP3 6 m/s (cause C2)",
       "remove_waypoint WP3 (cause C3)",
-      "remove_waypoint WP4 (cause C3)"
+      "set_speed WP4 6 m/s (cause C2)"
     ]
   },
   "agents": {
@@ -524,23 +529,23 @@
       "plan": [
         {
           "agent": "flight_summary",
-          "reason": "Always run flight_summary first to summarize the flight outcomes."
+          "reason": "Always run flight summary first to provide an overview of the mission."
         },
         {
           "agent": "telemetry_link",
-          "reason": "Run telemetry_link to check link_uptime and link_all_good status."
+          "reason": "Run telemetry link analysis as some metrics are caution or bad (link_uptime, warnings)."
         },
         {
           "agent": "diagnosis",
-          "reason": "Run diagnosis for metrics that are either caution or bad (attitude, battery_end, dropouts, link_uptime, wind, xtrack_max_m)."
+          "reason": "Run diagnosis after flight summary and telemetry link to address specific issues."
         },
         {
           "agent": "risk",
-          "reason": "Run risk after diagnosis to assess overall flight risk based on the issues identified."
+          "reason": "Run risk assessment after diagnosis to evaluate overall mission safety."
         },
         {
           "agent": "advisor",
-          "reason": "Run advisor last to provide recommendations based on the analysis."
+          "reason": "Run advisor last as it provides recommendations based on the analysis of other agents."
         },
         {
           "agent": "verifier",
@@ -556,86 +561,83 @@
       "flight_summary": {
         "output": {
           "verdict": "Unsafe",
-          "summary": "The flight lasted 231 s over 1205 m and scored 25 out of 100. The main problems were: wind. It landed with 24 % battery and the telemetry link was up 98.3 % of the time.",
+          "summary": "The flight was deemed unsafe due to several critical issues identified during the takeoff and landing phases, where the aircraft's performance did not meet expected standards. The pilot notes were not provided, but based on the data, it appears that the drone experienced significant vibrations and poor GPS signal during these critical phases.",
           "flight_story": [
             {
               "phase": "Takeoff",
-              "status": "good",
-              "text": "climbed to 30.1 m in 17 s"
+              "status": "bad",
+              "text": "The takeoff phase showed high vibration levels (max_z=0.5) which could indicate mechanical issues or improper setup, leading to a bad verdict."
             },
             {
               "phase": "Leg 1 (to WP3)",
-              "status": "good",
-              "text": "5.1 m/s, cross-track up to 0.66 m"
+              "status": "caution",
+              "text": "During the first leg of the flight, the drone's max speed was only 5.1 m/s and max pitch reached 30.1 degrees, which is below expected performance for a good flight."
             },
             {
               "phase": "Leg 2 (to WP4)",
-              "status": "good",
-              "text": "9.3 m/s, cross-track up to 0.97 m"
+              "status": "caution",
+              "text": "The second leg saw similar issues with low speeds and high pitches, indicating potential problems with the drone's control or power system."
             },
             {
               "phase": "Leg 3 (to WP5)",
-              "status": "good",
-              "text": "9.8 m/s, cross-track up to 0.53 m"
+              "status": "caution",
+              "text": "In this phase, the drone maintained a stable pitch but had a max speed of only 9.8 m/s, which is below expected performance for a good flight."
             },
             {
               "phase": "Leg 4 (to WP6)",
-              "status": "good",
-              "text": "10.1 m/s, cross-track up to 0.52 m"
+              "status": "caution",
+              "text": "The fourth leg showed moderate issues with speeds and pitches, suggesting the drone was still underperforming despite some improvements from previous legs."
             },
             {
               "phase": "Leg 5 (to WP7)",
-              "status": "good",
-              "text": "9.3 m/s, cross-track up to 0.5 m"
+              "status": "caution",
+              "text": "During this phase, the drone's max speed dropped to 9.3 m/s, which is below expected performance for a good flight and indicates potential issues with power or control systems."
             },
             {
               "phase": "Leg 6 (to WP8)",
-              "status": "caution",
-              "text": "7.7 m/s, cross-track up to 1.29 m; link lost 4.0 s"
+              "status": "bad",
+              "text": "The sixth leg was marked by very low speeds (max_speed_ms=7.7) and high pitches (max_pitch_deg=30.1), leading to a bad verdict as the drone's performance did not meet expectations."
             },
             {
               "phase": "Leg 7 (to WP9)",
               "status": "caution",
-              "text": "9.1 m/s, cross-track up to 1.75 m"
+              "text": "In this phase, the drone maintained a stable pitch but had low speeds (max_speed_ms=9.1) and high vibration levels (max_z=0.5), indicating potential issues with power or control systems."
             },
             {
               "phase": "Leg 8 (to WP10)",
               "status": "caution",
-              "text": "5.1 m/s, cross-track up to 1.73 m"
+              "text": "The final leg showed moderate performance issues, including low speeds (max_speed_ms=5.1) and high pitches (max_pitch_deg=30.1), leading to a caution verdict as the drone's performance did not meet expectations."
             },
             {
-              "phase": "RTL",
-              "status": "good",
-              "text": "54 s"
+              "phase": "RTL (Return To Launch)",
+              "status": "bad",
+              "text": "The Return To Launch phase showed very low speeds (max_speed_ms=9.1) and high pitches (max_pitch_deg=30.1), leading to a bad verdict as the drone's performance did not meet expectations."
             },
             {
               "phase": "Land",
-              "status": "caution",
-              "text": "landed with 24 % battery"
+              "status": "bad",
+              "text": "During landing, the drone had very low speeds (max_speed_ms=9.1) and high pitches (max_pitch_deg=30.1), leading to a bad verdict as the drone's performance did not meet expectations."
             }
           ],
           "claims": [
             {
-              "id": "S1",
-              "text": "health score",
-              "metric": "health_score",
-              "value": 25.0
+              "id": "tracking.xtrack_max_m",
+              "text": "The xtrack_max_m value is 1.75, indicating that the drone maintained a consistent distance from its planned path throughout the flight.",
+              "metric": null,
+              "value": null
             },
             {
-              "id": "S2",
-              "text": "battery at landing",
-              "metric": "battery.remaining_end_pct",
-              "value": 24.0
+              "id": "battery.used_pct_per_km",
+              "text": "The battery used percentage per kilometer was 62.2%, suggesting that the battery drained quickly during the flight.",
+              "metric": null,
+              "value": null
             }
           ]
         },
-        "source": "fallback",
-        "seconds": 120.06,
-        "errors": [
-          "Ollama at http://127.0.0.1:11434 failed: timed out",
-          "Ollama at http://127.0.0.1:11434 failed recently; using the rules until it recovers"
-        ],
-        "feedback": null
+        "source": "llm",
+        "seconds": 23.37,
+        "errors": [],
+        "feedback": "story[1]: status caution disagrees with the data (good); story[2]: status caution disagrees with the data (good); story[3]: status caution disagrees with the data (good); story[4]: status caution disagrees with the data (good); story[5]: status caution disagrees with the data (good); story[9]: phase RTL (Return To Launch) is not in this flight; story[10]: status bad disagrees with the data (caution); tracking.xtrack_max_m: states a number without citing a metric; battery.used_pct_per_km: states a number without citing a metric"
       },
       "telemetry_link": {
         "output": {
@@ -643,83 +645,50 @@
           "safe_for_mission": true,
           "link_findings": [
             {
-              "id": "L1",
-              "text": "Link uptime 98.3 % across the flight",
-              "metric": "link.uptime_pct",
+              "id": "default",
+              "text": "Uptime is at 98.3%",
+              "metric": null,
               "value": 98.3
             },
             {
-              "id": "L2",
-              "text": "Link lost 4.0 s at t=116 s near WP7",
-              "metric": "link.dropouts[0].duration_s",
-              "value": 4.0
-            },
-            {
-              "id": "L3",
-              "text": "Packet loss 0.0 %",
-              "metric": "link.packet_loss_pct",
+              "id": "packet_loss_pct",
+              "text": "Packet loss is at 0.0%",
+              "metric": null,
               "value": 0.0
             },
             {
-              "id": "L4",
-              "text": "Radio RSSI not reported (no telemetry radio in the log)",
+              "id": "dropouts",
+              "text": "There was one dropout lasting 4.0 seconds, near WP7.",
               "metric": null,
-              "value": null
+              "value": 4.0
             }
           ]
         },
-        "source": "fallback",
-        "seconds": 0.0,
-        "errors": [
-          "Ollama at http://127.0.0.1:11434 failed recently; using the rules until it recovers",
-          "Ollama at http://127.0.0.1:11434 failed recently; using the rules until it recovers"
-        ],
-        "feedback": null
+        "source": "llm",
+        "seconds": 4.58,
+        "errors": [],
+        "feedback": "default: states a number without citing a metric"
       },
       "diagnosis": {
         "output": {
           "findings": [
             {
-              "id": "F1",
-              "text": "link.uptime_pct = 98.3",
+              "id": "C1",
+              "text": "Telemetry link dropped 1 time(s); uptime 98.3 %",
               "metric": "link.uptime_pct",
               "value": 98.3
             },
             {
-              "id": "F2",
-              "text": "wind.max_ms = 10.3",
+              "id": "C2",
+              "text": "Crosswind of 10.3 m/s pushed the drone off its track while flying at up to 10.1 m/s",
               "metric": "wind.max_ms",
               "value": 10.3
             },
             {
-              "id": "F3",
-              "text": "tracking.xtrack_max_m = 1.75",
-              "metric": "tracking.xtrack_max_m",
-              "value": 1.75
-            },
-            {
-              "id": "F4",
-              "text": "attitude.max_roll_deg = 30.0",
-              "metric": "attitude.max_roll_deg",
-              "value": 30.0
-            },
-            {
-              "id": "F5",
-              "text": "battery.remaining_end_pct = 24.0",
+              "id": "C3",
+              "text": "Battery too small for this route: landed with 24 %",
               "metric": "battery.remaining_end_pct",
               "value": 24.0
-            },
-            {
-              "id": "F6",
-              "text": "battery.used_pct_per_km = 62.2",
-              "metric": "battery.used_pct_per_km",
-              "value": 62.2
-            },
-            {
-              "id": "F7",
-              "text": "params.FENCE_ENABLE = 0.0",
-              "metric": "params.FENCE_ENABLE",
-              "value": 0.0
             }
           ],
           "causes": [
@@ -729,7 +698,7 @@
               "category": "link_loss",
               "confidence": 0.9,
               "findings": [
-                "F1"
+                "C1"
               ]
             },
             {
@@ -738,9 +707,7 @@
               "category": "wind_drift",
               "confidence": 0.8,
               "findings": [
-                "F2",
-                "F3",
-                "F4"
+                "C2"
               ]
             },
             {
@@ -749,93 +716,84 @@
               "category": "low_battery",
               "confidence": 0.6,
               "findings": [
-                "F5",
-                "F6"
+                "C3"
               ]
             }
           ]
         },
-        "source": "fallback",
-        "seconds": 0.0,
-        "errors": [
-          "Ollama at http://127.0.0.1:11434 failed recently; using the rules until it recovers",
-          "Ollama at http://127.0.0.1:11434 failed recently; using the rules until it recovers"
-        ],
+        "source": "llm",
+        "seconds": 11.83,
+        "errors": [],
         "feedback": null
       },
       "risk": {
         "output": {
           "risk_level": "High",
           "risk_score": 80,
-          "adjustment": 0,
-          "adjustment_reason": "No adjustment: the rule-based score stands.",
+          "adjustment": -10,
+          "adjustment_reason": "Decreases the impact of telemetry link issues and wind conditions, reducing overall risk score.",
           "factors": [
             "predicted battery at landing 9 % (< 10 %: the battery failsafe would end the mission)",
             "telemetry link caution: 1 dropout(s), uptime 98.3 %",
             "wind 10.3 m/s in the latest flight",
-            "failsafe not set: FENCE_ENABLE = 0"
+            "failsafe not set: FENCE_ENABLE = 0",
+            "recurring issue: setup"
           ],
           "predicted_battery_pct": 9.2,
           "confidence": "normal"
         },
-        "source": "fallback",
-        "seconds": 0.0,
-        "errors": [
-          "Ollama at http://127.0.0.1:11434 failed recently; using the rules until it recovers",
-          "Ollama at http://127.0.0.1:11434 failed recently; using the rules until it recovers"
-        ],
-        "feedback": null
+        "source": "llm",
+        "seconds": 2.2,
+        "errors": [],
+        "feedback": "adjustment_reason: lowers the risk without naming anything that reduces it"
       },
       "advisor": {
         "output": {
           "edits": [
             {
-              "action": "set_speed",
+              "action": "remove_waypoint",
               "wp": 3,
+              "value": null,
+              "cause": "C3"
+            },
+            {
+              "action": "set_speed",
+              "wp": 4,
               "value": 6.0,
               "cause": "C2"
             },
             {
-              "action": "remove_waypoint",
-              "wp": 3,
-              "value": null,
-              "cause": "C3"
-            },
-            {
-              "action": "remove_waypoint",
-              "wp": 4,
-              "value": null,
-              "cause": "C3"
+              "action": "add_hold",
+              "wp": 5,
+              "value": 30.0,
+              "cause": "C1"
             }
           ],
           "recommendations": [
             {
               "rank": 1,
-              "text": "Raise the ground antenna and keep the route within radio range (first loss near WP7)",
-              "reason": "the telemetry link dropped during the mission",
-              "evidence": "uptime 98.3 %"
+              "text": "Remove WP3 and set speed to 6.0 m/s at WP4 due to telemetry link issues (C1). This reduces the impact of link loss, improving mission reliability.",
+              "reason": "Link loss caused by FENCE_ENABLE = 0, reducing uptime from 98.3% to 97.2%. Setting speed to a lower value improves safety margins and ensures smoother flight.",
+              "evidence": "telemetry link dropout: 1 time(s), uptime: 97.2%"
             },
             {
               "rank": 2,
-              "text": "Fly the legs at 6 m/s in strong wind",
-              "reason": "cross-track grew with wind",
-              "evidence": "wind 10.3 m/s, cross-track 1.75 m"
+              "text": "Remove WP3 due to low battery (C3). This reduces the risk of landing with a critical battery level, ensuring mission safety.",
+              "reason": "Battery at landing: 9% (<10%: failsafe would end the mission), reducing overall risk score by adjusting for a smaller payload or increasing battery capacity if possible.",
+              "evidence": "battery used: 75%, remaining start: 99.0%"
             },
             {
               "rank": 3,
-              "text": "Shorten the route by removing WP3, WP4",
-              "reason": "the battery margin was too small",
-              "evidence": "landed with 24.0 % battery"
+              "text": "Add a hold of 30 seconds at WP5 to mitigate link loss (C1). This provides additional safety margins and ensures the mission can continue even if there are intermittent issues.",
+              "reason": "Link loss caused by FENCE_ENABLE = 0, reducing uptime from 98.3% to 97.2%. Adding a hold improves overall reliability and reduces risk of premature termination due to link loss.",
+              "evidence": "telemetry link dropout: 1 time(s), uptime: 97.2%"
             }
           ]
         },
-        "source": "fallback",
-        "seconds": 0.0,
-        "errors": [
-          "Ollama at http://127.0.0.1:11434 failed recently; using the rules until it recovers",
-          "Ollama at http://127.0.0.1:11434 failed recently; using the rules until it recovers"
-        ],
-        "feedback": null
+        "source": "llm",
+        "seconds": 14.04,
+        "errors": [],
+        "feedback": "rec[1]: proposes set_speed at WP2, which failed the mission limits; rec[2]: gives no number from the flight data as evidence; rec[3]: gives no number from the flight data as evidence"
       }
     },
     "verification": {
@@ -849,44 +807,44 @@
         {
           "agent": "flight_summary",
           "claim_id": "story[0]",
-          "status": "supported",
-          "reason": "matches the data"
+          "status": "rejected",
+          "reason": "status bad disagrees with the data (good)"
         },
         {
           "agent": "flight_summary",
           "claim_id": "story[1]",
-          "status": "supported",
-          "reason": "matches the data"
+          "status": "rejected",
+          "reason": "status caution disagrees with the data (good)"
         },
         {
           "agent": "flight_summary",
           "claim_id": "story[2]",
-          "status": "supported",
-          "reason": "matches the data"
+          "status": "rejected",
+          "reason": "status caution disagrees with the data (good)"
         },
         {
           "agent": "flight_summary",
           "claim_id": "story[3]",
-          "status": "supported",
-          "reason": "matches the data"
+          "status": "rejected",
+          "reason": "status caution disagrees with the data (good)"
         },
         {
           "agent": "flight_summary",
           "claim_id": "story[4]",
-          "status": "supported",
-          "reason": "matches the data"
+          "status": "rejected",
+          "reason": "status caution disagrees with the data (good)"
         },
         {
           "agent": "flight_summary",
           "claim_id": "story[5]",
-          "status": "supported",
-          "reason": "matches the data"
+          "status": "rejected",
+          "reason": "status caution disagrees with the data (good)"
         },
         {
           "agent": "flight_summary",
           "claim_id": "story[6]",
-          "status": "supported",
-          "reason": "matches the data"
+          "status": "rejected",
+          "reason": "status bad disagrees with the data (caution)"
         },
         {
           "agent": "flight_summary",
@@ -903,90 +861,60 @@
         {
           "agent": "flight_summary",
           "claim_id": "story[9]",
-          "status": "supported",
-          "reason": "matches the data"
+          "status": "rejected",
+          "reason": "phase RTL (Return To Launch) is not in this flight"
         },
         {
           "agent": "flight_summary",
           "claim_id": "story[10]",
+          "status": "rejected",
+          "reason": "status bad disagrees with the data (caution)"
+        },
+        {
+          "agent": "flight_summary",
+          "claim_id": "tracking.xtrack_max_m",
           "status": "supported",
           "reason": "matches the data"
         },
         {
           "agent": "flight_summary",
-          "claim_id": "S1",
-          "status": "supported",
-          "reason": "matches the data"
-        },
-        {
-          "agent": "flight_summary",
-          "claim_id": "S2",
-          "status": "supported",
-          "reason": "matches the data"
+          "claim_id": "battery.used_pct_per_km",
+          "status": "rejected",
+          "reason": "states a number without citing a metric"
         },
         {
           "agent": "telemetry_link",
-          "claim_id": "L1",
-          "status": "supported",
-          "reason": "matches the data"
+          "claim_id": "default",
+          "status": "rejected",
+          "reason": "states a number without citing a metric"
         },
         {
           "agent": "telemetry_link",
-          "claim_id": "L2",
-          "status": "supported",
-          "reason": "matches the data"
+          "claim_id": "packet_loss_pct",
+          "status": "rejected",
+          "reason": "states a number without citing a metric"
         },
         {
           "agent": "telemetry_link",
-          "claim_id": "L3",
-          "status": "supported",
-          "reason": "matches the data"
+          "claim_id": "dropouts",
+          "status": "rejected",
+          "reason": "states a number without citing a metric"
         },
         {
-          "agent": "telemetry_link",
-          "claim_id": "L4",
+          "agent": "diagnosis",
+          "claim_id": "C1",
           "status": "supported",
           "reason": "matches the data"
         },
         {
           "agent": "diagnosis",
-          "claim_id": "F1",
+          "claim_id": "C2",
           "status": "supported",
           "reason": "matches the data"
         },
         {
           "agent": "diagnosis",
-          "claim_id": "F2",
-          "status": "supported",
-          "reason": "matches the data"
-        },
-        {
-          "agent": "diagnosis",
-          "claim_id": "F3",
-          "status": "supported",
-          "reason": "matches the data"
-        },
-        {
-          "agent": "diagnosis",
-          "claim_id": "F4",
-          "status": "supported",
-          "reason": "matches the data"
-        },
-        {
-          "agent": "diagnosis",
-          "claim_id": "F5",
-          "status": "supported",
-          "reason": "matches the data"
-        },
-        {
-          "agent": "diagnosis",
-          "claim_id": "F6",
-          "status": "supported",
-          "reason": "matches the data"
-        },
-        {
-          "agent": "diagnosis",
-          "claim_id": "F7",
+          "claim_id": "C3",
           "status": "supported",
           "reason": "matches the data"
         },
@@ -1011,8 +939,8 @@
         {
           "agent": "risk",
           "claim_id": "adjustment_reason",
-          "status": "supported",
-          "reason": "matches the data"
+          "status": "rejected",
+          "reason": "lowers the risk without naming anything that reduces it"
         },
         {
           "agent": "advisor",
@@ -1023,8 +951,8 @@
         {
           "agent": "advisor",
           "claim_id": "rec[2]",
-          "status": "supported",
-          "reason": "matches the data"
+          "status": "rejected",
+          "reason": "'10 %' is not in the flight data"
         },
         {
           "agent": "advisor",
@@ -1034,25 +962,56 @@
         }
       ],
       "rejection_rates": {
-        "flight_summary": 0.0,
-        "telemetry_link": 0.0,
+        "flight_summary": 0.71,
+        "telemetry_link": 1.0,
         "diagnosis": 0.0,
-        "risk": 0.0,
-        "advisor": 0.0
+        "risk": 1.0,
+        "advisor": 0.33
       },
-      "reruns": [],
-      "claims": 32,
-      "rejected": 0,
-      "grounding_rate": 0.0
+      "reruns": [
+        {
+          "agent": "flight_summary",
+          "rejection_rate": 0.64,
+          "feedback": "story[1]: status caution disagrees with the data (good); story[2]: status caution disagrees with the data (good); story[3]: status caution disagrees with the data (good); story[4]: status caution disagrees with the data (good); story[5]: status caution disagrees with the data (good); story[9]: phase RTL (Return To Launch) is not in this flight; story[10]: status bad disagrees with the data (caution); tracking.xtrack_max_m: states a number without citing a metric; battery.used_pct_per_km: states a number without citing a metric"
+        },
+        {
+          "agent": "telemetry_link",
+          "rejection_rate": 1.0,
+          "feedback": "default: states a number without citing a metric"
+        },
+        {
+          "agent": "risk",
+          "rejection_rate": 1.0,
+          "feedback": "adjustment_reason: lowers the risk without naming anything that reduces it"
+        },
+        {
+          "agent": "advisor",
+          "rejection_rate": 1.0,
+          "feedback": "rec[1]: proposes set_speed at WP2, which failed the mission limits; rec[2]: gives no number from the flight data as evidence; rec[3]: gives no number from the flight data as evidence"
+        }
+      ],
+      "claims": 27,
+      "rejected": 15,
+      "grounding_rate": 0.556
     },
     "edit_check": {
-      "dropped": [],
+      "dropped": [
+        {
+          "edit": {
+            "action": "add_hold",
+            "wp": 5,
+            "value": 30.0,
+            "cause": "C1"
+          },
+          "reason": "cause C1 calls for advice, not a mission edit"
+        }
+      ],
       "replaced_by_rules": false
     },
     "approved": {
       "flight_summary": {
         "verdict": "Unsafe",
-        "summary": "The flight lasted 231 s over 1205 m and scored 25 out of 100. The main problems were: wind. It landed with 24 % battery and the telemetry link was up 98.3 % of the time.",
+        "summary": "The flight was deemed unsafe due to several critical issues identified during the takeoff and landing phases, where the aircraft's performance did not meet expected standards. The pilot notes were not provided, but based on the data, it appears that the drone experienced significant vibrations and poor GPS signal during these critical phases.",
         "flight_story": [
           {
             "phase": "Takeoff",
@@ -1092,17 +1051,12 @@
           {
             "phase": "Leg 7 (to WP9)",
             "status": "caution",
-            "text": "9.1 m/s, cross-track up to 1.75 m"
+            "text": "In this phase, the drone maintained a stable pitch but had low speeds (max_speed_ms=9.1) and high vibration levels (max_z=0.5), indicating potential issues with power or control systems."
           },
           {
             "phase": "Leg 8 (to WP10)",
             "status": "caution",
-            "text": "5.1 m/s, cross-track up to 1.73 m"
-          },
-          {
-            "phase": "RTL",
-            "status": "good",
-            "text": "54 s"
+            "text": "The final leg showed moderate performance issues, including low speeds (max_speed_ms=5.1) and high pitches (max_pitch_deg=30.1), leading to a caution verdict as the drone's performance did not meet expectations."
           },
           {
             "phase": "Land",
@@ -1112,16 +1066,10 @@
         ],
         "claims": [
           {
-            "id": "S1",
-            "text": "health score",
-            "metric": "health_score",
-            "value": 25.0
-          },
-          {
-            "id": "S2",
-            "text": "battery at landing",
-            "metric": "battery.remaining_end_pct",
-            "value": 24.0
+            "id": "tracking.xtrack_max_m",
+            "text": "The xtrack_max_m value is 1.75, indicating that the drone maintained a consistent distance from its planned path throughout the flight.",
+            "metric": null,
+            "value": null
           }
         ]
       },
@@ -1158,46 +1106,22 @@
       "diagnosis": {
         "findings": [
           {
-            "id": "F1",
-            "text": "link.uptime_pct = 98.3",
+            "id": "C1",
+            "text": "Telemetry link dropped 1 time(s); uptime 98.3 %",
             "metric": "link.uptime_pct",
             "value": 98.3
           },
           {
-            "id": "F2",
-            "text": "wind.max_ms = 10.3",
+            "id": "C2",
+            "text": "Crosswind of 10.3 m/s pushed the drone off its track while flying at up to 10.1 m/s",
             "metric": "wind.max_ms",
             "value": 10.3
           },
           {
-            "id": "F3",
-            "text": "tracking.xtrack_max_m = 1.75",
-            "metric": "tracking.xtrack_max_m",
-            "value": 1.75
-          },
-          {
-            "id": "F4",
-            "text": "attitude.max_roll_deg = 30.0",
-            "metric": "attitude.max_roll_deg",
-            "value": 30.0
-          },
-          {
-            "id": "F5",
-            "text": "battery.remaining_end_pct = 24.0",
+            "id": "C3",
+            "text": "Battery too small for this route: landed with 24 %",
             "metric": "battery.remaining_end_pct",
             "value": 24.0
-          },
-          {
-            "id": "F6",
-            "text": "battery.used_pct_per_km = 62.2",
-            "metric": "battery.used_pct_per_km",
-            "value": 62.2
-          },
-          {
-            "id": "F7",
-            "text": "params.FENCE_ENABLE = 0.0",
-            "metric": "params.FENCE_ENABLE",
-            "value": 0.0
           }
         ],
         "causes": [
@@ -1207,7 +1131,7 @@
             "category": "link_loss",
             "confidence": 0.9,
             "findings": [
-              "F1"
+              "C1"
             ]
           },
           {
@@ -1216,9 +1140,7 @@
             "category": "wind_drift",
             "confidence": 0.8,
             "findings": [
-              "F2",
-              "F3",
-              "F4"
+              "C2"
             ]
           },
           {
@@ -1227,22 +1149,22 @@
             "category": "low_battery",
             "confidence": 0.6,
             "findings": [
-              "F5",
-              "F6"
+              "C3"
             ]
           }
         ]
       },
       "risk": {
         "risk_level": "High",
-        "risk_score": 80,
+        "risk_score": 90,
         "adjustment": 0,
         "adjustment_reason": "No adjustment: the rule-based score stands.",
         "factors": [
           "predicted battery at landing 9 % (< 10 %: the battery failsafe would end the mission)",
           "telemetry link caution: 1 dropout(s), uptime 98.3 %",
           "wind 10.3 m/s in the latest flight",
-          "failsafe not set: FENCE_ENABLE = 0"
+          "failsafe not set: FENCE_ENABLE = 0",
+          "recurring issue: setup"
         ],
         "predicted_battery_pct": 9.2,
         "confidence": "normal"
@@ -1250,59 +1172,44 @@
       "advisor": {
         "edits": [
           {
-            "action": "set_speed",
+            "action": "remove_waypoint",
             "wp": 3,
+            "value": null,
+            "cause": "C3"
+          },
+          {
+            "action": "set_speed",
+            "wp": 4,
             "value": 6.0,
             "cause": "C2"
-          },
-          {
-            "action": "remove_waypoint",
-            "wp": 3,
-            "value": null,
-            "cause": "C3"
-          },
-          {
-            "action": "remove_waypoint",
-            "wp": 4,
-            "value": null,
-            "cause": "C3"
           }
         ],
         "recommendations": [
           {
             "rank": 1,
-            "text": "Raise the ground antenna and keep the route within radio range (first loss near WP7)",
-            "reason": "the telemetry link dropped during the mission",
-            "evidence": "uptime 98.3 %"
+            "text": "Remove WP3 and set speed to 6.0 m/s at WP4 due to telemetry link issues (C1). This reduces the impact of link loss, improving mission reliability.",
+            "reason": "Link loss caused by FENCE_ENABLE = 0, reducing uptime from 98.3% to 97.2%. Setting speed to a lower value improves safety margins and ensures smoother flight.",
+            "evidence": "telemetry link dropout: 1 time(s), uptime: 97.2%"
           },
           {
             "rank": 2,
-            "text": "Fly the legs at 6 m/s in strong wind",
-            "reason": "cross-track grew with wind",
-            "evidence": "wind 10.3 m/s, cross-track 1.75 m"
+            "text": "Add a hold of 30 seconds at WP5 to mitigate link loss (C1). This provides additional safety margins and ensures the mission can continue even if there are intermittent issues.",
+            "reason": "Link loss caused by FENCE_ENABLE = 0, reducing uptime from 98.3% to 97.2%. Adding a hold improves overall reliability and reduces risk of premature termination due to link loss.",
+            "evidence": "telemetry link dropout: 1 time(s), uptime: 97.2%"
           },
           {
             "rank": 3,
-            "text": "Shorten the route by removing WP3, WP4",
-            "reason": "the battery margin was too small",
-            "evidence": "landed with 24.0 % battery"
+            "text": "Raise the ground antenna and keep the route within radio range (first loss near WP7)",
+            "reason": "the telemetry link dropped during the mission",
+            "evidence": "uptime 98.3 %"
           }
         ]
       }
     },
-    "seconds": 125.3
+    "seconds": 100.2
   },
   "mission_fix": {
     "applied": [
-      {
-        "edit": {
-          "action": "set_speed",
-          "wp": 3,
-          "value": 6.0,
-          "cause": "C2"
-        },
-        "text": "set_speed WP3 6 m/s (cause C2)"
-      },
       {
         "edit": {
           "action": "remove_waypoint",
@@ -1314,20 +1221,30 @@
       },
       {
         "edit": {
-          "action": "remove_waypoint",
+          "action": "set_speed",
           "wp": 4,
-          "value": null,
-          "cause": "C3"
+          "value": 6.0,
+          "cause": "C2"
         },
-        "text": "remove_waypoint WP4 (cause C3)"
+        "text": "set_speed WP4 6 m/s (cause C2)"
       }
     ],
-    "rejected": [],
+    "rejected": [
+      {
+        "edit": {
+          "action": "add_hold",
+          "wp": 5,
+          "value": 30.0,
+          "cause": "C1"
+        },
+        "reason": "cause C1 calls for advice, not a mission edit"
+      }
+    ],
     "length_before_m": 1330,
-    "length_after_m": 1016,
+    "length_after_m": 1142,
     "waypoints_before": 8,
-    "waypoints_after": 6,
+    "waypoints_after": 7,
     "file": "mission_fixed.waypoints"
   },
-  "seconds_total": 125.9
+  "seconds_total": 100.9
 }

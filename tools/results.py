@@ -132,8 +132,18 @@ def results_table(states: dict) -> list:
                      else str(before["metrics"]["health_score"]),
                      "risk": f"{risk(before)} -> {risk(after)}" if after else risk(before),
                      "key metric": f"{key[0]}: {key[1](before)}" + (f" -> {key[1](after)}" if after else ""),
-                     "edits applied": "; ".join(a["text"] for a in (before.get("mission_fix") or {}).get("applied", [])) or "none"})
+                     "edits flown": flown_edits(run, after)})
     return rows
+
+
+def flown_edits(run: str, after) -> str:
+    """The changes in the mission actually re-flown (data/<run>_fixed) against the original."""
+    if not after:
+        return "–"
+    from pipeline import resolve
+    original = wp.load(resolve(f"data/{run}/mission.waypoints"))
+    fixed = wp.load(resolve(f"data/{run}_fixed/mission.waypoints"))
+    return "; ".join(mission_io.describe_changes(original, fixed)) or "none"
 
 
 def _markdown(rows: list) -> str:
