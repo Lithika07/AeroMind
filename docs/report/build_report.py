@@ -266,9 +266,10 @@ def find_pages(report: Report, texts: list) -> dict:
     pages = {}
     for _, text in report.headings:
         key = " ".join(text.split())
-        found = next((k for k in range(len(texts)) if key in texts[k]
-                      and (k >= start or key in ("ACKNOWLEDGEMENT", "ABSTRACT", "TABLE OF CONTENTS",
-                                                 "LIST OF FIGURES", "LIST OF TABLES"))), None)
+        front = key in ("ACKNOWLEDGEMENT", "ABSTRACT", "TABLE OF CONTENTS", "LIST OF FIGURES", "LIST OF TABLES")
+        # a front-matter heading is the first thing on its page (its name also appears in the contents)
+        found = next((k for k in range(len(texts)) if (texts[k].strip().startswith(key) if front
+                                                       else key in texts[k] and k >= start)), None)
         if found is not None:
             pages[("h", text)] = str(found + 1)
     for kind, items in (("f", report.figures), ("t", report.tables)):

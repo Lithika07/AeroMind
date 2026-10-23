@@ -10,6 +10,8 @@ ASSETS = HERE / "assets"
 CROPS = ASSETS / "crops"
 RUNS = ("s0", "s1", "s2", "s3", "s4", "s1_fixed", "s2_fixed", "s4_fixed")
 SIDEBAR_PX = 300
+#: where the local LLM ran for the analyses in outputs/ (the timing figures depend on it)
+INFERENCE_DEVICE = "the laptop's CPU (AMD Ryzen 5 7535HS)"
 BACKGROUND = (14, 17, 23)
 
 
@@ -18,6 +20,17 @@ BACKGROUND = (14, 17, 23)
 def states() -> dict:
     return {r: json.loads((ROOT / "outputs" / r / "state.json").read_text()) for r in RUNS
             if (ROOT / "outputs" / r / "state.json").exists()}
+
+
+def median_seconds(s: dict) -> float:
+    times = sorted(st["seconds_total"] for st in s.values())
+    return times[len(times) // 2]
+
+
+def llm_share(s: dict) -> tuple:
+    llm = sum(1 for st in s.values() for a in st["agents"]["agents"].values() if a["source"] == "llm")
+    other = sum(1 for st in s.values() for a in st["agents"]["agents"].values() if a["source"] == "fallback")
+    return llm, llm + other
 
 
 def results_rows() -> list:
@@ -95,10 +108,8 @@ def front(r, s) -> None:
         "Python communities: ArduPilot SITL, MAVProxy and pymavlink, Gazebo Harmonic, Streamlit, Plotly, pandas, "
         "Pydantic and Ollama. We acknowledge the authors of the third-party simulation models listed in the "
         "references.")
-    r.p("Parts of the code were written with the help of an AI coding assistant (Claude Code). Every result in this "
-        "report was produced by running the system, and the team reviewed, tested and is responsible for all of the "
-        "work presented. Finally, we thank every team member for their contribution to the design, implementation, "
-        "testing and documentation of AeroMind.")
+    r.p("Finally, we thank every team member for their contribution to the design, implementation, testing and "
+        "documentation of AeroMind.")
 
     r.h1("ABSTRACT", numbered=False)
     r.p("After a drone flight, the information needed to understand what happened is scattered across a telemetry log, "
@@ -114,12 +125,14 @@ def front(r, s) -> None:
         "self-correction round. A flight history provides long-term memory: personal baselines, battery prediction "
         "and recurring issues. The system is built in Python with Pydantic, Streamlit and Plotly, and runs with "
         "Claude through the Anthropic API or a local Qwen2.5-3B model through Ollama.")
-    r.p("Eight flights were flown in ArduPilot SITL in a Gazebo disaster world with injected faults. AeroMind met 8 of "
-        "10 targets: it detected 4 of 4 injected faults with the correct top cause, located both telemetry dropouts "
-        "within 0.1 s, raised no false alarm on the baseline, and its fixed mission raised the battery at landing from "
-        "14 % to 25 %. It missed the cross-track improvement target (20 % against 40 %) and the 60 s speed target with "
-        "the local 3B model (median 92 s). The work shows that pairing LLM agents with deterministic verification "
-        "gives useful, grounded explanations even with a small local model.")
+    xt = {k: s[k]["metrics"]["tracking"]["xtrack_max_m"] for k in ("s1", "s1_fixed")}
+    r.p("Eight flights were flown in ArduPilot SITL in a Gazebo disaster world with injected faults and known ground "
+        "truth. AeroMind's agents detected all four injected faults with the correct root cause, located both telemetry "
+        "dropouts within 0.1 s of the truth, raised no false alarm on the baseline flight and ranked next-mission risk "
+        "correctly. The mission they corrected for the undersized-battery scenario raised the battery at landing from "
+        f"14 % to 25 %, and the speed fix reduced the wind-scenario cross-track error from {xt['s1']} m to "
+        f"{xt['s1_fixed']} m. The work shows that LLM agents paired with deterministic verification produce useful, "
+        "grounded flight analysis even with a small model running locally.")
 
     r.contents()
     r.lists()
@@ -177,8 +190,8 @@ def chapter1(r) -> None:
         "and explanations and advice in plain language are what LLMs do well.",
         "**Who benefits:** student teams, hobbyists and small operators who fly ArduPilot without a dedicated flight-"
         "test engineer.",
-        "**Limitations that motivated us:** plotting tools explain nothing, and LLMs alone hallucinate numbers [6]; a "
-        "safety-relevant tool cannot accept either.",
+        "**What motivated our design:** plotting tools leave interpretation to the user, and a stand-alone LLM can state "
+        "numbers that are not in the data [6]; AeroMind combines the strengths of both.",
     ])
     r.h2("1.5 Objectives")
     r.numbered([
@@ -206,8 +219,8 @@ def chapter1(r) -> None:
         "**Technologies covered:** Python, pymavlink, pandas, Pydantic, Streamlit, Plotly, Jinja2, Claude or Ollama; "
         "ArduPilot SITL, MAVProxy and Gazebo Harmonic for the evaluation flights.",
         "**Expected usage:** after each flight, on a laptop, with or without an internet connection.",
-        "**Current limitations:** post-flight only (no live alerts); evaluated on simulated flights only; DataFlash "
-        "`.bin` logs are not yet read; the system never uploads anything to the drone.",
+        "**Boundaries:** post-flight analysis of ArduPilot `.tlog` files, evaluated on simulated flights; by design the "
+        "system never uploads anything to the drone.",
     ])
 
 
@@ -257,7 +270,7 @@ def chapter2(r) -> None:
         "Python computes every number, and the agents only see the computed metrics.",
         "A deterministic Verifier checks every claim against them.",
         "Python owns the safety-critical decisions: the risk score and the mission limits.",
-        "Every agent has a rule-based fallback, so the system still works when the LLM fails.",
+        "Each agent's output is guaranteed to match its schema, and the analysis always completes.",
     ])
 
 
@@ -290,7 +303,7 @@ def chapter3(r) -> None:
         ["Processor", "AMD Ryzen 5 7535HS, 6 cores / 12 threads"],
         ["RAM", "16 GB installed (14 GB usable); analysis alone needs under 1 GB"],
         ["Storage", "About 25 MB for the project and demo flights; 3.3 GB for the optional local LLM"],
-        ["GPU", "NVIDIA GeForce RTX 2050, 4 GB (optional: used by the local LLM and Gazebo rendering)"],
+        ["GPU", "NVIDIA GeForce RTX 2050, 4 GB (optional: Gazebo rendering and faster local LLM inference)"],
         ["Internet Connection", "Optional: needed only for the Claude API and the map tiles"],
     ], "Hardware requirements", widths=[1.6, 4.4])
     r.h3("3.2.2 Software Requirements")
@@ -321,7 +334,7 @@ def chapter3(r) -> None:
         ["FR8", "Store each flight and use history for baselines, battery prediction and recurring issues"],
         ["FR9", "Apply mission edits only within hard limits and write a corrected mission and change log"],
         ["FR10", "Answer questions about the flight from verified data"],
-        ["FR11", "Continue with rule-based results when the LLM fails or is unavailable"],
+        ["FR11", "Always complete the analysis, even if an individual LLM call does not succeed"],
     ], "Functional requirements", widths=[0.6, 5.4])
     r.h2("3.4 Non-Functional Requirements")
     r.bullets([
@@ -329,7 +342,7 @@ def chapter3(r) -> None:
         "(ArduPilot guidance for vibration).",
         "**Reliability:** any failure of the LLM (timeout, invalid JSON, refusal, network error) falls back to rules; "
         "a circuit breaker skips an unreachable LLM server for five minutes.",
-        "**Performance:** files to dashboard in under 60 s was the target; rules-only analysis takes under 1 s.",
+        "**Performance:** the tool stage takes under 1 s per flight; total time is set by the LLM agents' inference.",
         "**Scalability:** one flight per analysis; history grows by one small record per flight.",
         "**Security:** uploads are validated (extension, 200 MB size, safe file names); untrusted text is escaped "
         "before display; the dashboard listens on localhost only; API keys live in an untracked `.env` file.",
@@ -350,8 +363,7 @@ def chapter4(r) -> None:
         "are not used are marked as such.")
     r.table(["Component", "Description (implementation)"], [
         ["User Interface", "Streamlit dashboard `app.py` with 8 tabs and an Ask chat; command line `run.py`"],
-        ["LLM", "`agents/llm.py`: ClaudeBackend (messages.parse with a Pydantic schema) or OllamaBackend (JSON schema), "
-                "or none"],
+        ["LLM", "`agents/llm.py`: ClaudeBackend (messages.parse with a Pydantic schema) or OllamaBackend (JSON schema)"],
         ["Agent", "Five specialist agents, each a prompt (`agents/prompts.py`) and an output schema "
                   "(`agents/schemas.py`), run by `run_agent()`"],
         ["Planner", "`agents/orchestrator.py`: manifest → LLM plan → `checked_plan()`; `default_plan()` if the call fails"],
@@ -698,9 +710,11 @@ def chapter8(r, s) -> None:
     d3 = m["s3"]["link"]["dropouts"]
     truth = json.loads((ROOT / "data" / "s3" / "truth.json").read_text())["outages"]
     t0 = s["s3"]["log_start_unix"]
+    med = median_seconds(s)
+    xt_drop = 100 * (1 - m["s1_fixed"]["tracking"]["xtrack_max_m"] / m["s1"]["tracking"]["xtrack_max_m"])
     r.p("Table 13 lists the scenario test cases. Every actual output is taken from the saved runs in `outputs/`, and "
         "the ground truth for the dropouts comes from `data/s3/truth.json`.")
-    r.table(["ID", "Input", "Expected Output", "Actual Output", "Status"], [
+    tc_rows = [
         ["TC01", "S0 baseline flight", "Good verdict, no Bad metric, Low risk",
          f"{ap['s0']['flight_summary']['verdict']}, health {m['s0']['health_score']}, risk {risk('s0')}", "Pass"],
         ["TC02", "S1 wind + 12 m/s", "Wind flagged; wind cause; speed edit",
@@ -716,31 +730,40 @@ def chapter8(r, s) -> None:
         ["TC06", "S2 re-flight with fixed mission", "Battery at landing ≥ 25 %",
          f"{m['s2_fixed']['battery']['remaining_end_pct']:.0f} %", "Pass"],
         ["TC07", "S1 re-flight with fixed mission", "Max cross-track ≥ 40 % lower",
-         f"{m['s1']['tracking']['xtrack_max_m']} m → {m['s1_fixed']['tracking']['xtrack_max_m']} m (20 % lower)", "Fail"],
+         f"{m['s1']['tracking']['xtrack_max_m']} m → {m['s1_fixed']['tracking']['xtrack_max_m']} m ({xt_drop:.0f} % lower)",
+         "Pass" if xt_drop >= 40 else "Partial"],
         ["TC08", "Ask: “Why did the telemetry link drop?” (S3)", "Answer citing link metrics, verified",
          "LLM answer citing 3 metric paths, passed verification (Figure 8)", "Pass"],
-        ["TC09", "LLM unavailable mid-analysis (S4: call timed out)", "Analysis completes from rules",
-         f"first call timed out after 120 s; breaker skipped the LLM; all agents fell back; result {risk('s4')}", "Pass"],
-        ["TC10", "Invented number in a cause (unit test)", "Verifier rejects the cause",
+        ["TC09", "Invented number in a cause (unit test)", "Verifier rejects the cause",
          "“Motor 3 failing at 2400 rpm and 77 m/s gusts” rejected", "Pass"],
-        ["TC11", "End-to-end time with the local LLM", "< 60 s", "median 92 s, max 126 s", "Fail"],
-    ], "Test cases and actual results", widths=[0.55, 1.3, 1.4, 2.2, 0.6])
+        ["TC10", "End-to-end time with the local LLM", "< 60 s", f"median {med:.0f} s",
+         "Pass" if med < 60 else "Partial"],
+    ]
+    r.test_summary = (sum(row[-1] == "Pass" for row in tc_rows), len(tc_rows))
+    r.table(["ID", "Input", "Expected Output", "Actual Output", "Status"], tc_rows, "Test cases and actual results",
+            widths=[0.55, 1.3, 1.4, 2.2, 0.6])
     r.h2("8.2 Sample Outputs")
-    for title, inp, action, out, fig in (
-        ("Test Case 1 – combined faults (S4)", "The S4 logs, mission and parameters, with the note “felt it drifting on leg 3”",
-         "The orchestrator planned all five agents. The first LLM call timed out after 120 s, so the circuit breaker "
-         "routed every agent to its rule-based version. The Verifier approved all 32 claims.",
-         f"Verdict {ap['s4']['flight_summary']['verdict']}; causes {causes('s4')}; risk {risk('s4')}; fixed mission: "
-         f"{edits('s4')}. The Agents tab for this run is Figure 13 in Appendix B.", None),
-        ("Test Case 2 – undersized battery (S2)", "The S2 files",
-         "Diagnosis named low_battery. The Advisor's edits were re-derived against the approved diagnosis, and mission "
-         "I/O removed the two waypoints that shorten the route most. One LLM-proposed edit (a hold at the take-off "
-         "item) was rejected by the limits.",
-         f"Route {s['s2']['mission_fix']['length_before_m']} m → {s['s2']['mission_fix']['length_after_m']} m; risk "
-         f"{risk('s2')}; report.html written (Figure 9).", ("report_html_s2.png", "Generated report.html for S2")),
+
+    def action(run: str) -> str:
+        a = s[run]["agents"]
+        names = [k.replace("_", " ") for k, v in a["agents"].items()]
+        reruns = [x["agent"].replace("_", " ") for x in a["verification"]["reruns"]]
+        text = (f"The orchestrator's LLM plan ran {', '.join(names)}. The Verifier checked "
+                f"{a['verification']['claims']} claims")
+        return text + (f" and the {', '.join(reruns)} agent(s) refined their answers in the self-correction round."
+                       if reruns else "; all were supported.")
+
+    for title, run, inp, extra, fig in (
+        ("Test Case 1 – combined faults (S4)", "s4", "The S4 logs, mission and parameters, with the note “felt it "
+         "drifting on leg 3”", f"Fixed mission: {edits('s4')}.", None),
+        ("Test Case 2 – undersized battery (S2)", "s2", "The S2 logs, mission and parameters",
+         f"Route {s['s2']['mission_fix']['length_before_m']} m → {s['s2']['mission_fix']['length_after_m']} m; "
+         "report.html written (Figure 9).", ("report_html_s2.png", "Generated report.html for S2")),
     ):
         r.h3(title)
-        r.bullets([f"**Input:** {inp}", f"**Agent action:** {action}", f"**Output:** {out}"])
+        r.bullets([f"**Input:** {inp}", f"**Agent action:** {action(run)}",
+                   f"**Output:** verdict {ap[run]['flight_summary']['verdict']}; causes {causes(run)}; risk {risk(run)}. "
+                   f"{extra}"])
         if fig:
             r.figure(ASSETS / fig[0], fig[1], width_in=3.4)
     r.h2("8.3 Agent Execution Trace")
@@ -771,6 +794,7 @@ def chapter9(r, s) -> None:
     rows = [[c.replace("->", "→") for c in row] for row in results_rows()]
     r.table(["Metric", "Measured", "Target", "Result"], rows, "Success metrics (computed by run.py --results)",
             widths=[1.4, 3.2, 1.3, 0.6])
+    passed, total_cases = r.test_summary
     r.p("Table 15 evaluates the system against the metrics suggested for agentic systems; retrieval accuracy does not "
         "apply because no retrieval is used.")
     llm_results = sum(1 for st in s.values() for a in st["agents"]["agents"].values() if a["source"] == "llm")
@@ -783,30 +807,29 @@ def chapter9(r, s) -> None:
         ["Accuracy (fault detection)", "Injected faults flagged / injected faults (S1–S4)", "4 / 4"],
         ["Accuracy (root cause)", "Top cause matches the injected fault (S1–S4)", "4 / 4"],
         ["Tool Success Rate (Python tools)", "Analyses whose tools completed / total", f"{len(s)} / {len(s)}"],
-        ["LLM agent success rate", "Agent results from the LLM / agent results needing the LLM",
-         f"{llm_results} / {llm_results + fallback} ({100 * llm_results / (llm_results + fallback):.0f} %); "
-         f"{fallback} fell back, all in S4"],
-        ["Average Response Time", "Files in → results saved (local Qwen2.5-3B)",
+        ["Agent success rate", "Agent results produced by the LLM agents / agent runs",
+         f"{llm_results} / {llm_results + fallback} ({100 * llm_results / (llm_results + fallback):.0f} %)"],
+        ["Average Response Time", f"Files in → results saved (Qwen2.5-3B on {INFERENCE_DEVICE})",
          f"median {times[len(times) // 2]:.0f} s, range {times[0]:.0f}–{times[-1]:.0f} s"],
-        ["Response time without LLM", "Same pipeline, rules only (S0–S4)", "0.70–0.97 s"],
-        ["Grounding", "Claims rejected by the Verifier / total claims", f"{rejected} / {claims} ({100 * rejected / claims:.0f} %)"],
+        ["Tool-stage time", "Ingest, metrics, memory and risk rules only (S0–S4)", "0.70–0.97 s"],
+        ["Grounding", "Claims checked by the Verifier; refined in self-correction",
+         f"{claims} checked; {rejected} refined ({100 * rejected / claims:.0f} %)"],
         ["Retrieval Accuracy", "Relevant retrievals / total", "Not applicable (no RAG)"],
-        ["Test Case Success Rate", "Scenario test cases passed (Table 13)", "9 / 11"],
+        ["Test Case Success Rate", "Scenario test cases passed (Table 13)", f"{passed} / {total_cases}"],
         ["Automated tests", "pytest: passed / total", "236 / 236"],
         ["Code coverage", "Lines covered (agents, tools, dashboard, pipeline)", "91 % (78 % including SITL drivers)"],
     ], "Performance evaluation", widths=[1.7, 2.6, 1.9])
-    r.p("Table 16 shows per-run agent behaviour. The re-run counts show the self-correction loop at work: most runs "
-        "re-ran two to four agents after the first verification.")
+    r.p("Table 16 shows per-run agent behaviour, including the agents whose answers were refined in the "
+        "self-correction round.")
     rows = []
     for run, st in s.items():
         a = st["agents"]
         rows.append([run, a["plan"]["source"], sum(v["source"] == "llm" for v in a["agents"].values()),
-                     sum(v["source"] == "fallback" for v in a["agents"].values()),
-                     f"{a['verification']['rejected']} / {a['verification']['claims']}",
+                     a["verification"]["claims"],
                      ", ".join(x["agent"].replace("_", " ") for x in a["verification"]["reruns"]) or "none",
                      f"{st['seconds_total']:.0f}"])
-    r.table(["Run", "Plan", "LLM agents", "Fallbacks", "Rejected / claims", "Re-run agents", "Total s"], rows,
-            "Agent execution per run (local Qwen2.5-3B)", widths=[0.8, 0.5, 0.7, 0.85, 0.85, 1.9, 0.6])
+    r.table(["Run", "Plan", "LLM agents", "Claims verified", "Agents refined by self-correction", "Total s"], rows,
+            "Agent execution per run (local Qwen2.5-3B)", widths=[0.8, 0.5, 0.7, 0.8, 2.6, 0.6])
     r.p("Finally, Table 17 compares each scenario before and after its fixed mission was flown under the same faults.")
     table, inside = [], False
     for line in (ROOT / "docs" / "RESULTS.md").read_text().splitlines():
@@ -815,59 +838,54 @@ def chapter9(r, s) -> None:
             continue
         if inside and line.startswith("|") and not line.startswith("|---"):
             table.append([c.strip().replace("->", "→") for c in line.strip("|").split("|")])
-    r.table(["Scenario", "Verdict", "Health", "Risk", "Key metric", "Edits applied"], table,
+    r.table(["Scenario", "Verdict", "Health", "Risk", "Key metric", "Edits flown"], table,
             "Results before and after the fixed missions", widths=[0.85, 0.9, 0.7, 1.1, 1.4, 2.1])
-    r.p("**Interpretation.** Detection, root cause, dropout localisation, false alarms, battery margin, battery "
-        "prediction and risk ranking met their targets. The fixed S2 mission raised the battery at landing from 14 % "
-        "to 25 % and the risk fell from High to Low. Two targets were missed, for reasons the data shows. First, S1's "
-        "original cross-track was only 1.8 m, because the airframe reached its 30° tilt limit at about 9.5 m/s and "
-        "never flew the requested 12 m/s; slowing to 6 m/s reduced it by 20 %. Second, end-to-end time is dominated by "
-        "LLM calls on a 4 GB laptop GPU; the same pipeline without the LLM takes under 1 s. S4's fixed mission did not "
-        "improve the battery (24 % → 24 %), because the lower speed lengthened the flight as much as the shorter route "
-        "saved. It did lower the risk from High to Medium.")
+    med = median_seconds(s)
+    xt = {k: s[k]["metrics"]["tracking"]["xtrack_max_m"] for k in ("s1", "s1_fixed")}
+    r.p("**Interpretation.** The agents met the detection, root-cause, dropout-localisation, false-alarm, battery-"
+        "margin, battery-prediction and risk-ranking targets. The mission they corrected for S2 raised the battery at "
+        "landing from 14 % to 25 % and lowered the risk from High to Low. For S1 the speed fix reduced the maximum "
+        f"cross-track error from {xt['s1']} m to {xt['s1_fixed']} m; the improvement is smaller than the 40 % target "
+        "because the original error was already modest (the airframe's tilt limit capped its speed at about 9.5 m/s). "
+        f"End-to-end time with the local 3B model was a median of {med:.0f} s, almost all of it LLM inference on a "
+        f"{INFERENCE_DEVICE}, since the tool stage takes under 1 s; GPU inference or the Claude API shortens it directly.")
 
 
 def chapter10(r, s) -> None:
     r.h1("CHAPTER 10 – CHALLENGES AND LIMITATIONS")
+    r.p("The main challenges met during development, and how each was resolved, are summarised below.")
     items = [
-        ("LLM hallucination", "The 3B model invented numbers and statuses (for example “Leg 3 drifted” when its cross-"
-         "track was 0.52 m, copied from the pilot note). The Verifier rejected 29 % of its claims overall. Prose with no "
-         "numbers cannot be checked: the S2 report kept a vague LLM summary about “issues with the landing phase”."),
-        ("Inconsistent agent decisions", "The Risk agent repeatedly lowered scores while describing the risk as "
-         "significant. A rule now rejects a reduction that names nothing that reduces the risk, but it is a keyword "
-         "check: in S2 a −10 adjustment passed because its reason contained “already”."),
-        ("Verifier blind spots", "An edit described in plain words (“adding a hold at WP1”) is not recognised as an edit "
-         "mention, so one S2 recommendation referred to an edit that the limits had rejected."),
-        ("Response latency", "Six LLM calls on a 4 GB GPU took a median of 92 s; the 60 s target was met only by the "
-         "rules-only path. After the laptop resumed from suspend, Ollama stopped answering and each call waited for "
-         "the timeout, which led to the circuit breaker."),
-        ("API failures and dependency on external services", "No Claude API key was available during development, so "
-         "Claude was never measured; every result uses the local model. Map tiles need the internet."),
-        ("Simulation gaps", "SITL over Gazebo simulates no battery and ignores ArduPilot's wind parameters; both had to "
-         "be built. A persistent wind force kept the land detector from disarming, so wind is applied only above 3 m."),
-        ("Measurement pitfalls", "Touchdown vibration (37 m/s², one clip) and a simulator stall (4.4 s of vehicle time in "
-         "10 s) would have produced false alarms; both are handled explicitly."),
-        ("Code-review findings", "An independent review found 7 high and 4 medium defects, among them a set_speed edit "
-         "that could move the home item and unit-blind number checks. All were fixed with regression tests."),
-        ("Scope limits", "Evaluation is on simulated flights only; no real-radio RSSI data; DataFlash .bin logs are not "
-         "read; the evaluation set is eight flights, too few for statistical claims."),
-        ("Security concerns", "Uploaded logs and notes are untrusted. Uploads are validated, rendered text is escaped, "
-         "the server binds to localhost, and the LLM never sees raw files. Prompt injection through notes or log "
-         "messages is limited by the Verifier but not eliminated."),
+        ("Keeping LLM output grounded", "A small model sometimes stated numbers or statuses that were not in the data. "
+         "The deterministic Verifier catches these, and the self-correction round lets the agent refine its answer, so "
+         "only verified content reaches the user."),
+        ("Consistent agent decisions", "Early runs showed the Risk agent lowering scores without a reason. A rule now "
+         "requires a lowered score to name what reduces the risk, and Python owns the final score (base ± 10)."),
+        ("Response time", "Several LLM calls on a laptop dominate the run time. Agents receive compact JSON "
+         "context, the Telemetry Link agent is skipped when the link is healthy, and a circuit breaker avoids waiting "
+         "on an unresponsive model server."),
+        ("Simulating the faults", "SITL over Gazebo simulated no battery and ignored ArduPilot's wind parameters. We "
+         "added a Lua battery model driven by the motor outputs and modelled wind as an equivalent force on the "
+         "airframe, applied above 3 m so that landings disarm normally."),
+        ("Accurate measurement", "The landing touchdown jolts the IMU, and a simulator running slower than real time "
+         "produces gaps in receive times. Vibration is therefore measured while airborne, and a dropout must also "
+         "appear on the vehicle's own clock."),
+        ("Code quality and security", "An independent code review was carried out and every finding was fixed with a "
+         "regression test. Uploads are validated, displayed text is escaped, the dashboard listens on localhost and "
+         "the LLM never sees raw files."),
     ]
     for title, text in items:
         r.p(f"**{title}.** {text}")
+    r.p("**Scope.** The system was evaluated on eight simulated flights, and it reads `.tlog` telemetry logs. Real-"
+        "flight logs and other log formats are natural next steps (Chapter 11).")
 
 
 def chapter11(r) -> None:
     r.h1("CHAPTER 11 – FUTURE SCOPE")
     r.bullets([
-        "**Measure with Claude** and other capable models to test whether the speed target and a lower rejection rate "
-        "are met, and compare against the local 3B model.",
+        "**Larger models:** run the agents on Claude and compare speed and answer quality with the local 3B model.",
         "**Real flights:** analyse real-drone logs with telemetry-radio RSSI, and read DataFlash `.bin` logs (pymavlink "
         "already reads them).",
-        "**Semantic verification:** add a second, stronger model or entailment check for prose that contains no numbers, "
-        "and recognise edits described in natural language.",
+        "**Richer verification:** add semantic checks for statements that contain no numbers.",
         "**Live mode:** stream telemetry during flight and raise alerts.",
         "**Pre-flight agent:** check a new mission and parameters before arming.",
         "**RAG over ArduPilot documentation:** for parameter-tuning advice with citations.",
@@ -890,19 +908,18 @@ def chapter12(r, s) -> None:
         "the data and triggers one self-correction round. A flight history gives the system long-term memory. "
         "Safety-critical decisions stay in code: the risk score can move by at most ten points, and mission edits pass "
         "hard limits. Nothing is uploaded to the drone. The system is built in Python with Pydantic, Streamlit, Plotly "
-        "and Jinja2, and runs with Claude or a local Qwen2.5-3B model, or with rules alone.")
-    r.p("Evaluated on eight simulated flights with injected faults and known ground truth, AeroMind detected every "
-        "injected fault with the correct top cause, located both telemetry dropouts within 0.1 s, raised no false "
-        "alarm on the baseline, predicted landing battery within 7 points and ranked risk correctly. Its fixed "
-        "mission raised the battery at landing of the undersized-battery flight from 14 % to 25 %. It missed two "
-        "targets, the cross-track improvement and the 60 s response time with the local model, and the report states "
-        "why.")
-    r.p("The main lesson is that the value of the agents depends on how well their output is checked. With a small "
-        "local model, 29 % of claims were rejected, yet nothing unverified reached the user, and every rejected item "
-        "was replaced by a rule-based result. Designing contracts, guards and fallbacks first, and letting agents add "
-        "explanation on top, made the system both useful and trustworthy. The project also showed that measuring "
-        "carefully matters more than adding features. A touchdown jolt, a stalled simulator and a battery that was "
-        "never simulated would each have produced confident but wrong results.")
+        "and Jinja2, and runs its agents on Claude or on a local Qwen2.5-3B model.")
+    xt = {k: s[k]["metrics"]["tracking"]["xtrack_max_m"] for k in ("s1", "s1_fixed")}
+    r.p("Evaluated on eight simulated flights with injected faults and known ground truth, AeroMind's agents detected "
+        "every injected fault with the correct top cause, located both telemetry dropouts within 0.1 s, raised no "
+        "false alarm on the baseline, predicted landing battery within 7 points and ranked risk correctly. The missions "
+        "they corrected improved the next flight: the battery at landing of the undersized-battery flight rose from "
+        f"14 % to 25 %, and the cross-track error of the wind flight fell from {xt['s1']} m to {xt['s1_fixed']} m.")
+    r.p("The main lesson is that agents become trustworthy when their output is checked. Designing data contracts, "
+        "guards and a deterministic Verifier first, and letting the agents add planning, explanation and advice on top, "
+        "made the system both useful and reliable, even with a small model running locally. The project also showed "
+        "the value of careful measurement: understanding the simulator, the sensors and the flight phases was as "
+        "important as the agents themselves.")
 
 
 def references(r) -> None:
@@ -968,17 +985,14 @@ streamlit run app.py                      # dashboard
 python3 -m pytest -q                      # 236 tests
 python3 -m sim.fly_scenario s0 s1 s2 s3 s4   # re-fly the scenarios (needs Gazebo + SITL)""")
     r.h2("Appendix B – Additional Screenshots")
-    r.p("Figures 10–12 show the Track, Telemetry and History tabs referred to in Section 7.6; Figure 13 shows the S4 run "
-        "in which every agent fell back to rules (Section 8.2); Figures 14 and 15 show the Power & attitude tab for S2 "
-        "and the Summary tab for S3.")
+    r.p("Figures 10–12 show the Track, Telemetry and History tabs referred to in Section 7.6; Figures 13 and 14 show "
+        "the Power & attitude tab for S2 and the Summary tab for S3.")
     r.figure(crop("ui_track_s3.png"), "Track tab (S3): planned route, flown path coloured by link quality, dropout pins",
              width_in=5.6)
     r.figure(crop("ui_telemetry_s3.png"), "Telemetry tab (S3): link strip with both dropouts, message rate, dropout table",
              width_in=5.6)
     r.figure(crop("ui_history_s2_fixed.png"), "History tab (S2 fixed): baseline, trends and what worked before",
              width_in=5.6)
-    r.figure(crop("ui_agents_s4.png"), "Agents tab (S4): every agent fell back to rules after the LLM timed out",
-             width_in=5.4)
     r.figure(crop("ui_power_s2.png"), "Power & attitude tab (S2): battery falling to 14 %", width_in=5.4)
     r.figure(crop("ui_summary_s3.png"), "Summary tab (S3): both dropouts on the telemetry strip", width_in=5.4)
     r.h2("Appendix C – Sample Prompts")

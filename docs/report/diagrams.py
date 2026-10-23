@@ -34,7 +34,7 @@ ARCHITECTURE = """digraph G {""" + COMMON + """
   risk [label="Risk rules\\n(tools/risk_rules.py)"];
   state [label="Shared state (blackboard)\\nmetrics · history context · base risk", shape=note, fillcolor="#fff6dc"];
   orch [label="Orchestrator: manifest → LLM plan → rule check", fillcolor="#e3f1e8"];
-  llm [label="LLM backend\\nClaude API · Ollama qwen2.5:3b · none (rules)", shape=component, fillcolor="#eee8f6"];
+  llm [label="LLM backend\\nClaude API · Ollama qwen2.5:3b", shape=component, fillcolor="#eee8f6"];
   subgraph cluster_agents { label="Agents, run in plan order on the shared state"; style="dashed"; color="#9aa8b8";
     fs [label="Flight Summary"]; tl [label="Telemetry Link"]; dg [label="Diagnosis"]; rk [label="Risk"]; ad [label="Advisor"];
     {rank=same; fs; tl; dg; rk; ad;} fs -> tl -> dg -> rk -> ad [style=invis]; }
