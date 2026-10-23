@@ -74,9 +74,9 @@ def test_recurring_causes_in_three_of_the_last_five():
 
 
 def test_fix_effectiveness_compares_with_the_parent_run():
-    history = [entry("s1", xtrack_max_m=6.0, battery_end_pct=40.0),
+    history = [entry("s1", xtrack_max_m=6.0, battery_end_pct=40.0, edits_applied=["set_speed WP3 7 m/s"]),
                entry("s1_fixed", parent_run="s1", xtrack_max_m=2.0, battery_end_pct=45.0,
-                     edits_applied=["set_speed WP3 7 m/s"])]
+                     edits_applied=["something the re-flight's own analysis proposed"])]
     (result,) = memory.fix_effectiveness(history)
     assert result["run_id"] == "s1_fixed" and result["parent_run"] == "s1"
     assert result["changes"]["xtrack_max_m"] == {"before": 6.0, "after": 2.0, "improved": True}

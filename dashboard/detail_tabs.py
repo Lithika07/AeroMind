@@ -101,8 +101,8 @@ def history(state, history_path) -> None:
     base = state["history"]["baselines"]
     entry = state["history_entry"]
     if base:
-        rows = [{"metric": k, "this flight": entry.get(k), "your usual": round(v["mean"], 2), "± std": round(v["std"], 2),
-                 "flights": v["n"]} for k, v in base.items()]
+        rows = [{"metric": k, "this flight": f"{entry.get(k):g}" if entry.get(k) is not None else "n/a",
+                 "your usual": f"{v['mean']:.2f}", "± std": f"{v['std']:.2f}", "flights": v["n"]} for k, v in base.items()]
         st.markdown("**This flight against your baseline** (flagged beyond 2 standard deviations)")
         flagged = {w["metric"] for w in state["history"]["worse_than_usual"]}
         st.dataframe(pd.DataFrame(rows).style.apply(
@@ -116,7 +116,7 @@ def history(state, history_path) -> None:
                                          ("battery_mah_per_km", "Battery use (mAh/km)"), ("link_uptime_pct", "Link uptime (%)"))):
         (left if k % 2 == 0 else right).plotly_chart(charts.trend(frame, column, title, state["run_id"]),
                                                      width="stretch", key=f"trend_{column}")
-    effective = state["history"]["fix_effectiveness"]
+    effective = memory.fix_effectiveness(entries)     # live from history.json, so later re-flights show too
     if effective:
         st.markdown("**What worked before** (re-flown missions against their originals)")
         rows = [{"run": f["run_id"], "fixes": f["parent_run"], "edits": "; ".join(f["edits"]),

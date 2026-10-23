@@ -126,6 +126,7 @@ def fix_effectiveness(entries: list) -> list:
                 continue
             improved = after < before if higher_is_worse else after > before
             changes[metric] = {"before": before, "after": after, "improved": improved}
-        results.append({"run_id": e.run_id, "parent_run": parent.run_id, "edits": e.edits_applied,
+        # the edits that made this mission were applied to the parent's: they are the parent's edits
+        results.append({"run_id": e.run_id, "parent_run": parent.run_id, "edits": parent.edits_applied,
                         "changes": changes})
     return results
