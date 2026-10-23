@@ -419,7 +419,7 @@
       "setup"
     ],
     "edits_applied": [
-      "remove_waypoint WP3 (cause C1)"
+      "remove_waypoint WP5 (cause C1)"
     ]
   },
   "agents": {
@@ -457,7 +457,7 @@
       "plan": [
         {
           "agent": "flight_summary",
-          "reason": "Always run flight summary first."
+          "reason": "Always run flight_summary first as it provides an overview of the flight."
         },
         {
           "agent": "telemetry_link",
@@ -465,19 +465,19 @@
         },
         {
           "agent": "diagnosis",
-          "reason": "Run diagnosis as there are problems (battery_end)."
+          "reason": "Run diagnosis as there are warnings (battery_end) that require attention."
         },
         {
           "agent": "risk",
-          "reason": "Run risk analysis after diagnosis to assess new risks."
+          "reason": "history has 2 flight(s); confidence low (added by rule)"
         },
         {
           "agent": "advisor",
-          "reason": "Run advisor last in the sequence."
+          "reason": "mission file present: edits allowed (added by rule)"
         },
         {
           "agent": "verifier",
-          "reason": "Always run verifier at the end of the process."
+          "reason": "Always run verifier last to ensure all systems are functioning correctly after diagnostics."
         }
       ],
       "source": "llm"
@@ -489,95 +489,70 @@
       "flight_summary": {
         "output": {
           "verdict": "Needs attention",
-          "summary": "The flight was generally smooth, but there were issues during landing and return to launch (RTL) phases. The drone's speed decreased significantly in these final stages, which could affect its stability and safety.",
+          "summary": "The flight was mostly smooth but showed issues with battery usage and vibration. Max altitude was reached but not consistently, and the drone hovered at low speeds for extended periods. The pilot should monitor battery levels and vibration levels to prevent future issues.",
           "flight_story": [
             {
               "phase": "Takeoff",
               "status": "good",
-              "text": "The takeoff was smooth with no issues."
+              "text": "The drone took off smoothly within the expected time frame."
             },
             {
               "phase": "Leg 1 (to WP3)",
               "status": "good",
-              "text": "During the first leg, the drone maintained a good track and speed."
+              "text": "The drone flew the first leg of the route without issues."
             },
             {
               "phase": "Leg 2 (to WP4)",
               "status": "good",
-              "text": "The second leg saw consistent tracking and speed, indicating smooth progress."
+              "text": "The drone continued to fly the second leg smoothly."
             },
             {
               "phase": "Leg 3 (to WP5)",
-              "status": "bad",
-              "text": "In the third leg, the drone's speed dropped significantly, which could be concerning for stability during landing."
+              "status": "good",
+              "text": "The drone flew the third leg without any problems."
             },
             {
               "phase": "Leg 4 (to WP6)",
               "status": "good",
-              "text": "The fourth leg continued with good tracking and maintained a steady speed."
+              "text": "The drone flew the fourth leg smoothly."
             },
             {
               "phase": "Leg 5 (to WP7)",
-              "status": "bad",
-              "text": "During the fifth leg, the drone's speed dropped again, which is not ideal for safe landing."
+              "status": "good",
+              "text": "The drone flew the fifth leg without any issues."
             },
             {
               "phase": "Leg 6 (to WP8)",
               "status": "good",
-              "text": "The sixth leg saw good tracking and maintained a steady speed."
+              "text": "The drone flew the sixth leg smoothly."
             },
             {
               "phase": "Leg 7 (to WP9)",
-              "status": "bad",
-              "text": "In the seventh leg, the drone's speed dropped again, which could affect its stability during landing."
+              "status": "good",
+              "text": "The drone flew the seventh leg without any problems."
             },
             {
               "phase": "Leg 8 (to WP10)",
               "status": "good",
-              "text": "The eighth leg continued with good tracking and maintained a steady speed."
+              "text": "The drone flew the eighth leg smoothly."
             },
             {
               "phase": "RTL",
-              "status": "bad",
-              "text": "During the return to launch phase, the drone's speed dropped significantly, which could affect its stability and safety."
+              "status": "good",
+              "text": "The drone executed the return-to-launch maneuver without issues."
             },
             {
               "phase": "Land",
               "status": "good",
-              "text": "The landing was smooth with no issues."
+              "text": "The drone landed safely within the expected time frame."
             }
           ],
-          "claims": [
-            {
-              "id": "flight.duration_s",
-              "text": "309.5 seconds",
-              "metric": null,
-              "value": null
-            },
-            {
-              "id": "flight.distance_m",
-              "text": "1198.0 meters",
-              "metric": null,
-              "value": null
-            },
-            {
-              "id": "flight.max_alt_m",
-              "text": "30.0 meters",
-              "metric": null,
-              "value": null
-            },
-            {
-              "id": "flight.max_speed_ms",
-              "text": "9.8 m/s",
-              "metric": null,
-              "value": null
-            }
-          ]
+          "claims": []
         },
         "source": "llm",
-        "seconds": 15.48,
+        "seconds": 37.53,
         "errors": [],
-        "feedback": "summary: 4 sentences; the summary must be 3; story[0]: status bad disagrees with the data (good); story[3]: status bad disagrees with the data (good); story[5]: status bad disagrees with the data (good); story[7]: status bad disagrees with the data (good); story[9]: status bad disagrees with the data (good); story[10]: status good disagrees with the data (bad)"
+        "feedback": null
       },
       "telemetry_link": {
         "output": {
@@ -613,14 +588,20 @@
         "output": {
           "findings": [
             {
-              "id": "F3",
-              "text": "Battery at landing Caution/Bad",
+              "id": "F1",
+              "text": "battery.remaining_end_pct is 14.0",
               "metric": null,
               "value": null
             },
             {
-              "id": "F4",
-              "text": "Failsafe parameter FENCE_ENABLE is set to 0.0, which disables the fence and may cause unexpected behavior.",
+              "id": "F2",
+              "text": "battery.used_pct_per_km is 71.0",
+              "metric": null,
+              "value": null
+            },
+            {
+              "id": "F3",
+              "text": "params.FENCE_ENABLE is 0.0",
               "metric": null,
               "value": null
             }
@@ -628,35 +609,36 @@
           "causes": [
             {
               "id": "C1",
-              "cause": "Battery too small for this route: landed with 14 % of battery remaining.",
+              "cause": "Battery too small for this route: landed with 14 %",
               "category": "low_battery",
               "confidence": 0.85,
               "findings": [
-                "F3"
+                "F1",
+                "F2"
               ]
             },
             {
               "id": "C2",
-              "cause": "Failsafe parameter FENCE_ENABLE is set to 0, which disables the fence and may cause unexpected behavior.",
+              "cause": "Failsafe disabled in the parameters: FENCE_ENABLE",
               "category": "setup",
               "confidence": 0.5,
               "findings": [
-                "F4"
+                "F3"
               ]
             }
           ]
         },
         "source": "llm",
-        "seconds": 6.07,
+        "seconds": 13.68,
         "errors": [],
-        "feedback": "wind_drift: cites unknown findings ['F1', 'F2']; coverage: omits causes the data shows: low_battery, setup"
+        "feedback": "F1: states a number without citing a metric; F4: states a number without citing a metric; F5: states a number without citing a metric; C1: rests on rejected findings ['F1', 'F4']; C2: rests on rejected findings ['F1', 'F5']"
       },
       "risk": {
         "output": {
           "risk_level": "High",
-          "risk_score": 65,
-          "adjustment": -5,
-          "adjustment_reason": "The mission has a high risk score and the factors indicate that there is room for improvement. The predicted battery percentage at landing is below the safe threshold, which could be due to unexpected consumption or drift off course. Reducing the risk slightly by adjusting the score downward can help mitigate these issues.",
+          "risk_score": 60,
+          "adjustment": -10,
+          "adjustment_reason": "The mission has a high risk score and the latest flight landed with a low battery percentage. Reducing the score by 10 points will help mitigate the immediate risk of a battery failure, which could end the mission prematurely.",
           "factors": [
             "predicted battery at landing 9 % (< 10 %: the battery failsafe would end the mission)",
             "latest flight landed with 14 % battery",
@@ -666,7 +648,7 @@
           "confidence": "low"
         },
         "source": "llm",
-        "seconds": 5.1,
+        "seconds": 10.1,
         "errors": [],
         "feedback": null
       },
@@ -674,14 +656,20 @@
         "output": {
           "edits": [
             {
-              "action": "remove_waypoint",
-              "wp": 3,
-              "value": null,
+              "action": "change_altitude",
+              "wp": 2,
+              "value": -30.0,
               "cause": "C1"
             },
             {
-              "action": "change_altitude",
+              "action": "add_hold",
               "wp": 2,
+              "value": 30.0,
+              "cause": "C1"
+            },
+            {
+              "action": "remove_waypoint",
+              "wp": 5,
               "value": null,
               "cause": "C1"
             }
@@ -689,28 +677,28 @@
           "recommendations": [
             {
               "rank": 1,
-              "text": "remove_waypoint at WP3, reason: C1 (Battery too small for this route: landed with 14 % of battery remaining.), evidence: predicted battery at landing 9 % (< 10 %: the battery failsafe would end the mission).",
-              "reason": "C1",
-              "evidence": "predicted battery at landing 9 %"
+              "text": "change_altitude(wp=2, value=-30.0)",
+              "reason": "C1: Battery too small for this route: landed with 14 %",
+              "evidence": "flight.duration_s: 309.5, flight.distance_m: 1198.0, flight.max_alt_m: 30.0"
             },
             {
               "rank": 2,
-              "text": "change_altitude at WP2, reason: C1 (Battery too small for this route: landed with 14 % of battery remaining.), evidence: latest flight landed with 14 % battery.",
-              "reason": "C1",
-              "evidence": "latest flight landed with 14 % battery"
+              "text": "add_hold(wp=2, value=30)",
+              "reason": "C1: Battery too small for this route: landed with 14 %",
+              "evidence": "flight.duration_s: 309.5, flight.distance_m: 1198.0, flight.max_alt_m: 30.0"
             },
             {
               "rank": 3,
-              "text": "remove_waypoint at WP4, reason: C1 (Battery too small for this route: landed with 14 % of battery remaining.), evidence: latest flight landed with 14 % battery.",
-              "reason": "C1",
-              "evidence": "latest flight landed with 14 % battery"
+              "text": "remove_waypoint(wp=5)",
+              "reason": "C1: Battery too small for this route: landed with 14 %",
+              "evidence": "flight.duration_s: 309.5, flight.distance_m: 1198.0, flight.max_alt_m: 30.0"
             }
           ]
         },
         "source": "llm",
-        "seconds": 10.4,
+        "seconds": 41.55,
         "errors": [],
-        "feedback": "rec[1]: proposes remove_waypoint at WP1, which failed the mission limits; rec[2]: proposes add_hold at WP3, which failed the mission limits; rec[3]: proposes change_altitude at WP2, which failed the mission limits"
+        "feedback": "rec[1]: gives no number from the flight data as evidence; rec[2]: gives no number from the flight data as evidence; rec[3]: gives no number from the flight data as evidence"
       }
     },
     "verification": {
@@ -718,8 +706,8 @@
         {
           "agent": "flight_summary",
           "claim_id": "summary",
-          "status": "supported",
-          "reason": "matches the data"
+          "status": "rejected",
+          "reason": "presents vibration as a problem, but its metrics are all Good"
         },
         {
           "agent": "flight_summary",
@@ -742,8 +730,8 @@
         {
           "agent": "flight_summary",
           "claim_id": "story[3]",
-          "status": "rejected",
-          "reason": "status bad disagrees with the data (good)"
+          "status": "supported",
+          "reason": "matches the data"
         },
         {
           "agent": "flight_summary",
@@ -754,8 +742,8 @@
         {
           "agent": "flight_summary",
           "claim_id": "story[5]",
-          "status": "rejected",
-          "reason": "status bad disagrees with the data (good)"
+          "status": "supported",
+          "reason": "matches the data"
         },
         {
           "agent": "flight_summary",
@@ -766,8 +754,8 @@
         {
           "agent": "flight_summary",
           "claim_id": "story[7]",
-          "status": "rejected",
-          "reason": "status bad disagrees with the data (good)"
+          "status": "supported",
+          "reason": "matches the data"
         },
         {
           "agent": "flight_summary",
@@ -778,38 +766,14 @@
         {
           "agent": "flight_summary",
           "claim_id": "story[9]",
-          "status": "rejected",
-          "reason": "status bad disagrees with the data (good)"
+          "status": "supported",
+          "reason": "matches the data"
         },
         {
           "agent": "flight_summary",
           "claim_id": "story[10]",
           "status": "rejected",
           "reason": "status good disagrees with the data (bad)"
-        },
-        {
-          "agent": "flight_summary",
-          "claim_id": "flight.duration_s",
-          "status": "rejected",
-          "reason": "states a number without citing a metric"
-        },
-        {
-          "agent": "flight_summary",
-          "claim_id": "flight.distance_m",
-          "status": "rejected",
-          "reason": "states a number without citing a metric"
-        },
-        {
-          "agent": "flight_summary",
-          "claim_id": "flight.max_alt_m",
-          "status": "rejected",
-          "reason": "states a number without citing a metric"
-        },
-        {
-          "agent": "flight_summary",
-          "claim_id": "flight.max_speed_ms",
-          "status": "rejected",
-          "reason": "states a number without citing a metric"
         },
         {
           "agent": "telemetry_link",
@@ -831,13 +795,19 @@
         },
         {
           "agent": "diagnosis",
-          "claim_id": "F3",
+          "claim_id": "F1",
           "status": "supported",
           "reason": "matches the data"
         },
         {
           "agent": "diagnosis",
-          "claim_id": "F4",
+          "claim_id": "F2",
+          "status": "supported",
+          "reason": "matches the data"
+        },
+        {
+          "agent": "diagnosis",
+          "claim_id": "F3",
           "status": "supported",
           "reason": "matches the data"
         },
@@ -862,49 +832,44 @@
         {
           "agent": "advisor",
           "claim_id": "rec[1]",
-          "status": "rejected",
-          "reason": "'10 %' is not in the flight data"
+          "status": "supported",
+          "reason": "matches the data"
         },
         {
           "agent": "advisor",
           "claim_id": "rec[2]",
-          "status": "rejected",
-          "reason": "proposes change_altitude at WP2, which failed the mission limits"
+          "status": "supported",
+          "reason": "matches the data"
         },
         {
           "agent": "advisor",
           "claim_id": "rec[3]",
-          "status": "rejected",
-          "reason": "proposes remove_waypoint at WP4, which failed the mission limits"
+          "status": "supported",
+          "reason": "matches the data"
         }
       ],
       "rejection_rates": {
-        "flight_summary": 0.56,
+        "flight_summary": 0.17,
         "telemetry_link": 0.0,
         "diagnosis": 0.0,
         "risk": 0.0,
-        "advisor": 1.0
+        "advisor": 0.0
       },
       "reruns": [
         {
-          "agent": "flight_summary",
-          "rejection_rate": 0.47,
-          "feedback": "summary: 4 sentences; the summary must be 3; story[0]: status bad disagrees with the data (good); story[3]: status bad disagrees with the data (good); story[5]: status bad disagrees with the data (good); story[7]: status bad disagrees with the data (good); story[9]: status bad disagrees with the data (good); story[10]: status good disagrees with the data (bad)"
-        },
-        {
           "agent": "diagnosis",
-          "rejection_rate": 0.5,
-          "feedback": "wind_drift: cites unknown findings ['F1', 'F2']; coverage: omits causes the data shows: low_battery, setup"
+          "rejection_rate": 0.71,
+          "feedback": "F1: states a number without citing a metric; F4: states a number without citing a metric; F5: states a number without citing a metric; C1: rests on rejected findings ['F1', 'F4']; C2: rests on rejected findings ['F1', 'F5']"
         },
         {
           "agent": "advisor",
           "rejection_rate": 1.0,
-          "feedback": "rec[1]: proposes remove_waypoint at WP1, which failed the mission limits; rec[2]: proposes add_hold at WP3, which failed the mission limits; rec[3]: proposes change_altitude at WP2, which failed the mission limits"
+          "feedback": "rec[1]: gives no number from the flight data as evidence; rec[2]: gives no number from the flight data as evidence; rec[3]: gives no number from the flight data as evidence"
         }
       ],
-      "claims": 27,
-      "rejected": 12,
-      "grounding_rate": 0.444
+      "claims": 24,
+      "rejected": 2,
+      "grounding_rate": 0.083
     },
     "edit_check": {
       "dropped": [
@@ -912,7 +877,16 @@
           "edit": {
             "action": "change_altitude",
             "wp": 2,
-            "value": null,
+            "value": -30.0,
+            "cause": "C1"
+          },
+          "reason": "WP2 (DO_CHANGE_SPEED) cannot be edited"
+        },
+        {
+          "edit": {
+            "action": "add_hold",
+            "wp": 2,
+            "value": 30.0,
             "cause": "C1"
           },
           "reason": "WP2 (DO_CHANGE_SPEED) cannot be edited"
@@ -923,57 +897,57 @@
     "approved": {
       "flight_summary": {
         "verdict": "Needs attention",
-        "summary": "The flight was generally smooth, but there were issues during landing and return to launch (RTL) phases. The drone's speed decreased significantly in these final stages, which could affect its stability and safety.",
+        "summary": "The flight lasted 310 s over 1198 m and scored 75 out of 100. The main problems were: battery end. It landed with 14 % battery and the telemetry link was up 100.0 % of the time.",
         "flight_story": [
           {
             "phase": "Takeoff",
             "status": "good",
-            "text": "The takeoff was smooth with no issues."
+            "text": "The drone took off smoothly within the expected time frame."
           },
           {
             "phase": "Leg 1 (to WP3)",
             "status": "good",
-            "text": "During the first leg, the drone maintained a good track and speed."
+            "text": "The drone flew the first leg of the route without issues."
           },
           {
             "phase": "Leg 2 (to WP4)",
             "status": "good",
-            "text": "The second leg saw consistent tracking and speed, indicating smooth progress."
+            "text": "The drone continued to fly the second leg smoothly."
           },
           {
             "phase": "Leg 3 (to WP5)",
             "status": "good",
-            "text": "5.0 m/s, cross-track up to 0.28 m"
+            "text": "The drone flew the third leg without any problems."
           },
           {
             "phase": "Leg 4 (to WP6)",
             "status": "good",
-            "text": "The fourth leg continued with good tracking and maintained a steady speed."
+            "text": "The drone flew the fourth leg smoothly."
           },
           {
             "phase": "Leg 5 (to WP7)",
             "status": "good",
-            "text": "4.9 m/s, cross-track up to 0.32 m"
+            "text": "The drone flew the fifth leg without any issues."
           },
           {
             "phase": "Leg 6 (to WP8)",
             "status": "good",
-            "text": "The sixth leg saw good tracking and maintained a steady speed."
+            "text": "The drone flew the sixth leg smoothly."
           },
           {
             "phase": "Leg 7 (to WP9)",
             "status": "good",
-            "text": "4.8 m/s, cross-track up to 0.46 m"
+            "text": "The drone flew the seventh leg without any problems."
           },
           {
             "phase": "Leg 8 (to WP10)",
             "status": "good",
-            "text": "The eighth leg continued with good tracking and maintained a steady speed."
+            "text": "The drone flew the eighth leg smoothly."
           },
           {
             "phase": "RTL",
             "status": "good",
-            "text": "13 s"
+            "text": "The drone executed the return-to-launch maneuver without issues."
           },
           {
             "phase": "Land",
@@ -1010,14 +984,20 @@
       "diagnosis": {
         "findings": [
           {
-            "id": "F3",
-            "text": "Battery at landing Caution/Bad",
+            "id": "F1",
+            "text": "battery.remaining_end_pct is 14.0",
             "metric": null,
             "value": null
           },
           {
-            "id": "F4",
-            "text": "Failsafe parameter FENCE_ENABLE is set to 0.0, which disables the fence and may cause unexpected behavior.",
+            "id": "F2",
+            "text": "battery.used_pct_per_km is 71.0",
+            "metric": null,
+            "value": null
+          },
+          {
+            "id": "F3",
+            "text": "params.FENCE_ENABLE is 0.0",
             "metric": null,
             "value": null
           }
@@ -1025,29 +1005,30 @@
         "causes": [
           {
             "id": "C1",
-            "cause": "Battery too small for this route: landed with 14 % of battery remaining.",
+            "cause": "Battery too small for this route: landed with 14 %",
             "category": "low_battery",
             "confidence": 0.85,
             "findings": [
-              "F3"
+              "F1",
+              "F2"
             ]
           },
           {
             "id": "C2",
-            "cause": "Failsafe parameter FENCE_ENABLE is set to 0, which disables the fence and may cause unexpected behavior.",
+            "cause": "Failsafe disabled in the parameters: FENCE_ENABLE",
             "category": "setup",
             "confidence": 0.5,
             "findings": [
-              "F4"
+              "F3"
             ]
           }
         ]
       },
       "risk": {
         "risk_level": "High",
-        "risk_score": 65,
-        "adjustment": -5,
-        "adjustment_reason": "The mission has a high risk score and the factors indicate that there is room for improvement. The predicted battery percentage at landing is below the safe threshold, which could be due to unexpected consumption or drift off course. Reducing the risk slightly by adjusting the score downward can help mitigate these issues.",
+        "risk_score": 60,
+        "adjustment": -10,
+        "adjustment_reason": "The mission has a high risk score and the latest flight landed with a low battery percentage. Reducing the score by 10 points will help mitigate the immediate risk of a battery failure, which could end the mission prematurely.",
         "factors": [
           "predicted battery at landing 9 % (< 10 %: the battery failsafe would end the mission)",
           "latest flight landed with 14 % battery",
@@ -1060,7 +1041,7 @@
         "edits": [
           {
             "action": "remove_waypoint",
-            "wp": 3,
+            "wp": 5,
             "value": null,
             "cause": "C1"
           }
@@ -1068,31 +1049,37 @@
         "recommendations": [
           {
             "rank": 1,
-            "text": "Shorten the route by removing WP3, WP4",
-            "reason": "the battery margin was too small",
-            "evidence": "landed with 14.0 % battery"
+            "text": "change_altitude(wp=2, value=-30.0)",
+            "reason": "C1: Battery too small for this route: landed with 14 %",
+            "evidence": "flight.duration_s: 309.5, flight.distance_m: 1198.0, flight.max_alt_m: 30.0"
           },
           {
             "rank": 2,
-            "text": "Enable a geofence sized for the route and keep failsafes on",
-            "reason": "a failsafe parameter is 0",
-            "evidence": "FENCE_ENABLE = 0"
+            "text": "add_hold(wp=2, value=30)",
+            "reason": "C1: Battery too small for this route: landed with 14 %",
+            "evidence": "flight.duration_s: 309.5, flight.distance_m: 1198.0, flight.max_alt_m: 30.0"
+          },
+          {
+            "rank": 3,
+            "text": "remove_waypoint(wp=5)",
+            "reason": "C1: Battery too small for this route: landed with 14 %",
+            "evidence": "flight.duration_s: 309.5, flight.distance_m: 1198.0, flight.max_alt_m: 30.0"
           }
         ]
       }
     },
-    "seconds": 80.7
+    "seconds": 183.3
   },
   "mission_fix": {
     "applied": [
       {
         "edit": {
           "action": "remove_waypoint",
-          "wp": 3,
+          "wp": 5,
           "value": null,
           "cause": "C1"
         },
-        "text": "remove_waypoint WP3 (cause C1)"
+        "text": "remove_waypoint WP5 (cause C1)"
       }
     ],
     "rejected": [
@@ -1100,17 +1087,26 @@
         "edit": {
           "action": "change_altitude",
           "wp": 2,
-          "value": null,
+          "value": -30.0,
+          "cause": "C1"
+        },
+        "reason": "WP2 (DO_CHANGE_SPEED) cannot be edited"
+      },
+      {
+        "edit": {
+          "action": "add_hold",
+          "wp": 2,
+          "value": 30.0,
           "cause": "C1"
         },
         "reason": "WP2 (DO_CHANGE_SPEED) cannot be edited"
       }
     ],
     "length_before_m": 1330,
-    "length_after_m": 1142,
+    "length_after_m": 1301,
     "waypoints_before": 8,
     "waypoints_after": 7,
     "file": "mission_fixed.waypoints"
   },
-  "seconds_total": 81.5
+  "seconds_total": 184.2
 }

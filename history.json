@@ -46,7 +46,7 @@
         "setup"
       ],
       "edits_applied": [
-        "set_speed WP3 6 m/s (cause C1)"
+        "set_speed WP3 6 m/s (cause C2)"
       ]
     },
     {
@@ -73,7 +73,7 @@
         "setup"
       ],
       "edits_applied": [
-        "remove_waypoint WP3 (cause C1)"
+        "remove_waypoint WP5 (cause C1)"
       ]
     },
     {
@@ -123,11 +123,10 @@
       "causes": [
         "link_loss",
         "wind_drift",
-        "low_battery"
+        "setup"
       ],
       "edits_applied": [
-        "remove_waypoint WP3 (cause C3)",
-        "set_speed WP4 6 m/s (cause C2)"
+        "set_speed WP3 6 m/s (cause C3)"
       ]
     },
     {
@@ -181,8 +180,7 @@
         "setup"
       ],
       "edits_applied": [
-        "remove_waypoint WP4 (cause C2)",
-        "set_speed WP5 6 m/s (cause C2)"
+        "remove_waypoint WP5 (cause C1)"
       ]
     },
     {
@@ -205,12 +203,12 @@
       "wind_max_ms": 10.3,
       "health_score": 25,
       "causes": [
-        "link_loss",
         "wind_drift",
-        "low_battery"
+        "low_battery",
+        "setup"
       ],
       "edits_applied": [
-        "add_hold WP4 5 s (cause C2)"
+        "remove_waypoint WP3 (cause C1)"
       ]
     }
   ]

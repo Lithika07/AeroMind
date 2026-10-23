@@ -14,15 +14,15 @@ Computed by `python3 run.py --results` from the analysed SITL flights in `output
 | Battery margin | S2 fixed landed with 25 % | >= 25 % | pass |
 | Battery prediction error | s1: predicted 80 %, actual 81 %; s2: predicted 31 %, actual 25 %; s4: predicted 31 %, actual 24 % | within 10 points | pass |
 | Risk ranking | s0 Low, s2 High, s4 High | S0 Low; S2, S4 High | pass |
-| Grounding | 63 of 192 claims rejected (33 %) via ollama qwen2.5:3b | report the rate | n/a |
-| Speed | files in -> dashboard ready: max 122 s, median 89 s | < 60 s | fail |
+| Grounding | 55 of 185 claims rejected (30 %) via ollama qwen2.5:3b | report the rate | n/a |
+| Speed | files in -> dashboard ready: max 235 s, median 174 s | < 60 s | fail |
 
 ## Results table
 
 | scenario | verdict | health | risk | key metric | edits flown |
 |---|---|---|---|---|---|
 | s0 | Good | 100 | Low 10 | health: 100 | – |
-| s1 | Needs attention | 55 -> 55 | Low 15 -> Low 25 | max cross-track m: 1.8 -> 1.44 | speed 12 → 6 m/s |
-| s2 | Needs attention | 75 -> 90 | High 65 -> Low 20 | battery at landing %: 14.0 -> 25.0 | removed WP3, WP4 |
-| s3 | Needs attention | 50 | Low 20 | link uptime %: 92.4 | – |
-| s4 | Unsafe | 25 -> 25 | High 90 -> Medium 45 | battery at landing %: 24.0 -> 24.0 | removed WP3, WP4; speed 12 → 6 m/s |
+| s1 | Needs attention | 55 -> 55 | Medium 35 -> Medium 45 | max cross-track m: 1.8 -> 1.44 | speed 12 → 6 m/s |
+| s2 | Needs attention | 75 -> 90 | High 60 -> Medium 30 | battery at landing %: 14.0 -> 25.0 | removed WP3, WP4 |
+| s3 | Needs attention | 50 | Low 25 | link uptime %: 92.4 | – |
+| s4 | Unsafe | 25 -> 25 | High 90 -> Medium 55 | battery at landing %: 24.0 -> 24.0 | removed WP3, WP4; speed 12 → 6 m/s |

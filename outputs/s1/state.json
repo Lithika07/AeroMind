@@ -422,7 +422,7 @@
       "setup"
     ],
     "edits_applied": [
-      "set_speed WP3 6 m/s (cause C1)"
+      "set_speed WP3 6 m/s (cause C2)"
     ]
   },
   "agents": {
@@ -462,7 +462,7 @@
       "plan": [
         {
           "agent": "flight_summary",
-          "reason": "Always run flight summary first."
+          "reason": "Always run flight_summary first to provide an overview of the flight."
         },
         {
           "agent": "telemetry_link",
@@ -470,19 +470,19 @@
         },
         {
           "agent": "diagnosis",
-          "reason": "Run diagnosis for any metrics that are caution or bad (attitude and wind)."
+          "reason": "Run diagnosis when there are caution or bad metrics, and there are caution or bad metrics in the problems list."
         },
         {
           "agent": "risk",
-          "reason": "Run risk analysis after diagnostics to assess overall mission safety."
+          "reason": "Run risk after diagnosis to assess the risk based on the current metrics and problems."
         },
         {
           "agent": "advisor",
-          "reason": "Run advisor last as it can provide recommendations based on the current state."
+          "reason": "mission file present: edits allowed (added by rule)"
         },
         {
           "agent": "verifier",
-          "reason": "Always run verifier last to ensure all systems are functioning correctly post-analysis."
+          "reason": "Always run verifier last to ensure all systems are functioning correctly."
         }
       ],
       "source": "llm"
@@ -494,86 +494,70 @@
       "flight_summary": {
         "output": {
           "verdict": "Needs attention",
-          "summary": "The flight lasted 274 s over 1206 m and scored 55 out of 100. The main problems were: wind. It landed with 83 % battery and the telemetry link was up 100.0 % of the time.",
+          "summary": "The flight was smooth with no issues. The drone maintained optimal speeds and altitudes, and the takeoff and landing were executed well. The GPS accuracy was consistent, and the battery performance was satisfactory. The pilot notes were not provided, but the flight data indicated a good performance overall.",
           "flight_story": [
             {
               "phase": "Takeoff",
               "status": "good",
-              "text": "climbed to 30.1 m in 19 s"
+              "text": "Takeoff was smooth with no issues."
             },
             {
               "phase": "Leg 1 (to WP3)",
               "status": "good",
-              "text": "5.1 m/s, cross-track up to 0.66 m"
+              "text": "Leg 1 was executed smoothly with optimal speed and altitude."
             },
             {
               "phase": "Leg 2 (to WP4)",
               "status": "good",
-              "text": "9.4 m/s, cross-track up to 0.97 m"
+              "text": "Leg 2 was executed smoothly with optimal speed and altitude."
             },
             {
               "phase": "Leg 3 (to WP5)",
               "status": "good",
-              "text": "9.7 m/s, cross-track up to 0.52 m"
+              "text": "Leg 3 was executed smoothly with optimal speed and altitude."
             },
             {
               "phase": "Leg 4 (to WP6)",
               "status": "good",
-              "text": "10.1 m/s, cross-track up to 0.52 m"
+              "text": "Leg 4 was executed smoothly with optimal speed and altitude."
             },
             {
               "phase": "Leg 5 (to WP7)",
               "status": "good",
-              "text": "9.2 m/s, cross-track up to 0.54 m"
+              "text": "Leg 5 was executed smoothly with optimal speed and altitude."
             },
             {
               "phase": "Leg 6 (to WP8)",
-              "status": "caution",
-              "text": "8.7 m/s, cross-track up to 1.29 m"
+              "status": "good",
+              "text": "Leg 6 was executed smoothly with optimal speed and altitude."
             },
             {
               "phase": "Leg 7 (to WP9)",
-              "status": "caution",
-              "text": "9.2 m/s, cross-track up to 1.79 m"
+              "status": "good",
+              "text": "Leg 7 was executed smoothly with optimal speed and altitude."
             },
             {
               "phase": "Leg 8 (to WP10)",
-              "status": "caution",
-              "text": "5.0 m/s, cross-track up to 1.8 m"
+              "status": "good",
+              "text": "Leg 8 was executed smoothly with optimal speed and altitude."
             },
             {
               "phase": "RTL",
               "status": "good",
-              "text": "72 s"
+              "text": "Return to Launch was executed smoothly with no issues."
             },
             {
               "phase": "Land",
               "status": "good",
-              "text": "landed with 83 % battery"
+              "text": "Landing was smooth with no issues."
             }
           ],
-          "claims": [
-            {
-              "id": "S1",
-              "text": "health score",
-              "metric": "health_score",
-              "value": 55.0
-            },
-            {
-              "id": "S2",
-              "text": "battery at landing",
-              "metric": "battery.remaining_end_pct",
-              "value": 83.0
-            }
-          ]
+          "claims": []
         },
-        "source": "fallback",
-        "seconds": 37.66,
-        "errors": [
-          "invalid JSON from qwen2.5:3b: [{'type': 'string_too_long', 'loc': ('summary',), 'msg': 'String should have at most 800 characters', 'input': \"The flight was generally smooth but had several issues that need addressing. The takeoff and landing phases were good, as indicated by the xtrack_max_m status",
-          "invalid JSON from qwen2.5:3b: [{'type': 'string_too_long', 'loc': ('summary',), 'msg': 'String should have at most 800 characters', 'input': \"The flight was generally smooth but had several issues that need addressing. The takeoff and landing phases were good, as indicated by the xtrack_max_m status"
-        ],
-        "feedback": null
+        "source": "llm",
+        "seconds": 24.99,
+        "errors": [],
+        "feedback": "story[3]: status caution disagrees with the data (good); story[6]: status good disagrees with the data (caution); story[7]: status good disagrees with the data (caution); story[8]: status good disagrees with the data (caution)"
       },
       "telemetry_link": {
         "output": {
@@ -609,20 +593,20 @@
         "output": {
           "findings": [
             {
-              "id": "F2",
-              "text": "Crosswind of 10.3 m/s pushed the drone off its track while flying at up to 10.1 m/s; max speed was 9.4 m/s on leg 2 and max speed exceeded 8 m/s.",
+              "id": "F1",
+              "text": "Crosswind of 10.3 m/s pushed the drone off its track while flying at up to 10.1 m/s",
               "metric": "wind.max_ms",
               "value": 10.3
             },
             {
-              "id": "F3",
-              "text": "Crosswind of 10.3 m/s pushed the drone off its track while flying at up to 10.1 m/s; max speed was 9.4 m/s on leg 2 and max speed exceeded 8 m/s.",
+              "id": "F2",
+              "text": "Crosswind of 10.3 m/s pushed the drone off its track while flying at up to 10.1 m/s",
               "metric": "tracking.xtrack_max_m",
               "value": 1.8
             },
             {
-              "id": "F4",
-              "text": "Crosswind of 10.3 m/s pushed the drone off its track while flying at up to 10.1 m/s; max speed was 9.4 m/s on leg 2 and max speed exceeded 8 m/s.",
+              "id": "F3",
+              "text": "Crosswind of 10.3 m/s pushed the drone off its track while flying at up to 10.1 m/s",
               "metric": "attitude.max_roll_deg",
               "value": 30.0
             }
@@ -630,28 +614,28 @@
           "causes": [
             {
               "id": "C1",
-              "cause": "Failsafe disabled in the parameters: FENCE_ENABLE, allowing wind to affect flight without corrective measures.",
+              "cause": "Failsafe disabled in the parameters: FENCE_ENABLE",
               "category": "setup",
               "confidence": 0.5,
               "findings": [
+                "F1",
                 "F2",
-                "F3",
-                "F4"
+                "F3"
               ]
             }
           ]
         },
         "source": "llm",
-        "seconds": 9.78,
+        "seconds": 40.31,
         "errors": [],
-        "feedback": "C1: rests on rejected findings ['C1']"
+        "feedback": null
       },
       "risk": {
         "output": {
-          "risk_level": "Low",
-          "risk_score": 15,
-          "adjustment": -10,
-          "adjustment_reason": "Decrease risk score due to mitigated factors and reduced confidence in findings.",
+          "risk_level": "Medium",
+          "risk_score": 35,
+          "adjustment": 10,
+          "adjustment_reason": "Increase risk score due to FENCE_ENABLE not set in parameters, which is a critical setup error.",
           "factors": [
             "wind 10.3 m/s in the latest flight",
             "failsafe not set: FENCE_ENABLE = 0"
@@ -660,29 +644,57 @@
           "confidence": "low"
         },
         "source": "llm",
-        "seconds": 3.4,
+        "seconds": 7.14,
         "errors": [],
         "feedback": null
       },
       "advisor": {
         "output": {
-          "edits": [],
+          "edits": [
+            {
+              "action": "set_speed",
+              "wp": 2,
+              "value": 12.0,
+              "cause": "C1"
+            },
+            {
+              "action": "change_altitude",
+              "wp": 2,
+              "value": -30.0,
+              "cause": "C1"
+            },
+            {
+              "action": "add_hold",
+              "wp": 2,
+              "value": 5.0,
+              "cause": "C1"
+            }
+          ],
           "recommendations": [
             {
               "rank": 1,
-              "text": "Enable a geofence sized for the route and keep failsafes on",
-              "reason": "a failsafe parameter is 0",
-              "evidence": "FENCE_ENABLE = 0"
+              "text": "set_speed at WP2 to 12.0 m/s",
+              "reason": "F1: Failsafe disabled in the parameters: FENCE_ENABLE",
+              "evidence": "F1"
+            },
+            {
+              "rank": 2,
+              "text": "change_altitude at WP2 by -30.0 m",
+              "reason": "F1: Failsafe disabled in the parameters: FENCE_ENABLE",
+              "evidence": "F1"
+            },
+            {
+              "rank": 3,
+              "text": "add_hold at WP2 for 5.0 seconds",
+              "reason": "F1: Failsafe disabled in the parameters: FENCE_ENABLE",
+              "evidence": "F1"
             }
           ]
         },
-        "source": "fallback",
-        "seconds": 27.27,
-        "errors": [
-          "invalid JSON from qwen2.5:3b: [{'type': 'string_too_long', 'loc': ('recommendations', 0, 'reason'), 'msg': 'String should have at most 300 characters', 'input': 'The Failsafe issue allows wind to affect flight without corrective measures, as indicated in findings F2, F3, and F4. Removing the takeoff",
-          "invalid JSON from qwen2.5:3b: [{'type': 'string_too_long', 'loc': ('recommendations', 0, 'reason'), 'msg': 'String should have at most 300 characters', 'input': 'The Failsafe issue allows wind to affect flight without corrective measures, as indicated in findings F2, F3, and F4. Removing the takeoff"
-        ],
-        "feedback": "rec[1]: '0.5 seconds' is not in the flight data; rec[2]: '0.5 seconds' is not in the flight data; rec[3]: '0.5 seconds' is not in the flight data"
+        "source": "llm",
+        "seconds": 18.12,
+        "errors": [],
+        "feedback": "rec[1]: proposes set_speed at WP2, which is not among the edits that passed the mission limits; rec[2]: proposes change_altitude at WP2, which is not among the edits that passed the mission limits; rec[3]: proposes add_hold at WP2, which is not among the edits that passed the mission limits"
       }
     },
     "verification": {
@@ -690,8 +702,8 @@
         {
           "agent": "flight_summary",
           "claim_id": "summary",
-          "status": "supported",
-          "reason": "matches the data"
+          "status": "rejected",
+          "reason": "4 sentences; the summary must be 3"
         },
         {
           "agent": "flight_summary",
@@ -732,20 +744,20 @@
         {
           "agent": "flight_summary",
           "claim_id": "story[6]",
-          "status": "supported",
-          "reason": "matches the data"
+          "status": "rejected",
+          "reason": "status good disagrees with the data (caution)"
         },
         {
           "agent": "flight_summary",
           "claim_id": "story[7]",
-          "status": "supported",
-          "reason": "matches the data"
+          "status": "rejected",
+          "reason": "status good disagrees with the data (caution)"
         },
         {
           "agent": "flight_summary",
           "claim_id": "story[8]",
-          "status": "supported",
-          "reason": "matches the data"
+          "status": "rejected",
+          "reason": "status good disagrees with the data (caution)"
         },
         {
           "agent": "flight_summary",
@@ -756,18 +768,6 @@
         {
           "agent": "flight_summary",
           "claim_id": "story[10]",
-          "status": "supported",
-          "reason": "matches the data"
-        },
-        {
-          "agent": "flight_summary",
-          "claim_id": "S1",
-          "status": "supported",
-          "reason": "matches the data"
-        },
-        {
-          "agent": "flight_summary",
-          "claim_id": "S2",
           "status": "supported",
           "reason": "matches the data"
         },
@@ -791,27 +791,27 @@
         },
         {
           "agent": "diagnosis",
+          "claim_id": "F1",
+          "status": "supported",
+          "reason": "matches the data"
+        },
+        {
+          "agent": "diagnosis",
           "claim_id": "F2",
-          "status": "rejected",
-          "reason": "'8 m/s' is not in the flight data"
+          "status": "supported",
+          "reason": "matches the data"
         },
         {
           "agent": "diagnosis",
           "claim_id": "F3",
-          "status": "rejected",
-          "reason": "'8 m/s' is not in the flight data"
-        },
-        {
-          "agent": "diagnosis",
-          "claim_id": "F4",
-          "status": "rejected",
-          "reason": "'8 m/s' is not in the flight data"
+          "status": "supported",
+          "reason": "matches the data"
         },
         {
           "agent": "diagnosis",
           "claim_id": "C1",
-          "status": "rejected",
-          "reason": "rests on rejected findings ['F2', 'F3', 'F4']"
+          "status": "supported",
+          "reason": "matches the data"
         },
         {
           "agent": "diagnosis",
@@ -828,35 +828,75 @@
         {
           "agent": "advisor",
           "claim_id": "rec[1]",
-          "status": "supported",
-          "reason": "matches the data"
+          "status": "rejected",
+          "reason": "proposes set_speed at WP2, which is not among the edits that passed the mission limits"
+        },
+        {
+          "agent": "advisor",
+          "claim_id": "rec[2]",
+          "status": "rejected",
+          "reason": "proposes change_altitude at WP2, which is not among the edits that passed the mission limits"
+        },
+        {
+          "agent": "advisor",
+          "claim_id": "rec[3]",
+          "status": "rejected",
+          "reason": "proposes add_hold at WP2, which is not among the edits that passed the mission limits"
         }
       ],
       "rejection_rates": {
-        "flight_summary": 0.0,
+        "flight_summary": 0.33,
         "telemetry_link": 0.0,
-        "diagnosis": 1.0,
+        "diagnosis": 0.2,
         "risk": 0.0,
-        "advisor": 0.0
+        "advisor": 1.0
       },
       "reruns": [
         {
-          "agent": "diagnosis",
-          "rejection_rate": 0.5,
-          "feedback": "C1: rests on rejected findings ['C1']"
+          "agent": "flight_summary",
+          "rejection_rate": 0.33,
+          "feedback": "story[3]: status caution disagrees with the data (good); story[6]: status good disagrees with the data (caution); story[7]: status good disagrees with the data (caution); story[8]: status good disagrees with the data (caution)"
         },
         {
           "agent": "advisor",
           "rejection_rate": 1.0,
-          "feedback": "rec[1]: '0.5 seconds' is not in the flight data; rec[2]: '0.5 seconds' is not in the flight data; rec[3]: '0.5 seconds' is not in the flight data"
+          "feedback": "rec[1]: proposes set_speed at WP2, which is not among the edits that passed the mission limits; rec[2]: proposes change_altitude at WP2, which is not among the edits that passed the mission limits; rec[3]: proposes add_hold at WP2, which is not among the edits that passed the mission limits"
         }
       ],
       "claims": 24,
-      "rejected": 5,
-      "grounding_rate": 0.208
+      "rejected": 8,
+      "grounding_rate": 0.333
     },
     "edit_check": {
-      "dropped": [],
+      "dropped": [
+        {
+          "edit": {
+            "action": "set_speed",
+            "wp": 2,
+            "value": 12.0,
+            "cause": "C1"
+          },
+          "reason": "speed must be 3-10 m/s"
+        },
+        {
+          "edit": {
+            "action": "change_altitude",
+            "wp": 2,
+            "value": -30.0,
+            "cause": "C1"
+          },
+          "reason": "WP2 (DO_CHANGE_SPEED) cannot be edited"
+        },
+        {
+          "edit": {
+            "action": "add_hold",
+            "wp": 2,
+            "value": 5.0,
+            "cause": "C1"
+          },
+          "reason": "WP2 (DO_CHANGE_SPEED) cannot be edited"
+        }
+      ],
       "replaced_by_rules": false
     },
     "approved": {
@@ -867,32 +907,32 @@
           {
             "phase": "Takeoff",
             "status": "good",
-            "text": "climbed to 30.1 m in 19 s"
+            "text": "Takeoff was smooth with no issues."
           },
           {
             "phase": "Leg 1 (to WP3)",
             "status": "good",
-            "text": "5.1 m/s, cross-track up to 0.66 m"
+            "text": "Leg 1 was executed smoothly with optimal speed and altitude."
           },
           {
             "phase": "Leg 2 (to WP4)",
             "status": "good",
-            "text": "9.4 m/s, cross-track up to 0.97 m"
+            "text": "Leg 2 was executed smoothly with optimal speed and altitude."
           },
           {
             "phase": "Leg 3 (to WP5)",
             "status": "good",
-            "text": "9.7 m/s, cross-track up to 0.52 m"
+            "text": "Leg 3 was executed smoothly with optimal speed and altitude."
           },
           {
             "phase": "Leg 4 (to WP6)",
             "status": "good",
-            "text": "10.1 m/s, cross-track up to 0.52 m"
+            "text": "Leg 4 was executed smoothly with optimal speed and altitude."
           },
           {
             "phase": "Leg 5 (to WP7)",
             "status": "good",
-            "text": "9.2 m/s, cross-track up to 0.54 m"
+            "text": "Leg 5 was executed smoothly with optimal speed and altitude."
           },
           {
             "phase": "Leg 6 (to WP8)",
@@ -912,28 +952,15 @@
           {
             "phase": "RTL",
             "status": "good",
-            "text": "72 s"
+            "text": "Return to Launch was executed smoothly with no issues."
           },
           {
             "phase": "Land",
             "status": "good",
-            "text": "landed with 83 % battery"
+            "text": "Landing was smooth with no issues."
           }
         ],
-        "claims": [
-          {
-            "id": "S1",
-            "text": "health score",
-            "metric": "health_score",
-            "value": 55.0
-          },
-          {
-            "id": "S2",
-            "text": "battery at landing",
-            "metric": "battery.remaining_end_pct",
-            "value": 83.0
-          }
-        ]
+        "claims": []
       },
       "telemetry_link": {
         "link_verdict": "good",
@@ -963,57 +990,71 @@
         "findings": [
           {
             "id": "F1",
-            "text": "wind.max_ms = 10.3",
+            "text": "Crosswind of 10.3 m/s pushed the drone off its track while flying at up to 10.1 m/s",
             "metric": "wind.max_ms",
             "value": 10.3
           },
           {
             "id": "F2",
-            "text": "tracking.xtrack_max_m = 1.8",
+            "text": "Crosswind of 10.3 m/s pushed the drone off its track while flying at up to 10.1 m/s",
             "metric": "tracking.xtrack_max_m",
             "value": 1.8
           },
           {
             "id": "F3",
-            "text": "attitude.max_roll_deg = 30.0",
+            "text": "Crosswind of 10.3 m/s pushed the drone off its track while flying at up to 10.1 m/s",
             "metric": "attitude.max_roll_deg",
             "value": 30.0
           },
           {
             "id": "F4",
-            "text": "params.FENCE_ENABLE = 0.0",
-            "metric": "params.FENCE_ENABLE",
-            "value": 0.0
+            "text": "wind.max_ms = 10.3",
+            "metric": "wind.max_ms",
+            "value": 10.3
+          },
+          {
+            "id": "F5",
+            "text": "tracking.xtrack_max_m = 1.8",
+            "metric": "tracking.xtrack_max_m",
+            "value": 1.8
+          },
+          {
+            "id": "F6",
+            "text": "attitude.max_roll_deg = 30.0",
+            "metric": "attitude.max_roll_deg",
+            "value": 30.0
           }
         ],
         "causes": [
           {
-            "id": "C1",
+            "id": "C2",
             "cause": "Crosswind of 10.3 m/s pushed the drone off its track while flying at up to 10.1 m/s",
             "category": "wind_drift",
             "confidence": 0.8,
+            "findings": [
+              "F4",
+              "F5",
+              "F6"
+            ]
+          },
+          {
+            "id": "C1",
+            "cause": "Failsafe disabled in the parameters: FENCE_ENABLE",
+            "category": "setup",
+            "confidence": 0.5,
             "findings": [
               "F1",
               "F2",
               "F3"
             ]
-          },
-          {
-            "id": "C2",
-            "cause": "Failsafe disabled in the parameters: FENCE_ENABLE",
-            "category": "setup",
-            "confidence": 0.5,
-            "findings": [
-              "F4"
-            ]
           }
         ]
       },
       "risk": {
-        "risk_level": "Low",
-        "risk_score": 15,
-        "adjustment": -10,
-        "adjustment_reason": "Decrease risk score due to mitigated factors and reduced confidence in findings.",
+        "risk_level": "Medium",
+        "risk_score": 35,
+        "adjustment": 10,
+        "adjustment_reason": "Increase risk score due to FENCE_ENABLE not set in parameters, which is a critical setup error.",
         "factors": [
           "wind 10.3 m/s in the latest flight",
           "failsafe not set: FENCE_ENABLE = 0"
@@ -1027,26 +1068,26 @@
             "action": "set_speed",
             "wp": 3,
             "value": 6.0,
-            "cause": "C1"
+            "cause": "C2"
           }
         ],
         "recommendations": [
           {
             "rank": 1,
-            "text": "Enable a geofence sized for the route and keep failsafes on",
-            "reason": "a failsafe parameter is 0",
-            "evidence": "FENCE_ENABLE = 0"
-          },
-          {
-            "rank": 2,
             "text": "Fly the legs at 6 m/s in strong wind",
             "reason": "cross-track grew with wind",
             "evidence": "wind 10.3 m/s, cross-track 1.8 m"
+          },
+          {
+            "rank": 2,
+            "text": "Enable a geofence sized for the route and keep failsafes on",
+            "reason": "a failsafe parameter is 0",
+            "evidence": "FENCE_ENABLE = 0"
           }
         ]
       }
     },
-    "seconds": 101.4
+    "seconds": 174.0
   },
   "mission_fix": {
     "applied": [
@@ -1055,17 +1096,45 @@
           "action": "set_speed",
           "wp": 3,
           "value": 6.0,
-          "cause": "C1"
+          "cause": "C2"
         },
-        "text": "set_speed WP3 6 m/s (cause C1)"
+        "text": "set_speed WP3 6 m/s (cause C2)"
       }
     ],
-    "rejected": [],
+    "rejected": [
+      {
+        "edit": {
+          "action": "set_speed",
+          "wp": 2,
+          "value": 12.0,
+          "cause": "C1"
+        },
+        "reason": "speed must be 3-10 m/s"
+      },
+      {
+        "edit": {
+          "action": "change_altitude",
+          "wp": 2,
+          "value": -30.0,
+          "cause": "C1"
+        },
+        "reason": "WP2 (DO_CHANGE_SPEED) cannot be edited"
+      },
+      {
+        "edit": {
+          "action": "add_hold",
+          "wp": 2,
+          "value": 5.0,
+          "cause": "C1"
+        },
+        "reason": "WP2 (DO_CHANGE_SPEED) cannot be edited"
+      }
+    ],
     "length_before_m": 1330,
     "length_after_m": 1330,
     "waypoints_before": 8,
     "waypoints_after": 8,
     "file": "mission_fixed.waypoints"
   },
-  "seconds_total": 102.1
+  "seconds_total": 174.7
 }

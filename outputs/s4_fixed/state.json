@@ -376,7 +376,7 @@
         "run_id": "s1_fixed",
         "parent_run": "s1",
         "edits": [
-          "set_speed WP3 6 m/s (cause C1)"
+          "set_speed WP3 6 m/s (cause C2)"
         ],
         "changes": {
           "xtrack_max_m": {
@@ -415,7 +415,7 @@
         "run_id": "s2_fixed",
         "parent_run": "s2",
         "edits": [
-          "remove_waypoint WP3 (cause C1)"
+          "remove_waypoint WP5 (cause C1)"
         ],
         "changes": {
           "xtrack_max_m": {
@@ -454,8 +454,7 @@
         "run_id": "s4_fixed",
         "parent_run": "s4",
         "edits": [
-          "remove_waypoint WP3 (cause C3)",
-          "set_speed WP4 6 m/s (cause C2)"
+          "set_speed WP3 6 m/s (cause C3)"
         ],
         "changes": {
           "xtrack_max_m": {
@@ -536,12 +535,12 @@
     "wind_max_ms": 10.3,
     "health_score": 25,
     "causes": [
-      "link_loss",
       "wind_drift",
-      "low_battery"
+      "low_battery",
+      "setup"
     ],
     "edits_applied": [
-      "add_hold WP4 5 s (cause C2)"
+      "remove_waypoint WP3 (cause C1)"
     ]
   },
   "agents": {
@@ -584,7 +583,7 @@
       "plan": [
         {
           "agent": "flight_summary",
-          "reason": "Always run flight summary first to provide an overview of the mission."
+          "reason": "Always run flight_summary first to provide an overview of the flight."
         },
         {
           "agent": "telemetry_link",
@@ -592,11 +591,11 @@
         },
         {
           "agent": "diagnosis",
-          "reason": "Run diagnosis on caution or bad metrics, which are attitude and battery_end in this case."
+          "reason": "Run diagnosis on caution or bad metrics, which are attitude, battery_end, dropouts, link_uptime, wind, and xtrack_max_m."
         },
         {
           "agent": "risk",
-          "reason": "Risk analysis should be run after flight summary and diagnosis to assess overall mission risk based on the findings."
+          "reason": "Run risk after diagnosis to assess overall flight risk based on the current metrics."
         },
         {
           "agent": "advisor",
@@ -604,7 +603,7 @@
         },
         {
           "agent": "verifier",
-          "reason": "Run verifier last to ensure all systems are functioning correctly post-analysis."
+          "reason": "Always run verifier last to ensure all systems are functioning correctly post-flight."
         }
       ],
       "source": "llm"
@@ -616,60 +615,60 @@
       "flight_summary": {
         "output": {
           "verdict": "Unsafe",
-          "summary": "The flight was deemed unsafe due to several critical issues identified during and after the flight. The pilot experienced multiple warnings related to GPS accuracy, battery usage, and wind conditions which collectively led to a poor overall performance.",
+          "summary": "The flight had several issues, particularly during the takeoff and landing phases. The takeoff and landing phases were marked as bad, despite the data showing good metrics. The flight duration and distance were within acceptable limits, but the takeoff and landing phases required closer inspection for potential issues.",
           "flight_story": [
             {
               "phase": "Takeoff",
               "status": "bad",
-              "text": "The takeoff phase was marked by an unexpected drop in altitude and speed, indicating potential issues with the drone's control system. The pilot should ensure that all systems are functioning correctly before initiating a flight."
+              "text": "Takeoff phase was marked as bad, despite good metrics for vibration, attitude, and GPS."
             },
             {
               "phase": "Leg 1 (to WP3)",
-              "status": "caution",
-              "text": "During Leg 1, the drone maintained a safe distance from waypoints but experienced minor deviations in speed and altitude. This suggests there might be slight issues with the autopilot's navigation system."
+              "status": "good",
+              "text": "Leg 1 was marked as good, despite a caution for attitude."
             },
             {
               "phase": "Leg 2 (to WP4)",
-              "status": "bad",
-              "text": "In Leg 2, significant deviations were observed in both speed and altitude, which could indicate problems with the drone\u2019s control surfaces or sensors. The pilot should check for any physical damage to the drone before attempting another flight."
+              "status": "good",
+              "text": "Leg 2 was marked as good, despite a caution for attitude."
             },
             {
               "phase": "Leg 3 (to WP5)",
-              "status": "caution",
-              "text": "During Leg 3, the drone maintained a safe distance from waypoints but experienced minor deviations in speed and altitude. This suggests there might be slight issues with the autopilot's navigation system."
+              "status": "good",
+              "text": "Leg 3 was marked as good, despite a caution for attitude."
             },
             {
               "phase": "Leg 4 (to WP6)",
-              "status": "bad",
-              "text": "In Leg 4, significant deviations were observed in both speed and altitude, which could indicate problems with the drone\u2019s control surfaces or sensors. The pilot should check for any physical damage to the drone before attempting another flight."
+              "status": "good",
+              "text": "Leg 4 was marked as good, despite a caution for attitude."
             },
             {
               "phase": "Leg 5 (to WP7)",
-              "status": "caution",
-              "text": "During Leg 5, the drone maintained a safe distance from waypoints but experienced minor deviations in speed and altitude. This suggests there might be slight issues with the autopilot's navigation system."
+              "status": "good",
+              "text": "Leg 5 was marked as good, despite a caution for attitude."
             },
             {
               "phase": "Leg 6 (to WP8)",
-              "status": "bad",
-              "text": "In Leg 6, significant deviations were observed in both speed and altitude, which could indicate problems with the drone\u2019s control surfaces or sensors. The pilot should check for any physical damage to the drone before attempting another flight."
+              "status": "good",
+              "text": "Leg 6 was marked as good, despite a caution for attitude."
             },
             {
-              "phase": "RTL (Return To Launch)",
-              "status": "caution",
-              "text": "During RTL, the drone maintained a safe distance from waypoints but experienced minor deviations in speed and altitude. This suggests there might be slight issues with the autopilot's navigation system."
+              "phase": "RTL",
+              "status": "bad",
+              "text": "RTL phase was marked as bad, despite good metrics for vibration, attitude, and GPS."
             },
             {
               "phase": "Land",
               "status": "bad",
-              "text": "The landing phase was marked by significant deviations in both speed and altitude, indicating potential issues with the drone\u2019s control surfaces or sensors. The pilot should check for any physical damage to the drone before attempting another flight."
+              "text": "Land phase was marked as bad, despite good metrics for vibration, attitude, and GPS."
             }
           ],
           "claims": []
         },
         "source": "llm",
-        "seconds": 17.34,
+        "seconds": 23.61,
         "errors": [],
-        "feedback": "story[0]: status bad disagrees with the data (good); story[1]: status caution disagrees with the data (good); story[2]: status bad disagrees with the data (good); story[3]: status caution disagrees with the data (good); story[4]: status bad disagrees with the data (caution); story[5]: status caution disagrees with the data (good); story[6]: status bad disagrees with the data (caution); story[7]: status caution disagrees with the data (good); story[8]: status bad disagrees with the data (caution)"
+        "feedback": "summary: presents vibration as a problem, but its metrics are all Good; story[0]: status bad disagrees with the data (good); story[1]: status bad disagrees with the data (good); story[2]: status bad disagrees with the data (good); story[3]: status bad disagrees with the data (good); story[4]: status bad disagrees with the data (caution); story[5]: status bad disagrees with the data (good); story[6]: status bad disagrees with the data (caution); story[7]: status bad disagrees with the data (good); story[8]: status bad disagrees with the data (caution)"
       },
       "telemetry_link": {
         "output": {
@@ -678,26 +677,26 @@
           "link_findings": [
             {
               "id": "default",
-              "text": "Uptime is at 97.1%",
+              "text": "Uptime: 97.1%",
               "metric": null,
               "value": 97.1
             },
             {
-              "id": "packet_loss_pct",
-              "text": "Packet loss is at 0.0%",
+              "id": "packet_loss",
+              "text": "Packet Loss: 0.0%",
               "metric": null,
               "value": 0.0
             },
             {
               "id": "dropouts",
-              "text": "There was one dropout lasting 8.2 seconds, near WP5.",
+              "text": "Dropouts: 1 dropout, duration 8.2 seconds, near waypoint WP5",
               "metric": null,
               "value": 8.2
             }
           ]
         },
         "source": "llm",
-        "seconds": 4.57,
+        "seconds": 7.4,
         "errors": [],
         "feedback": "default: states a number without citing a metric"
       },
@@ -705,65 +704,71 @@
         "output": {
           "findings": [
             {
-              "id": "C1",
+              "id": "F1",
               "text": "Telemetry link dropped 1 time(s); uptime 97.1 %",
               "metric": "link.uptime_pct",
               "value": 97.1
             },
             {
-              "id": "C2",
+              "id": "F2",
               "text": "Crosswind of 10.3 m/s pushed the drone off its track",
               "metric": "wind.max_ms",
               "value": 10.3
             },
             {
-              "id": "C3",
+              "id": "F3",
               "text": "Battery too small for this route: landed with 24 %",
               "metric": "battery.remaining_end_pct",
               "value": 24.0
+            },
+            {
+              "id": "F4",
+              "text": "Failsafe disabled in the parameters: FENCE_ENABLE",
+              "metric": "params.FENCE_ENABLE",
+              "value": 0.0
             }
           ],
           "causes": [
             {
               "id": "C1",
-              "cause": "Telemetry link dropped 1 time(s); uptime 97.1 %",
-              "category": "link_loss",
-              "confidence": 0.9,
-              "findings": [
-                "C1"
-              ]
-            },
-            {
-              "id": "C2",
               "cause": "Crosswind of 10.3 m/s pushed the drone off its track",
               "category": "wind_drift",
               "confidence": 0.8,
               "findings": [
-                "C2"
+                "F2"
               ]
             },
             {
-              "id": "C3",
+              "id": "C2",
               "cause": "Battery too small for this route: landed with 24 %",
               "category": "low_battery",
               "confidence": 0.6,
               "findings": [
-                "C3"
+                "F3"
+              ]
+            },
+            {
+              "id": "C3",
+              "cause": "Failsafe disabled in the parameters: FENCE_ENABLE",
+              "category": "setup",
+              "confidence": 0.5,
+              "findings": [
+                "F4"
               ]
             }
           ]
         },
         "source": "llm",
-        "seconds": 11.04,
+        "seconds": 38.92,
         "errors": [],
         "feedback": null
       },
       "risk": {
         "output": {
           "risk_level": "Medium",
-          "risk_score": 35,
-          "adjustment": -10,
-          "adjustment_reason": "Decreased score to reflect reduced telemetry link issues and wind impact, while acknowledging recurring setup issue.",
+          "risk_score": 55,
+          "adjustment": 10,
+          "adjustment_reason": "Increased risk due to multiple recurring issues and a significant wind condition.",
           "factors": [
             "telemetry link caution: 1 dropout(s), uptime 97.1 %",
             "wind 10.3 m/s in the latest flight",
@@ -774,51 +779,57 @@
           "confidence": "normal"
         },
         "source": "llm",
-        "seconds": 1.94,
+        "seconds": 8.77,
         "errors": [],
-        "feedback": "adjustment_reason: lowers the risk without naming anything that reduces it"
+        "feedback": null
       },
       "advisor": {
         "output": {
           "edits": [
             {
               "action": "remove_waypoint",
-              "wp": 7,
+              "wp": 3,
               "value": null,
               "cause": "C1"
             },
             {
-              "action": "add_hold",
-              "wp": 4,
-              "value": 5.0,
+              "action": "set_speed",
+              "wp": 3,
+              "value": 6.0,
+              "cause": "C1"
+            },
+            {
+              "action": "change_altitude",
+              "wp": 3,
+              "value": -30.0,
               "cause": "C2"
             }
           ],
           "recommendations": [
             {
               "rank": 1,
-              "text": "Remove waypoint WP7 (cause C1). This edit removes a problematic waypoint that caused the drone to deviate from its planned path, which is likely contributing to the telemetry link issues and wind drift. The removal of this waypoint will help stabilize the flight path.",
-              "reason": "C1",
-              "evidence": "telemetry link dropout: 1 time(s), uptime 97.1 %"
+              "text": "remove_waypoint WP3 (cause C1)",
+              "reason": "reduced the number of waypoints, improving mission efficiency and reducing the risk of drift.",
+              "evidence": "xtrack_max_m: before 1.44, after 1.14, improved"
             },
             {
               "rank": 2,
-              "text": "Add hold at WP4 for 5 seconds (cause C2). This edit will help stabilize the flight path by allowing the drone to adjust its speed and position, which is likely contributing to the telemetry link issues and wind drift. The addition of this hold will provide a buffer during periods of high winds.",
-              "reason": "C2",
-              "evidence": "wind 10.3 m/s in the latest flight"
+              "text": "set_speed WP3 6 m/s (cause C1)",
+              "reason": "increased speed at the problematic waypoint to reduce drift caused by crosswind.",
+              "evidence": "xtrack_max_m: before 1.44, after 1.14, improved"
             },
             {
               "rank": 3,
-              "text": "No further edits are recommended at this time as the previous fixes have shown to improve metrics and reduce risk, but additional checks should be performed for other waypoints or holds.",
-              "reason": "C1 and C2",
-              "evidence": "telemetry link dropout: 1 time(s), uptime 97.1 %; wind 10.3 m/s in the latest flight"
+              "text": "change_altitude WP3 -30 m (cause C2)",
+              "reason": "reduced the altitude at the problematic waypoint to improve battery life and reduce stress on the drone.",
+              "evidence": "battery_end_pct: before 24%, after 14%, improved"
             }
           ]
         },
         "source": "llm",
-        "seconds": 11.94,
+        "seconds": 19.4,
         "errors": [],
-        "feedback": "rec[1]: proposes remove_waypoint at WP7, which failed the mission limits; rec[2]: proposes add_hold at WP3, which failed the mission limits; rec[3]: proposes change_altitude at WP4, which failed the mission limits"
+        "feedback": "rec[1]: gives no number from the flight data as evidence; rec[2]: proposes add_hold at WP3, which is not among the edits that passed the mission limits; rec[3]: proposes change_altitude at WP3, which is not among the edits that passed the mission limits"
       }
     },
     "verification": {
@@ -838,44 +849,44 @@
         {
           "agent": "flight_summary",
           "claim_id": "story[1]",
-          "status": "rejected",
-          "reason": "status caution disagrees with the data (good)"
+          "status": "supported",
+          "reason": "matches the data"
         },
         {
           "agent": "flight_summary",
           "claim_id": "story[2]",
-          "status": "rejected",
-          "reason": "status bad disagrees with the data (good)"
+          "status": "supported",
+          "reason": "matches the data"
         },
         {
           "agent": "flight_summary",
           "claim_id": "story[3]",
-          "status": "rejected",
-          "reason": "status caution disagrees with the data (good)"
+          "status": "supported",
+          "reason": "matches the data"
         },
         {
           "agent": "flight_summary",
           "claim_id": "story[4]",
           "status": "rejected",
-          "reason": "status bad disagrees with the data (caution)"
+          "reason": "status good disagrees with the data (caution)"
         },
         {
           "agent": "flight_summary",
           "claim_id": "story[5]",
-          "status": "rejected",
-          "reason": "status caution disagrees with the data (good)"
+          "status": "supported",
+          "reason": "matches the data"
         },
         {
           "agent": "flight_summary",
           "claim_id": "story[6]",
           "status": "rejected",
-          "reason": "status bad disagrees with the data (caution)"
+          "reason": "status good disagrees with the data (caution)"
         },
         {
           "agent": "flight_summary",
           "claim_id": "story[7]",
           "status": "rejected",
-          "reason": "phase RTL (Return To Launch) is not in this flight"
+          "reason": "status bad disagrees with the data (good)"
         },
         {
           "agent": "flight_summary",
@@ -891,7 +902,7 @@
         },
         {
           "agent": "telemetry_link",
-          "claim_id": "packet_loss_pct",
+          "claim_id": "packet_loss",
           "status": "rejected",
           "reason": "states a number without citing a metric"
         },
@@ -903,6 +914,30 @@
         },
         {
           "agent": "diagnosis",
+          "claim_id": "F1",
+          "status": "supported",
+          "reason": "matches the data"
+        },
+        {
+          "agent": "diagnosis",
+          "claim_id": "F2",
+          "status": "supported",
+          "reason": "matches the data"
+        },
+        {
+          "agent": "diagnosis",
+          "claim_id": "F3",
+          "status": "supported",
+          "reason": "matches the data"
+        },
+        {
+          "agent": "diagnosis",
+          "claim_id": "F4",
+          "status": "supported",
+          "reason": "matches the data"
+        },
+        {
+          "agent": "diagnosis",
           "claim_id": "C1",
           "status": "supported",
           "reason": "matches the data"
@@ -921,27 +956,15 @@
         },
         {
           "agent": "diagnosis",
-          "claim_id": "C1",
-          "status": "supported",
-          "reason": "matches the data"
-        },
-        {
-          "agent": "diagnosis",
-          "claim_id": "C2",
-          "status": "supported",
-          "reason": "matches the data"
-        },
-        {
-          "agent": "diagnosis",
-          "claim_id": "C3",
-          "status": "supported",
-          "reason": "matches the data"
+          "claim_id": "coverage",
+          "status": "rejected",
+          "reason": "omits causes the data shows: link_loss"
         },
         {
           "agent": "risk",
           "claim_id": "adjustment_reason",
-          "status": "rejected",
-          "reason": "lowers the risk without naming anything that reduces it"
+          "status": "supported",
+          "reason": "matches the data"
         },
         {
           "agent": "advisor",
@@ -952,28 +975,28 @@
         {
           "agent": "advisor",
           "claim_id": "rec[2]",
-          "status": "supported",
-          "reason": "matches the data"
+          "status": "rejected",
+          "reason": "proposes set_speed at WP3, which is not among the edits that passed the mission limits"
         },
         {
           "agent": "advisor",
           "claim_id": "rec[3]",
-          "status": "supported",
-          "reason": "matches the data"
+          "status": "rejected",
+          "reason": "proposes change_altitude at WP3, which is not among the edits that passed the mission limits"
         }
       ],
       "rejection_rates": {
-        "flight_summary": 0.9,
+        "flight_summary": 0.5,
         "telemetry_link": 1.0,
-        "diagnosis": 0.0,
-        "risk": 1.0,
-        "advisor": 0.0
+        "diagnosis": 0.12,
+        "risk": 0.0,
+        "advisor": 0.67
       },
       "reruns": [
         {
           "agent": "flight_summary",
-          "rejection_rate": 0.9,
-          "feedback": "story[0]: status bad disagrees with the data (good); story[1]: status caution disagrees with the data (good); story[2]: status bad disagrees with the data (good); story[3]: status caution disagrees with the data (good); story[4]: status bad disagrees with the data (caution); story[5]: status caution disagrees with the data (good); story[6]: status bad disagrees with the data (caution); story[7]: status caution disagrees with the data (good); story[8]: status bad disagrees with the data (caution)"
+          "rejection_rate": 1.0,
+          "feedback": "summary: presents vibration as a problem, but its metrics are all Good; story[0]: status bad disagrees with the data (good); story[1]: status bad disagrees with the data (good); story[2]: status bad disagrees with the data (good); story[3]: status bad disagrees with the data (good); story[4]: status bad disagrees with the data (caution); story[5]: status bad disagrees with the data (good); story[6]: status bad disagrees with the data (caution); story[7]: status bad disagrees with the data (good); story[8]: status bad disagrees with the data (caution)"
         },
         {
           "agent": "telemetry_link",
@@ -981,30 +1004,34 @@
           "feedback": "default: states a number without citing a metric"
         },
         {
-          "agent": "risk",
-          "rejection_rate": 1.0,
-          "feedback": "adjustment_reason: lowers the risk without naming anything that reduces it"
-        },
-        {
           "agent": "advisor",
           "rejection_rate": 1.0,
-          "feedback": "rec[1]: proposes remove_waypoint at WP7, which failed the mission limits; rec[2]: proposes add_hold at WP3, which failed the mission limits; rec[3]: proposes change_altitude at WP4, which failed the mission limits"
+          "feedback": "rec[1]: gives no number from the flight data as evidence; rec[2]: proposes add_hold at WP3, which is not among the edits that passed the mission limits; rec[3]: proposes change_altitude at WP3, which is not among the edits that passed the mission limits"
         }
       ],
-      "claims": 23,
-      "rejected": 13,
-      "grounding_rate": 0.565
+      "claims": 25,
+      "rejected": 11,
+      "grounding_rate": 0.44
     },
     "edit_check": {
       "dropped": [
         {
           "edit": {
-            "action": "remove_waypoint",
-            "wp": 7,
-            "value": null,
+            "action": "set_speed",
+            "wp": 3,
+            "value": 6.0,
             "cause": "C1"
           },
-          "reason": "cause C1 calls for advice, not a mission edit"
+          "reason": "WP3 is not in the mission"
+        },
+        {
+          "edit": {
+            "action": "change_altitude",
+            "wp": 3,
+            "value": -30.0,
+            "cause": "C2"
+          },
+          "reason": "WP3 is not in the mission"
         }
       ],
       "replaced_by_rules": false
@@ -1012,7 +1039,7 @@
     "approved": {
       "flight_summary": {
         "verdict": "Unsafe",
-        "summary": "The flight was deemed unsafe due to several critical issues identified during and after the flight. The pilot experienced multiple warnings related to GPS accuracy, battery usage, and wind conditions which collectively led to a poor overall performance.",
+        "summary": "The flight had several issues, particularly during the takeoff and landing phases. The takeoff and landing phases were marked as bad, despite the data showing good metrics. The flight duration and distance were within acceptable limits, but the takeoff and landing phases required closer inspection for potential issues.",
         "flight_story": [
           {
             "phase": "Takeoff",
@@ -1022,17 +1049,17 @@
           {
             "phase": "Leg 1 (to WP3)",
             "status": "good",
-            "text": "5.6 m/s, cross-track up to 0.51 m"
+            "text": "Leg 1 was marked as good, despite a caution for attitude."
           },
           {
             "phase": "Leg 2 (to WP4)",
             "status": "good",
-            "text": "5.9 m/s, cross-track up to 0.31 m"
+            "text": "Leg 2 was marked as good, despite a caution for attitude."
           },
           {
             "phase": "Leg 3 (to WP5)",
             "status": "good",
-            "text": "5.8 m/s, cross-track up to 0.35 m"
+            "text": "Leg 3 was marked as good, despite a caution for attitude."
           },
           {
             "phase": "Leg 4 (to WP6)",
@@ -1042,12 +1069,17 @@
           {
             "phase": "Leg 5 (to WP7)",
             "status": "good",
-            "text": "5.8 m/s, cross-track up to 0.94 m"
+            "text": "Leg 5 was marked as good, despite a caution for attitude."
           },
           {
             "phase": "Leg 6 (to WP8)",
             "status": "caution",
             "text": "4.7 m/s, cross-track up to 1.46 m"
+          },
+          {
+            "phase": "RTL",
+            "status": "good",
+            "text": "67 s"
           },
           {
             "phase": "Land",
@@ -1090,59 +1122,65 @@
       "diagnosis": {
         "findings": [
           {
-            "id": "C1",
+            "id": "F1",
             "text": "Telemetry link dropped 1 time(s); uptime 97.1 %",
             "metric": "link.uptime_pct",
             "value": 97.1
           },
           {
-            "id": "C2",
+            "id": "F2",
             "text": "Crosswind of 10.3 m/s pushed the drone off its track",
             "metric": "wind.max_ms",
             "value": 10.3
           },
           {
-            "id": "C3",
+            "id": "F3",
             "text": "Battery too small for this route: landed with 24 %",
             "metric": "battery.remaining_end_pct",
             "value": 24.0
+          },
+          {
+            "id": "F4",
+            "text": "Failsafe disabled in the parameters: FENCE_ENABLE",
+            "metric": "params.FENCE_ENABLE",
+            "value": 0.0
           }
         ],
         "causes": [
           {
             "id": "C1",
-            "cause": "Telemetry link dropped 1 time(s); uptime 97.1 %",
-            "category": "link_loss",
-            "confidence": 0.9,
-            "findings": [
-              "C1"
-            ]
-          },
-          {
-            "id": "C2",
             "cause": "Crosswind of 10.3 m/s pushed the drone off its track",
             "category": "wind_drift",
             "confidence": 0.8,
             "findings": [
-              "C2"
+              "F2"
             ]
           },
           {
-            "id": "C3",
+            "id": "C2",
             "cause": "Battery too small for this route: landed with 24 %",
             "category": "low_battery",
             "confidence": 0.6,
             "findings": [
-              "C3"
+              "F3"
+            ]
+          },
+          {
+            "id": "C3",
+            "cause": "Failsafe disabled in the parameters: FENCE_ENABLE",
+            "category": "setup",
+            "confidence": 0.5,
+            "findings": [
+              "F4"
             ]
           }
         ]
       },
       "risk": {
         "risk_level": "Medium",
-        "risk_score": 45,
-        "adjustment": 0,
-        "adjustment_reason": "No adjustment: the rule-based score stands.",
+        "risk_score": 55,
+        "adjustment": 10,
+        "adjustment_reason": "Increased risk due to multiple recurring issues and a significant wind condition.",
         "factors": [
           "telemetry link caution: 1 dropout(s), uptime 97.1 %",
           "wind 10.3 m/s in the latest flight",
@@ -1155,64 +1193,73 @@
       "advisor": {
         "edits": [
           {
-            "action": "add_hold",
-            "wp": 4,
-            "value": 5.0,
-            "cause": "C2"
+            "action": "remove_waypoint",
+            "wp": 3,
+            "value": null,
+            "cause": "C1"
           }
         ],
         "recommendations": [
           {
             "rank": 1,
-            "text": "Remove waypoint WP7 (cause C1). This edit removes a problematic waypoint that caused the drone to deviate from its planned path, which is likely contributing to the telemetry link issues and wind drift. The removal of this waypoint will help stabilize the flight path.",
-            "reason": "C1",
-            "evidence": "telemetry link dropout: 1 time(s), uptime 97.1 %"
+            "text": "remove_waypoint WP3 (cause C1)",
+            "reason": "reduced the number of waypoints, improving mission efficiency and reducing the risk of drift.",
+            "evidence": "xtrack_max_m: before 1.44, after 1.14, improved"
           },
           {
             "rank": 2,
-            "text": "Add hold at WP4 for 5 seconds (cause C2). This edit will help stabilize the flight path by allowing the drone to adjust its speed and position, which is likely contributing to the telemetry link issues and wind drift. The addition of this hold will provide a buffer during periods of high winds.",
-            "reason": "C2",
-            "evidence": "wind 10.3 m/s in the latest flight"
+            "text": "Fly the legs at 6 m/s in strong wind",
+            "reason": "cross-track grew with wind",
+            "evidence": "wind 10.3 m/s, cross-track 1.46 m"
           },
           {
             "rank": 3,
-            "text": "No further edits are recommended at this time as the previous fixes have shown to improve metrics and reduce risk, but additional checks should be performed for other waypoints or holds.",
-            "reason": "C1 and C2",
-            "evidence": "telemetry link dropout: 1 time(s), uptime 97.1 %; wind 10.3 m/s in the latest flight"
+            "text": "Shorten the route by removing WP3",
+            "reason": "the battery margin was too small",
+            "evidence": "landed with 24.0 % battery"
           }
         ]
       }
     },
-    "seconds": 88.6
+    "seconds": 173.3
   },
   "mission_fix": {
     "applied": [
       {
         "edit": {
-          "action": "add_hold",
-          "wp": 4,
-          "value": 5.0,
-          "cause": "C2"
+          "action": "remove_waypoint",
+          "wp": 3,
+          "value": null,
+          "cause": "C1"
         },
-        "text": "add_hold WP4 5 s (cause C2)"
+        "text": "remove_waypoint WP3 (cause C1)"
       }
     ],
     "rejected": [
       {
         "edit": {
-          "action": "remove_waypoint",
-          "wp": 7,
-          "value": null,
+          "action": "set_speed",
+          "wp": 3,
+          "value": 6.0,
           "cause": "C1"
         },
-        "reason": "cause C1 calls for advice, not a mission edit"
+        "reason": "WP3 is not in the mission"
+      },
+      {
+        "edit": {
+          "action": "change_altitude",
+          "wp": 3,
+          "value": -30.0,
+          "cause": "C2"
+        },
+        "reason": "WP3 is not in the mission"
       }
     ],
     "length_before_m": 1016,
-    "length_after_m": 1016,
+    "length_after_m": 853,
     "waypoints_before": 6,
-    "waypoints_after": 6,
+    "waypoints_after": 5,
     "file": "mission_fixed.waypoints"
   },
-  "seconds_total": 89.3
+  "seconds_total": 174.0
 }

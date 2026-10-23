@@ -486,7 +486,7 @@
       "plan": [
         {
           "agent": "flight_summary",
-          "reason": "Always run flight summary first to provide an overview of the mission."
+          "reason": "Always run flight_summary first to provide an overview of the flight."
         },
         {
           "agent": "telemetry_link",
@@ -494,19 +494,19 @@
         },
         {
           "agent": "diagnosis",
-          "reason": "Run diagnosis when there are caution or bad metrics, and telemetry_link has a bad uptime."
+          "reason": "Run diagnosis to address any caution or bad metrics, which are present in the problems list."
         },
         {
           "agent": "risk",
-          "reason": "Run risk after diagnosis to assess potential risks based on the current status."
+          "reason": "history has 3 flight(s) (added by rule)"
         },
         {
           "agent": "advisor",
-          "reason": "Run advisor last as it can provide recommendations based on the analysis done by previous agents."
+          "reason": "mission file present: edits allowed (added by rule)"
         },
         {
           "agent": "verifier",
-          "reason": "Always run verifier last to ensure all checks are completed and validate the results."
+          "reason": "Run verifier last to ensure all systems are functioning correctly after other agents have run."
         }
       ],
       "source": "llm"
@@ -518,87 +518,68 @@
       "flight_summary": {
         "output": {
           "verdict": "Needs attention",
-          "summary": "The flight was generally successful, but there were issues with the link uptime and some GPS data. The drone maintained a good track throughout all legs, though the link performance dropped below expected levels at times. The pilot notes are not available to provide context for these issues.",
+          "summary": "The flight had issues with link uptime and battery usage. The link uptime was below the usual threshold, and the battery used more than expected for the distance flown. The pilot should monitor these metrics more closely in future flights.",
           "flight_story": [
             {
               "phase": "Takeoff",
               "status": "good",
-              "text": "The takeoff phase was smooth with no reported issues."
+              "text": "Takeoff was smooth."
             },
             {
               "phase": "Leg 1 (to WP3)",
               "status": "good",
-              "text": "During the first leg, the drone maintained a good track and speed as it flew to waypoint 3."
+              "text": "Leg 1 was executed smoothly."
             },
             {
               "phase": "Leg 2 (to WP4)",
               "status": "good",
-              "text": "The second leg saw consistent tracking with moderate speeds as the drone moved towards waypoint 4."
+              "text": "Leg 2 was executed smoothly."
             },
             {
               "phase": "Leg 3 (to WP5)",
               "status": "good",
-              "text": "In this phase, the drone continued to track well and maintain a steady speed while heading toward waypoint 5."
+              "text": "Leg 3 was executed smoothly."
             },
             {
               "phase": "Leg 4 (to WP6)",
               "status": "good",
-              "text": "The fourth leg saw good tracking with moderate speeds as the drone flew towards waypoint 6."
+              "text": "Leg 4 was executed smoothly."
             },
             {
               "phase": "Leg 5 (to WP7)",
               "status": "good",
-              "text": "During this phase, the drone maintained a good track and speed while moving toward waypoint 7."
+              "text": "Leg 5 was executed smoothly."
             },
             {
               "phase": "Leg 6 (to WP8)",
               "status": "good",
-              "text": "The sixth leg continued with consistent tracking as the drone flew towards waypoint 8."
+              "text": "Leg 6 was executed smoothly."
             },
             {
               "phase": "Leg 7 (to WP9)",
               "status": "good",
-              "text": "In this phase, the drone maintained good track and speed while heading toward waypoint 9."
+              "text": "Leg 7 was executed smoothly."
             },
             {
               "phase": "Leg 8 (to WP10)",
               "status": "good",
-              "text": "The final leg saw consistent tracking as the drone flew towards waypoint 10."
+              "text": "Leg 8 was executed smoothly."
             },
             {
               "phase": "RTL",
               "status": "good",
-              "text": "During return-to-launch, the drone maintained good track and speed."
+              "text": "Return to launch was smooth."
             },
             {
               "phase": "Land",
               "status": "good",
-              "text": "The landing phase was smooth with no reported issues."
+              "text": "Landing was smooth."
             }
           ],
-          "claims": [
-            {
-              "id": "tracking.xtrack_max_m",
-              "text": "0.48",
-              "metric": null,
-              "value": null
-            },
-            {
-              "id": "gps.min_sats",
-              "text": "10",
-              "metric": null,
-              "value": null
-            },
-            {
-              "id": "wind.max_ms",
-              "text": "0.5",
-              "metric": null,
-              "value": null
-            }
-          ]
+          "claims": []
         },
         "source": "llm",
-        "seconds": 17.87,
+        "seconds": 38.18,
         "errors": [],
         "feedback": null
       },
@@ -609,26 +590,26 @@
           "link_findings": [
             {
               "id": "default",
-              "text": "Uptime is below acceptable levels (92.4%) and there are multiple dropouts, one lasting for 12.3 seconds at WP8.",
-              "metric": null,
-              "value": "bad"
-            },
-            {
-              "id": "dropout_0",
-              "text": "Dropout occurred at t=90.1s with duration of 12.3s near WP4.",
-              "metric": null,
+              "text": "Uptime is bad (92.4%)",
+              "metric": "link_uptime",
               "value": "bad"
             },
             {
               "id": "dropout_1",
-              "text": "Another dropout occurred at t=200.1s with duration of 12.2s near WP8.",
-              "metric": null,
+              "text": "Dropout at WP4, duration 12.3 seconds",
+              "metric": "dropouts",
+              "value": "bad"
+            },
+            {
+              "id": "dropout_2",
+              "text": "Dropout at WP8, duration 12.2 seconds",
+              "metric": "dropouts",
               "value": "bad"
             }
           ]
         },
         "source": "llm",
-        "seconds": 5.64,
+        "seconds": 9.2,
         "errors": [],
         "feedback": "default: states a number without citing a metric"
       },
@@ -639,13 +620,13 @@
               "id": "F1",
               "text": "Telemetry link dropped 2 time(s); uptime 92.4 %",
               "metric": "link.uptime_pct",
-              "value": null
+              "value": 92.4
             },
             {
               "id": "F2",
               "text": "Failsafe disabled in the parameters: FENCE_ENABLE",
               "metric": "params.FENCE_ENABLE",
-              "value": null
+              "value": 0.0
             }
           ],
           "causes": [
@@ -670,16 +651,16 @@
           ]
         },
         "source": "llm",
-        "seconds": 7.17,
+        "seconds": 36.4,
         "errors": [],
         "feedback": null
       },
       "risk": {
         "output": {
           "risk_level": "Low",
-          "risk_score": 20,
-          "adjustment": -10,
-          "adjustment_reason": "The telemetry link has dropped twice, which is a significant factor. Reducing the risk score by 10 points will help mitigate this issue.",
+          "risk_score": 25,
+          "adjustment": -5,
+          "adjustment_reason": "Reducing the risk score by 5 points to reflect the telemetry link issues and the fact that failsafe is not set, but the telemetry link issues are already captured in the score.",
           "factors": [
             "telemetry link bad: 2 dropout(s), uptime 92.4 %",
             "failsafe not set: FENCE_ENABLE = 0"
@@ -688,7 +669,7 @@
           "confidence": "normal"
         },
         "source": "llm",
-        "seconds": 4.09,
+        "seconds": 8.64,
         "errors": [],
         "feedback": null
       },
@@ -697,48 +678,48 @@
           "edits": [
             {
               "action": "remove_waypoint",
-              "wp": 7,
+              "wp": 10,
               "value": null,
               "cause": "C1"
             },
             {
               "action": "change_altitude",
-              "wp": 3,
-              "value": -20.0,
+              "wp": 2,
+              "value": -10.0,
               "cause": "C1"
             },
             {
               "action": "add_hold",
-              "wp": 4,
-              "value": 5.0,
+              "wp": 2,
+              "value": 10.0,
               "cause": "C1"
             }
           ],
           "recommendations": [
             {
               "rank": 1,
-              "text": "remove_waypoint at WP7, evidence: F2 (Failsafe disabled in the parameters)",
-              "reason": "Removing a waypoint will help mitigate the failsafe issue without affecting other mission objectives.",
-              "evidence": "C1"
+              "text": "remove_waypoint at WP10",
+              "reason": "Waypoint removal reduces the number of waypoints to 9, aligning with the limit of at most 30% of waypoints.",
+              "evidence": "metrics.warnings: 0, what_worked_before: []"
             },
             {
               "rank": 2,
-              "text": "change_altitude at WP3, evidence: F1 (Telemetry link dropped twice; uptime 92.4%)",
-              "reason": "Adjusting the altitude will help stabilize the flight and reduce the risk of further telemetry drops.",
-              "evidence": "C1"
+              "text": "change_altitude at WP2 by -10m",
+              "reason": "Altitude change at WP2 helps to address the telemetry link issues by reducing the altitude difference between waypoints.",
+              "evidence": "metrics.flight.duration_s: 324.5, metrics.flight.distance_m: 1192.0, metrics.flight.max_alt_m: 30.0"
             },
             {
               "rank": 3,
-              "text": "add_hold at WP4, evidence: F1 (Telemetry link dropped twice; uptime 92.4%)",
-              "reason": "Adding a hold will help stabilize the flight and reduce the risk of further telemetry drops.",
-              "evidence": "C1"
+              "text": "add_hold at WP2 for 10 seconds",
+              "reason": "Adding a hold at WP2 can help stabilize the flight and address the telemetry link issues.",
+              "evidence": "metrics.flight.duration_s: 324.5, metrics.flight.distance_m: 1192.0, metrics.flight.max_alt_m: 30.0"
             }
           ]
         },
         "source": "llm",
-        "seconds": 9.53,
+        "seconds": 22.74,
         "errors": [],
-        "feedback": "rec[2]: proposes add_hold at WP10, which failed the mission limits; rec[3]: proposes change_altitude at WP3, which failed the mission limits"
+        "feedback": "rec[1]: proposes remove_waypoint at WP10, which is not among the edits that passed the mission limits; rec[2]: proposes change_altitude at WP2, which is not among the edits that passed the mission limits; rec[3]: proposes add_hold at WP2, which is not among the edits that passed the mission limits"
       }
     },
     "verification": {
@@ -746,8 +727,8 @@
         {
           "agent": "flight_summary",
           "claim_id": "summary",
-          "status": "supported",
-          "reason": "matches the data"
+          "status": "rejected",
+          "reason": "presents battery as a problem, but its metrics are all Good"
         },
         {
           "agent": "flight_summary",
@@ -816,40 +797,22 @@
           "reason": "matches the data"
         },
         {
-          "agent": "flight_summary",
-          "claim_id": "tracking.xtrack_max_m",
-          "status": "supported",
-          "reason": "matches the data"
-        },
-        {
-          "agent": "flight_summary",
-          "claim_id": "gps.min_sats",
-          "status": "supported",
-          "reason": "matches the data"
-        },
-        {
-          "agent": "flight_summary",
-          "claim_id": "wind.max_ms",
-          "status": "supported",
-          "reason": "matches the data"
-        },
-        {
           "agent": "telemetry_link",
           "claim_id": "default",
           "status": "rejected",
-          "reason": "states a number without citing a metric"
-        },
-        {
-          "agent": "telemetry_link",
-          "claim_id": "dropout_0",
-          "status": "rejected",
-          "reason": "states a number without citing a metric"
+          "reason": "metric link_uptime does not exist"
         },
         {
           "agent": "telemetry_link",
           "claim_id": "dropout_1",
           "status": "rejected",
-          "reason": "states a number without citing a metric"
+          "reason": "metric dropouts does not exist"
+        },
+        {
+          "agent": "telemetry_link",
+          "claim_id": "dropout_2",
+          "status": "rejected",
+          "reason": "metric dropouts does not exist"
         },
         {
           "agent": "diagnosis",
@@ -885,23 +848,23 @@
           "agent": "advisor",
           "claim_id": "rec[1]",
           "status": "rejected",
-          "reason": "proposes remove_waypoint at WP7, which failed the mission limits"
+          "reason": "proposes remove_waypoint at WP10, which is not among the edits that passed the mission limits"
         },
         {
           "agent": "advisor",
           "claim_id": "rec[2]",
           "status": "rejected",
-          "reason": "proposes change_altitude at WP3, which failed the mission limits"
+          "reason": "proposes change_altitude at WP2, which is not among the edits that passed the mission limits"
         },
         {
           "agent": "advisor",
           "claim_id": "rec[3]",
           "status": "rejected",
-          "reason": "proposes add_hold at WP4, which failed the mission limits"
+          "reason": "proposes add_hold at WP2, which is not among the edits that passed the mission limits"
         }
       ],
       "rejection_rates": {
-        "flight_summary": 0.13,
+        "flight_summary": 0.25,
         "telemetry_link": 1.0,
         "diagnosis": 0.0,
         "risk": 0.0,
@@ -910,25 +873,25 @@
       "reruns": [
         {
           "agent": "telemetry_link",
-          "rejection_rate": 1.0,
+          "rejection_rate": 0.8,
           "feedback": "default: states a number without citing a metric"
         },
         {
           "agent": "advisor",
-          "rejection_rate": 0.67,
-          "feedback": "rec[2]: proposes add_hold at WP10, which failed the mission limits; rec[3]: proposes change_altitude at WP3, which failed the mission limits"
+          "rejection_rate": 1.0,
+          "feedback": "rec[1]: proposes remove_waypoint at WP10, which is not among the edits that passed the mission limits; rec[2]: proposes change_altitude at WP2, which is not among the edits that passed the mission limits; rec[3]: proposes add_hold at WP2, which is not among the edits that passed the mission limits"
         }
       ],
-      "claims": 26,
-      "rejected": 8,
-      "grounding_rate": 0.308
+      "claims": 23,
+      "rejected": 9,
+      "grounding_rate": 0.391
     },
     "edit_check": {
       "dropped": [
         {
           "edit": {
             "action": "remove_waypoint",
-            "wp": 7,
+            "wp": 10,
             "value": null,
             "cause": "C1"
           },
@@ -937,8 +900,8 @@
         {
           "edit": {
             "action": "change_altitude",
-            "wp": 3,
-            "value": -20.0,
+            "wp": 2,
+            "value": -10.0,
             "cause": "C1"
           },
           "reason": "cause C1 calls for advice, not a mission edit"
@@ -946,8 +909,8 @@
         {
           "edit": {
             "action": "add_hold",
-            "wp": 4,
-            "value": 5.0,
+            "wp": 2,
+            "value": 10.0,
             "cause": "C1"
           },
           "reason": "cause C1 calls for advice, not a mission edit"
@@ -958,17 +921,17 @@
     "approved": {
       "flight_summary": {
         "verdict": "Needs attention",
-        "summary": "The flight was generally successful, but there were issues with the link uptime and some GPS data. The drone maintained a good track throughout all legs, though the link performance dropped below expected levels at times. The pilot notes are not available to provide context for these issues.",
+        "summary": "The flight lasted 324 s over 1192 m and scored 50 out of 100. The main problems were: link uptime, dropouts. It landed with 81 % battery and the telemetry link was up 92.4 % of the time.",
         "flight_story": [
           {
             "phase": "Takeoff",
             "status": "good",
-            "text": "The takeoff phase was smooth with no reported issues."
+            "text": "Takeoff was smooth."
           },
           {
             "phase": "Leg 1 (to WP3)",
             "status": "good",
-            "text": "During the first leg, the drone maintained a good track and speed as it flew to waypoint 3."
+            "text": "Leg 1 was executed smoothly."
           },
           {
             "phase": "Leg 2 (to WP4)",
@@ -978,17 +941,17 @@
           {
             "phase": "Leg 3 (to WP5)",
             "status": "good",
-            "text": "In this phase, the drone continued to track well and maintain a steady speed while heading toward waypoint 5."
+            "text": "Leg 3 was executed smoothly."
           },
           {
             "phase": "Leg 4 (to WP6)",
             "status": "good",
-            "text": "The fourth leg saw good tracking with moderate speeds as the drone flew towards waypoint 6."
+            "text": "Leg 4 was executed smoothly."
           },
           {
             "phase": "Leg 5 (to WP7)",
             "status": "good",
-            "text": "During this phase, the drone maintained a good track and speed while moving toward waypoint 7."
+            "text": "Leg 5 was executed smoothly."
           },
           {
             "phase": "Leg 6 (to WP8)",
@@ -998,44 +961,25 @@
           {
             "phase": "Leg 7 (to WP9)",
             "status": "good",
-            "text": "In this phase, the drone maintained good track and speed while heading toward waypoint 9."
+            "text": "Leg 7 was executed smoothly."
           },
           {
             "phase": "Leg 8 (to WP10)",
             "status": "good",
-            "text": "The final leg saw consistent tracking as the drone flew towards waypoint 10."
+            "text": "Leg 8 was executed smoothly."
           },
           {
             "phase": "RTL",
             "status": "good",
-            "text": "During return-to-launch, the drone maintained good track and speed."
+            "text": "Return to launch was smooth."
           },
           {
             "phase": "Land",
             "status": "good",
-            "text": "The landing phase was smooth with no reported issues."
+            "text": "Landing was smooth."
           }
         ],
-        "claims": [
-          {
-            "id": "tracking.xtrack_max_m",
-            "text": "0.48",
-            "metric": null,
-            "value": null
-          },
-          {
-            "id": "gps.min_sats",
-            "text": "10",
-            "metric": null,
-            "value": null
-          },
-          {
-            "id": "wind.max_ms",
-            "text": "0.5",
-            "metric": null,
-            "value": null
-          }
-        ]
+        "claims": []
       },
       "telemetry_link": {
         "link_verdict": "bad",
@@ -1079,13 +1023,13 @@
             "id": "F1",
             "text": "Telemetry link dropped 2 time(s); uptime 92.4 %",
             "metric": "link.uptime_pct",
-            "value": null
+            "value": 92.4
           },
           {
             "id": "F2",
             "text": "Failsafe disabled in the parameters: FENCE_ENABLE",
             "metric": "params.FENCE_ENABLE",
-            "value": null
+            "value": 0.0
           }
         ],
         "causes": [
@@ -1111,9 +1055,9 @@
       },
       "risk": {
         "risk_level": "Low",
-        "risk_score": 20,
-        "adjustment": -10,
-        "adjustment_reason": "The telemetry link has dropped twice, which is a significant factor. Reducing the risk score by 10 points will help mitigate this issue.",
+        "risk_score": 25,
+        "adjustment": -5,
+        "adjustment_reason": "Reducing the risk score by 5 points to reflect the telemetry link issues and the fact that failsafe is not set, but the telemetry link issues are already captured in the score.",
         "factors": [
           "telemetry link bad: 2 dropout(s), uptime 92.4 %",
           "failsafe not set: FENCE_ENABLE = 0"
@@ -1139,7 +1083,7 @@
         ]
       }
     },
-    "seconds": 65.2
+    "seconds": 172.2
   },
   "mission_fix": {
     "applied": [],
@@ -1147,7 +1091,7 @@
       {
         "edit": {
           "action": "remove_waypoint",
-          "wp": 7,
+          "wp": 10,
           "value": null,
           "cause": "C1"
         },
@@ -1156,8 +1100,8 @@
       {
         "edit": {
           "action": "change_altitude",
-          "wp": 3,
-          "value": -20.0,
+          "wp": 2,
+          "value": -10.0,
           "cause": "C1"
         },
         "reason": "cause C1 calls for advice, not a mission edit"
@@ -1165,8 +1109,8 @@
       {
         "edit": {
           "action": "add_hold",
-          "wp": 4,
-          "value": 5.0,
+          "wp": 2,
+          "value": 10.0,
           "cause": "C1"
         },
         "reason": "cause C1 calls for advice, not a mission edit"
@@ -1178,5 +1122,5 @@
     "waypoints_after": 8,
     "file": "mission_fixed.waypoints"
   },
-  "seconds_total": 66.0
+  "seconds_total": 173.0
 }
