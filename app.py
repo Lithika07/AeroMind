@@ -89,6 +89,9 @@ def sidebar():
         except (IngestError, ValueError, OSError) as error:
             st.sidebar.error(str(error))
     if runs:
+        linked = st.query_params.get("run")      # ?run=s4 opens that run (shareable links)
+        if linked in runs and "linked" not in st.session_state:
+            st.session_state["run"] = st.session_state["linked"] = linked
         current = st.session_state.get("run", runs[0])
         st.session_state["run"] = st.sidebar.selectbox("Saved runs (use cached run)", runs,
                                                        index=runs.index(current) if current in runs else 0)

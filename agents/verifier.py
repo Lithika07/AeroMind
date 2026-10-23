@@ -137,7 +137,7 @@ def derived(metrics: dict) -> dict:
     return {"s": [round(v, 1) for v in spans]}
 
 
-def check_text(text: str, known: dict, require_number: bool = False) -> str:
+def check_text(text: str, known: dict, require_number: bool = False, where: str = "the flight data") -> str:
     """'' if every number with a unit in `text` matches a known value of that unit."""
     if require_number and not BARE_NUMBER.search(text):
         return "gives no number from the flight data as evidence"
@@ -145,7 +145,7 @@ def check_text(text: str, known: dict, require_number: bool = False) -> str:
         family, factor = UNITS.get(unit.lower(), UNITS.get(unit, (None, 1)))
         value = float(raw) * factor
         if family is None or not any(close(value, k) for k in known.get(family, [])):
-            return f"'{raw} {unit}' is not in the flight data"
+            return f"'{raw} {unit}' is not in {where}"
     return ""
 
 

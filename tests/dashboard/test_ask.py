@@ -39,3 +39,10 @@ def test_llm_answer_with_invented_numbers_falls_back_to_rules(s3_state):
 def test_llm_answer_citing_nothing_real_is_rejected(s3_state):
     backend = FakeBackend({"AskOut": [{"answer": "It was fine.", "citations": ["link.magic"]}]})
     assert ask.answer("link?", s3_state, backend)["source"] == "rules"
+
+
+def test_citing_a_field_of_a_record_covers_the_record(s3_state):
+    d = s3_state["metrics"]["link"]["dropouts"][0]
+    backend = FakeBackend({"AskOut": [{"answer": f"Lost for {d['duration_s']} s starting at {d['t']} s.",
+                                       "citations": ["link.dropouts[0].duration_s"]}]})
+    assert ask.answer("link?", s3_state, backend)["source"] == "llm"

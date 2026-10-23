@@ -45,8 +45,10 @@ def _check(answer: AskOut, state: dict) -> str:
     if not answer.citations:
         return "no metric cited"
     # numbers in the answer must come from the metrics it cites, not from anywhere in the flight
-    known = verifier.merge(*(verifier.pools_at(data, c) for c in answer.citations))
-    return verifier.check_text(answer.answer, known)
+    # a cited field covers its record too: link.dropouts[0].duration_s also vouches for that dropout's t
+    records = [c.rsplit(".", 1)[0] for c in answer.citations if "." in c and c.rsplit(".", 1)[0].endswith("]")]
+    known = verifier.merge(*(verifier.pools_at(data, c) for c in answer.citations + records))
+    return verifier.check_text(answer.answer, known, where="the metrics you cited; add the metric path it comes from")
 
 
 def rule_answer(question: str, state: dict) -> dict:
