@@ -41,7 +41,7 @@ def test_numbers_in_text_must_be_in_the_data():
 def test_recommendations_may_only_name_edits_that_passed():
     kept = {("set_speed", 3)}
     assert verifier.check_edit_mentions("set_speed at WP3 to 6 m/s", kept) == ""
-    assert "failed" in verifier.check_edit_mentions("add_hold (value 30 s at WP3)", kept)
+    assert "not among" in verifier.check_edit_mentions("add_hold (value 30 s at WP3)", kept)
 
 
 def test_rule_based_outputs_always_pass(states):
@@ -128,3 +128,24 @@ def test_invented_number_in_a_cause_is_rejected(states):
                              "category": "other", "confidence": 0.5, "findings": ["F1"]}]}
     verdicts = {v.claim_id: v for v in verifier.verify({"diagnosis": diagnosis}, state).verdicts}
     assert verdicts["C1"].status == "rejected"
+
+
+def test_a_good_topic_cannot_be_called_a_problem():
+    status = {"vibration": "good", "gps_sats": "good", "battery_end": "caution"}
+    assert "vibration" in verifier.check_topics("The drone had significant vibrations.", status)
+    assert "GPS" in verifier.check_topics("Poor GPS signal was a problem.", status)
+    assert verifier.check_topics("Battery was a problem: it landed with 24 %.", status) == ""
+    assert verifier.check_topics("Vibration stayed low throughout.", status) == ""
+
+
+def test_percentages_must_match_to_rounding():
+    known = verifier.pools({"link": {"uptime_pct": 98.3}})
+    assert verifier.check_text("uptime 98 %", known) == ""
+    assert "97.2 %" in verifier.check_text("uptime fell to 97.2 %", known)
+
+
+def test_edits_named_in_plain_words_must_have_passed():
+    kept = {("remove_waypoint", 3)}
+    assert verifier.check_edit_mentions("Remove WP3 to shorten the route", kept) == ""
+    assert "add_hold" in verifier.check_edit_mentions("Add a hold of 30 seconds at WP5", kept)
+    assert "remove_waypoint" in verifier.check_edit_mentions("Consider removing WP7", kept)

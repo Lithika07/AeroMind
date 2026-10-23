@@ -30,6 +30,12 @@ ABS_TOLERANCE = 0.15
 MAX_SUMMARY_SENTENCES = 3
 SENTENCE_END = re.compile(r"[.!?](?:\s|$)")
 EDIT_MENTION = re.compile(r"(set_speed|change_altitude|remove_waypoint|add_hold).*?WP\s?(\d+)")
+#: the same edits in plain words: (pattern, action)
+PLAIN_EDITS = (
+    (re.compile(r"\b(?:remov|delet|skip|drop)\w*\s+(?:the\s+)?(?:waypoints?\s+)?WP\s?(\d+)", re.I), "remove_waypoint"),
+    (re.compile(r"\bhold\b[^.;]*?\b(?:at|on)\s+WP\s?(\d+)", re.I), "add_hold"),
+    (re.compile(r"\b(?:altitude|climb|descend)\w*[^.;]*?\b(?:at|of|for)\s+WP\s?(\d+)", re.I), "change_altitude"),
+)
 #: A lower score must say what lowers the risk; "the risk is significant" is a reason to raise it.
 MITIGATION_WORDS = ("mitigat", "overstat", "already", "fixed", "resolved", "improv", "shorter", "lower than",
                     "less than", "no longer", "safer", "within limit", "not recur", "margin is", "enough")
@@ -51,7 +57,12 @@ def resolve(data, path: str):
     return True, current
 
 
-def close(a: float, b: float) -> bool:
+PERCENT_TOLERANCE = 0.6       # a percentage may be rounded to a whole number, no more
+
+
+def close(a: float, b: float, unit: str = None) -> bool:
+    if unit == "%":
+        return abs(a - b) <= PERCENT_TOLERANCE
     return abs(a - b) <= max(REL_TOLERANCE * abs(b), ABS_TOLERANCE)
 
 
@@ -144,7 +155,7 @@ def check_text(text: str, known: dict, require_number: bool = False, where: str 
     for raw, unit in NUMBER_WITH_UNIT.findall(text):
         family, factor = UNITS.get(unit.lower(), UNITS.get(unit, (None, 1)))
         value = float(raw) * factor
-        if family is None or not any(close(value, k) for k in known.get(family, [])):
+        if family is None or not any(close(value, k, family) for k in known.get(family, [])):
             return f"'{raw} {unit}' is not in {where}"
     return ""
 
@@ -176,9 +187,40 @@ def check_claim(claim: dict, data: dict, known: dict) -> str:
 
 def check_edit_mentions(text: str, kept: set) -> str:
     """A recommendation may only name a mission edit that passed the mission limits."""
-    for action, seq in EDIT_MENTION.findall(text):
-        if (action, int(seq)) not in kept:
-            return f"proposes {action} at WP{seq}, which failed the mission limits"
+    mentions = [(action, int(seq)) for action, seq in EDIT_MENTION.findall(text)]
+    mentions += [(action, int(seq)) for pattern, action in PLAIN_EDITS for seq in pattern.findall(text)]
+    for action, seq in mentions:
+        if (action, seq) not in kept:
+            return f"proposes {action} at WP{seq}, which is not among the edits that passed the mission limits"
+    return ""
+
+
+#: topic -> (words that name it, status keys that measure it)
+TOPICS = {
+    "vibration": (("vibration", "vibrations", "clipping"), ("vibration", "clipping")),
+    "GPS": (("gps", "satellite", "satellites", "hdop"), ("gps_sats", "gps_hdop")),
+    "wind": (("wind", "gust", "gusts"), ("wind",)),
+    "battery": (("battery",), ("battery_end",)),
+    "telemetry link": (("link", "telemetry", "dropout", "dropouts", "signal", "connection"),
+                       ("link_uptime", "dropouts", "packet_loss")),
+    "tracking": (("cross-track", "drift", "drifted", "off track"), ("xtrack_max_m",)),
+    "attitude": (("roll", "pitch", "tilt", "attitude"), ("attitude",)),
+}
+PROBLEM_WORDS = re.compile(r"\b(poor|weak|excessive|significant|issues?|problems?|faults?|unstable|failures?|critical|"
+                           r"degraded|lost|dropped|unsafe|abnormal)\b", re.I)
+
+
+def check_topics(text: str, status: dict) -> str:
+    """A sentence may not present a topic as a problem when every metric of that topic is Good."""
+    for sentence in re.split(r"(?<=[.!?])\s+", text):
+        lower = sentence.lower()
+        if not PROBLEM_WORDS.search(sentence):
+            continue
+        for topic, (words, keys) in TOPICS.items():
+            measured = [status[k] for k in keys if k in status]
+            if measured and all(v == "good" for v in measured) and any(re.search(rf"\b{re.escape(w)}\b", lower)
+                                                                       for w in words):
+                return f"presents {topic} as a problem, but its metrics are all Good"
     return ""
 
 
@@ -202,7 +244,9 @@ def _verdict(agent, claim_id, reason) -> ClaimVerdict:
 def _summary(summary: dict, state: dict, data: dict, known: dict) -> list:
     sentences = len(SENTENCE_END.findall(summary["summary"].strip() + " "))
     too_long = f"{sentences} sentences; the summary must be 3" if sentences > MAX_SUMMARY_SENTENCES else ""
-    verdicts = [_verdict("flight_summary", "summary", too_long or check_text(summary["summary"], known))]
+    status = state["metrics"]["status"]
+    verdicts = [_verdict("flight_summary", "summary", too_long or check_topics(summary["summary"], status)
+                         or check_text(summary["summary"], known))]
     statuses = {line.phase: line.status for line in phase_statuses(state)}
     for k, line in enumerate(summary["flight_story"]):
         expected = statuses.get(line["phase"])
@@ -266,7 +310,9 @@ def verify(outputs: dict, state: dict, extra: dict = None) -> VerifierOut:
     if advisor:
         kept = {(e["action"], e["wp"]) for e in advisor["edits"]}
         for rec in advisor["recommendations"]:
-            reason = (check_edit_mentions(rec["text"], kept) or check_text(rec["text"], known)
+            status = state["metrics"]["status"]
+            reason = (check_edit_mentions(rec["text"], kept) or check_edit_mentions(rec["reason"], kept)
+                      or check_topics(rec["text"] + " " + rec["reason"], status) or check_text(rec["text"], known)
                       or check_text(rec["reason"], known) or check_text(rec["evidence"], known, require_number=True))
             verdicts.append(_verdict("advisor", f"rec[{rec['rank']}]", reason))
     return VerifierOut(verdicts=verdicts)

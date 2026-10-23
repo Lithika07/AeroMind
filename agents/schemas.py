@@ -12,6 +12,7 @@ Status = Literal["good", "caution", "bad"]
 #: a string until its output is cut off (a 5,440-character "3-sentence" summary did exactly that).
 SHORT_TEXT = 300
 SUMMARY_TEXT = 800
+ADVICE_TEXT = 500
 Verdict = Literal["Good", "Needs attention", "Unsafe"]
 RiskLevel = Literal["Low", "Medium", "High"]
 AGENT_NAMES = ("flight_summary", "telemetry_link", "diagnosis", "risk", "advisor", "verifier")
@@ -209,9 +210,9 @@ class Edit(Contract):
 
 class Recommendation(Contract):
     rank: int = Field(ge=1, le=3)
-    text: str = Field(max_length=SHORT_TEXT)
-    reason: str = Field(max_length=SHORT_TEXT)
-    evidence: str = Field(max_length=SHORT_TEXT)
+    text: str = Field(max_length=ADVICE_TEXT)
+    reason: str = Field(max_length=ADVICE_TEXT)
+    evidence: str = Field(max_length=ADVICE_TEXT)
 
 
 class AdvisorOut(Contract):

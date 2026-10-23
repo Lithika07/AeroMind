@@ -11,7 +11,8 @@ GROUNDING = ("Use only the JSON you are given. Copy numbers exactly as they appe
 
 FLIGHT_SUMMARY = f"""You are a drone flight-test engineer writing for a beginner pilot.
 Give a verdict (Good / Needs attention / Unsafe), one short line per flight phase in `phases` (use each
-phase's name as `phase`, and status good/caution/bad), and a 3-sentence summary of how the flight went.
+phase's name as `phase`, and status good/caution/bad), and a summary of how the flight went in exactly 3
+short sentences (under 400 characters). Only call something a problem if its status is caution or bad.
 Use `suggested_verdict` unless the data clearly says otherwise. Add `claims` for the key numbers you
 mention, each citing its metric path (for example tracking.xtrack_max_m) and value.
 If pilot notes are given, relate them to the data. {GROUNDING}"""
@@ -43,7 +44,8 @@ change, final altitude 25-120 m), remove_waypoint (at most 30 % of waypoints; ne
 add_hold (value seconds 0-10). At most 5 edits. A link_loss cause gets advice, never an edit. If no
 mission is given, propose no edits. `suggested_edits` is a valid starting point. Then rank the top 3
 improvements overall (rank 1-3), each with the reason and the evidence (numbers copied from the data),
-including hardware and parameter advice. If `what_worked_before` lists earlier fixes, prefer what
+including hardware and parameter advice; keep each text, reason and evidence under 200 characters.
+If `what_worked_before` lists earlier fixes, prefer what
 improved the metrics. {GROUNDING}"""
 
 PLANNER = """You are the orchestrator of a post-flight analysis. From the manifest, choose which agents run

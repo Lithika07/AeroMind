@@ -22,8 +22,6 @@ OLLAMA_TIMEOUT_S = 120
 #: A small local model can loop while writing JSON; capping the reply makes that a quick, retried
 #: invalid answer instead of a two-minute timeout. Every agent's answer fits well within this.
 MAX_LOCAL_TOKENS = 1500
-#: A mild penalty on repeated tokens stops the looping that produced a 5,000-character summary.
-REPEAT_PENALTY = 1.1
 LENGTH_KEYS = ("maxLength", "minLength")
 
 
@@ -98,7 +96,7 @@ class OllamaBackend:
 
     def complete(self, system: str, user: str, output: type[BaseModel]) -> BaseModel:
         body = {"model": self.model, "stream": False, "format": without_lengths(output.model_json_schema()),
-                "options": {"temperature": 0, "num_predict": MAX_LOCAL_TOKENS, "repeat_penalty": REPEAT_PENALTY},
+                "options": {"temperature": 0, "num_predict": MAX_LOCAL_TOKENS},
                 "keep_alive": "10m",
                 "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}]}
         reply = self._post("/api/chat", body, OLLAMA_TIMEOUT_S)
