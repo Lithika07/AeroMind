@@ -29,7 +29,10 @@ REL_TOLERANCE = 0.05
 ABS_TOLERANCE = 0.15
 MAX_SUMMARY_SENTENCES = 3
 SENTENCE_END = re.compile(r"[.!?](?:\s|$)")
-EDIT_MENTION = re.compile(r"(set_speed|change_altitude|remove_waypoint|add_hold).*?WP\s?(\d+)")
+EDIT_MENTION = re.compile(r"(set_speed|change_altitude|remove_waypoint|add_hold)[^.;]*?\bwp\s*=?\s*(\d+)", re.I)
+RAW_CALL = re.compile(r"\b\w+\s*\([^)]*\w+\s*=")         # change_altitude(wp=2, value=-20)
+CALLS_FINE = re.compile(r"\b(within (acceptable|normal|expected) (limits|range)|no (issues|problems)|"
+                        r"all metrics were (good|normal|fine))\b", re.I)
 #: the same edits in plain words: (pattern, action)
 PLAIN_EDITS = (
     (re.compile(r"\b(?:remov|delet|skip|drop)\w*\s+(?:the\s+)?(?:waypoints?\s+)?WP\s?(\d+)", re.I), "remove_waypoint"),
@@ -187,7 +190,7 @@ def check_claim(claim: dict, data: dict, known: dict) -> str:
 
 def check_edit_mentions(text: str, kept: set) -> str:
     """A recommendation may only name a mission edit that passed the mission limits."""
-    mentions = [(action, int(seq)) for action, seq in EDIT_MENTION.findall(text)]
+    mentions = [(action.lower(), int(seq)) for action, seq in EDIT_MENTION.findall(text)]
     mentions += [(action, int(seq)) for pattern, action in PLAIN_EDITS for seq in pattern.findall(text)]
     for action, seq in mentions:
         if (action, seq) not in kept:
@@ -212,7 +215,7 @@ PROBLEM_WORDS = re.compile(r"\b(poor|weak|excessive|significant|issues?|problems
 
 def check_topics(text: str, status: dict) -> str:
     """A sentence may not present a topic as a problem when every metric of that topic is Good."""
-    for sentence in re.split(r"(?<=[.!?])\s+", text):
+    for sentence in re.split(r"[.!?;,]|\b(?:and|but|while|whereas)\b", text):     # clause by clause
         lower = sentence.lower()
         if not PROBLEM_WORDS.search(sentence):
             continue
@@ -222,6 +225,16 @@ def check_topics(text: str, status: dict) -> str:
                                                                        for w in words):
                 return f"presents {topic} as a problem, but its metrics are all Good"
     return ""
+
+
+def check_plain(text: str) -> str:
+    return "is written as code; recommendations must be plain words" if RAW_CALL.search(text) else ""
+
+
+def check_story_line(line: dict, expected: str, status: dict) -> str:
+    if expected != "good" and CALLS_FINE.search(line["text"]):
+        return f"calls a {expected} phase fine"
+    return check_topics(line["text"], status)
 
 
 def check_adjustment(risk: dict) -> str:
@@ -252,7 +265,7 @@ def _summary(summary: dict, state: dict, data: dict, known: dict) -> list:
         expected = statuses.get(line["phase"])
         reason = (f"phase {line['phase']} is not in this flight" if expected is None else
                   f"status {line['status']} disagrees with the data ({expected})" if line["status"] != expected
-                  else check_text(line["text"], known))
+                  else check_story_line(line, expected, state["metrics"]["status"]) or check_text(line["text"], known))
         verdicts.append(_verdict("flight_summary", f"story[{k}]", reason))
     verdicts += [_verdict("flight_summary", c["id"], check_claim(c, data, known)) for c in summary.get("claims", [])]
     return verdicts
@@ -311,7 +324,8 @@ def verify(outputs: dict, state: dict, extra: dict = None) -> VerifierOut:
         kept = {(e["action"], e["wp"]) for e in advisor["edits"]}
         for rec in advisor["recommendations"]:
             status = state["metrics"]["status"]
-            reason = (check_edit_mentions(rec["text"], kept) or check_edit_mentions(rec["reason"], kept)
+            reason = (check_plain(rec["text"]) or check_edit_mentions(rec["text"], kept)
+                      or check_edit_mentions(rec["reason"], kept)
                       or check_topics(rec["text"] + " " + rec["reason"], status) or check_text(rec["text"], known)
                       or check_text(rec["reason"], known) or check_text(rec["evidence"], known, require_number=True))
             verdicts.append(_verdict("advisor", f"rec[{rec['rank']}]", reason))

@@ -149,3 +149,18 @@ def test_edits_named_in_plain_words_must_have_passed():
     assert verifier.check_edit_mentions("Remove WP3 to shorten the route", kept) == ""
     assert "add_hold" in verifier.check_edit_mentions("Add a hold of 30 seconds at WP5", kept)
     assert "remove_waypoint" in verifier.check_edit_mentions("Consider removing WP7", kept)
+
+
+def test_recommendations_must_be_plain_words():
+    assert "plain words" in verifier.check_plain("change_altitude(wp=2, value=-20.0, cause=C1)")
+    assert verifier.check_plain("Lower WP4 by 10 m (we keep 25 m clearance)") == ""
+
+
+def test_edit_mentions_in_call_form_are_checked():
+    assert "change_altitude" in verifier.check_edit_mentions("change_altitude(wp=2, value=-20)", {("set_speed", 3)})
+
+
+def test_a_caution_phase_cannot_be_called_fine():
+    line = {"phase": "Leg 6", "status": "caution", "text": "All metrics were within acceptable limits."}
+    assert "caution phase fine" in verifier.check_story_line(line, "caution", {})
+    assert verifier.check_story_line({**line, "status": "good"}, "good", {}) == ""
