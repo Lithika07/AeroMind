@@ -240,6 +240,13 @@ def shade(cell, hex_fill: str) -> None:
     tcpr.append(shd)
 
 
+def keep_row_together(row) -> None:
+    """Never split the row across pages (cantSplit precedes tblHeader in CT_TrPr)."""
+    trpr = row._tr.get_or_add_trPr()
+    e = OxmlElement("w:cantSplit")
+    trpr.insert(0, e)
+
+
 def repeat_header(row) -> None:
     trpr = row._tr.get_or_add_trPr()
     e = OxmlElement("w:tblHeader")

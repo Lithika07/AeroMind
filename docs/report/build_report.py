@@ -33,11 +33,12 @@ TEMPLATE = ROOT / "docs" / "Project Report Format.docx"
 OUTPUT = ROOT / "docs" / "AeroMind_Project_Report.docx"
 TITLE = "AeroMind: Multi-Agent Post-Flight Analysis of ArduPilot Drone Missions"
 TEXT_WIDTH_IN = 6.27
+KEEP_TABLE_ROWS = 12      # tables up to this many rows are never split across pages
 FIRST_GENERATED = "ACKNOWLEDGEMENT"
 
 
 class Report:
-    def __init__(self, pages: dict = None):
+    def __init__(self, pages: dict = None, labels: dict = None):
         self.doc = docx.Document(TEMPLATE)
         for table in self.doc.tables:
             for row in table.rows:
@@ -45,6 +46,8 @@ class Report:
                     for para in cell.paragraphs:
                         para.paragraph_format.line_spacing = 1.0
         self.pages = pages or {}
+        self.known = labels or {}       # label -> number, from the previous pass
+        self.labels = {}
         self.headings, self.figures, self.tables = [], [], []
         self._front_matter()
         kit.styles(self.doc)
@@ -156,14 +159,22 @@ class Report:
         for line in lines[1:]:
             cell.add_paragraph(line, style="Code")
         kit.fix_widths(table, [TEXT_WIDTH_IN])
+        kit.keep_row_together(table.rows[0])
+        cell.paragraphs[-1].paragraph_format.keep_with_next = True   # the caption stays with its listing
         if caption:
             self.p(caption).runs[0].italic = True
         else:
             self.doc.add_paragraph().paragraph_format.space_after = Pt(2)
 
     # -- numbered figures and tables ---------------------------------------------------------------
-    def figure(self, path: Path, caption: str, width_in: float = TEXT_WIDTH_IN) -> int:
+    def ref(self, label: str) -> str:
+        """The number of a labelled figure or table (known after the first pass)."""
+        return str(self.known.get(label, "?"))
+
+    def figure(self, path: Path, caption: str, width_in: float = TEXT_WIDTH_IN, label: str = None) -> int:
         number = len(self.figures) + 1
+        if label:
+            self.labels[label] = number
         para = self.doc.add_paragraph()
         para.alignment = WD_ALIGN_PARAGRAPH.CENTER
         para.paragraph_format.keep_with_next = True
@@ -176,8 +187,10 @@ class Report:
         self.figures.append((number, caption))
         return number
 
-    def table(self, headers: list, rows: list, caption: str, widths: list = None) -> int:
+    def table(self, headers: list, rows: list, caption: str, widths: list = None, label: str = None) -> int:
         number = len(self.tables) + 1
+        if label:
+            self.labels[label] = number
         cap = self.doc.add_paragraph(style="Caption")
         cap.paragraph_format.keep_with_next = True
         cap.add_run("Table ").bold = True
@@ -200,6 +213,12 @@ class Report:
         widths = widths or [1] * len(headers)
         total = sum(widths)
         kit.fix_widths(table, [TEXT_WIDTH_IN * w / total for w in widths])
+        for k, row in enumerate(table.rows):
+            kit.keep_row_together(row)
+            if len(table.rows) <= KEEP_TABLE_ROWS and k < len(table.rows) - 1:
+                for cell in row.cells:                   # a short table moves to the next page whole
+                    for para in cell.paragraphs:
+                        para.paragraph_format.keep_with_next = True
         self.doc.add_paragraph().paragraph_format.space_after = Pt(2)
         self.tables.append((number, caption))
         return number
@@ -281,19 +300,20 @@ def find_pages(report: Report, texts: list) -> dict:
     return pages
 
 
-def build(pages: dict = None) -> Report:
-    report = Report(pages)
+def build(pages: dict = None, labels: dict = None) -> Report:
+    report = Report(pages, labels)
     content.write(report)
     return report
 
 
 def main() -> int:
     work = Path(tempfile.mkdtemp(prefix="aeromind-report-"))
-    first = build({("h", "x"): "00"})
+    labels = build({("h", "x"): "00"}).labels          # pass 1: where every labelled figure and table lands
+    first = build({("h", "x"): "00"}, labels)
     draft = work / OUTPUT.name
     first.save(draft)
     texts = page_texts(render_pdf(draft, work))
-    final = build(find_pages(first, texts))
+    final = build(find_pages(first, texts), labels)
     final.save(OUTPUT)
     pdf = render_pdf(OUTPUT, OUTPUT.parent)
     texts = page_texts(pdf)
