@@ -27,9 +27,26 @@ MAX_UPLOAD_MB = 200
 TABS = ["Summary", "Track", "Telemetry", "Anomalies", "Power & attitude", "History", "Agents", "Ask"]
 
 
+def load_secrets() -> None:
+    """Copy the deployment's secrets (Streamlit Cloud: App settings → Secrets) into the environment,
+    where agents/llm.py reads its settings. Values already in the environment win."""
+    try:
+        secrets = dict(st.secrets)
+    except FileNotFoundError as error:
+        if "pars" in str(error).lower():     # the Secrets box is not valid TOML: say so instead of using the rules
+            st.sidebar.warning(f"Could not read the app's secrets: {error}")
+        return                               # otherwise no secrets file: running locally with .env or the shell
+    except Exception as error:       # e.g. a mistyped Secrets box; show it rather than silently using the rules
+        st.sidebar.warning(f"Could not read the app's secrets: {error}")
+        return
+    for key, value in secrets.items():
+        if isinstance(value, str):
+            os.environ.setdefault(key, value)
+
+
 @st.cache_resource(show_spinner=False)
-def backend_for(choice: str):
-    os.environ["AEROMIND_LLM"] = "" if choice == "auto" else choice
+def agents_backend():
+    """The LLM the agents use, chosen by the environment (see agents/llm.py)."""
     return llm.get_backend()
 
 
@@ -67,10 +84,7 @@ def analyse_uploads(run_id, tlogs, mission, params, notes, backend) -> str:
 
 def sidebar():
     st.sidebar.title("AeroMind")
-    choice = st.sidebar.selectbox("Agents' LLM", ("auto", "anthropic", "groq", "ollama", "none"),
-                                  help="auto: Claude if ANTHROPIC_API_KEY is set, else Groq if GROQ_API_KEY is set, "
-                                       "else local Ollama, else rules only")
-    backend = backend_for(choice)
+    backend = agents_backend()
     st.sidebar.caption(f"Using: {getattr(backend, 'name', 'rules only')} {getattr(backend, 'model', '') or ''}")
     runs = data.saved_runs(pipeline.OUTPUTS)
     with st.sidebar.form("analyse"):
@@ -101,6 +115,7 @@ def sidebar():
 
 def main() -> None:
     st.set_page_config(page_title="AeroMind", page_icon="🛩️", layout="wide")
+    load_secrets()
     backend = sidebar()
     run_id = st.session_state.get("run")
     if not run_id:
