@@ -67,8 +67,9 @@ def analyse_uploads(run_id, tlogs, mission, params, notes, backend) -> str:
 
 def sidebar():
     st.sidebar.title("AeroMind")
-    choice = st.sidebar.selectbox("Agents' LLM", ("auto", "anthropic", "ollama", "none"),
-                                  help="auto: Claude if ANTHROPIC_API_KEY is set, else local Ollama, else rules only")
+    choice = st.sidebar.selectbox("Agents' LLM", ("auto", "anthropic", "groq", "ollama", "none"),
+                                  help="auto: Claude if ANTHROPIC_API_KEY is set, else Groq if GROQ_API_KEY is set, "
+                                       "else local Ollama, else rules only")
     backend = backend_for(choice)
     st.sidebar.caption(f"Using: {getattr(backend, 'name', 'rules only')} {getattr(backend, 'model', '') or ''}")
     runs = data.saved_runs(pipeline.OUTPUTS)
