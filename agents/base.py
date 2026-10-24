@@ -71,9 +71,9 @@ def run_agent(name: str, state: dict, outputs: dict, backend, fallback, mission=
                 return AgentResult(name, output, "llm", round(time.monotonic() - started, 2), tuple(errors), feedback)
             except (LLMError, ValidationError) as error:
                 errors.append(str(error)[:300])
+                user += f"\nYour previous reply was invalid: {str(error)[:300]}. Reply again with valid JSON."
             except Exception as error:  # an unexpected backend failure must not stop the analysis
                 errors.append(f"{type(error).__name__}: {str(error)[:280]}")
                 break
-                user += f"\nYour previous reply was invalid: {str(error)[:300]}. Reply again with valid JSON."
     output = guard(name, fallback(), state, bool(mission))
     return AgentResult(name, output, "fallback", round(time.monotonic() - started, 2), tuple(errors), feedback)

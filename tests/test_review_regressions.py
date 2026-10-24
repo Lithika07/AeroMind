@@ -68,6 +68,23 @@ def test_unexpected_backend_errors_fall_back(states):
     assert result.source == "fallback" and "ConnectionResetError" in result.errors[0]
 
 
+def test_an_invalid_reply_is_retried_with_the_error(states):
+    state, mission = states.get("s0") or pytest.skip("s0 not flown")
+    prompts = []
+
+    class Flaky:
+        name, model = "flaky", None
+
+        def complete(self, system, user, schema):
+            prompts.append(user)
+            if len(prompts) == 1:
+                raise base.LLMError("risk_score missing")
+            return fallbacks.risk(state)
+
+    result = base.run_agent("risk", state, {}, Flaky(), lambda: fallbacks.risk(state), mission)
+    assert result.source == "llm" and "risk_score missing" in prompts[1]
+
+
 def test_llm_cannot_make_the_verdict_milder_than_the_data(states):
     state, _ = states.get("s4") or pytest.skip("s4 not flown")
     rule = fallbacks.verdict(state["metrics"])
