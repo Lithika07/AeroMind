@@ -129,8 +129,7 @@ def references(r) -> None:
     refs = [
         "S. Yao, J. Zhao, D. Yu, N. Du, I. Shafran, K. Narasimhan and Y. Cao, “ReAct: Synergizing Reasoning and Acting "
         "in Language Models,” in Proc. International Conference on Learning Representations (ICLR), 2023.",
-        "Q. Wu, G. Bansal, J. Zhang, Y. Wu, B. Li, E. Zhu, L. Jiang, X. Zhang, S. Zhang, J. Liu, A. H. Awadallah, "
-        "R. W. White, D. Burger and C. Wang, “AutoGen: Enabling Next-Gen LLM Applications via Multi-Agent "
+        "Q. Wu et al., “AutoGen: Enabling Next-Gen LLM Applications via Multi-Agent "
         "Conversation,” arXiv:2308.08155, 2023.",
         "S. Hong et al., “MetaGPT: Meta Programming for a Multi-Agent Collaborative Framework,” in Proc. ICLR, 2024.",
         "N. Shinn, F. Cassano, A. Gopinath, K. Narasimhan and S. Yao, “Reflexion: Language Agents with Verbal "
@@ -157,14 +156,20 @@ def references(r) -> None:
         "Plotly Technologies Inc., “Plotly Python Graphing Library,” plotly.com/python, 2026.",
         "The pandas development team, “pandas,” pandas.pydata.org, 2026; Pallets, “Jinja,” jinja.palletsprojects.com, 2026.",
         "OpenStreetMap contributors, “OpenStreetMap,” openstreetmap.org (map tiles in the Track tab), 2026.",
-        "Simulation assets: Aero Sense disaster world and Hexa-X airframe (the team's Smart India Hackathon 2026 project); "
-        "tdf_gazebo models (MIT licence); darpa_subt_worlds models (MIT licence); ardupilot_gazebo plugin and meshes "
-        "(LGPL-3.0).",
+        "Simulation assets: Aero Sense world and Hexa-X (the team's SIH 2026 project); tdf_gazebo and "
+        "darpa_subt_worlds models (MIT); ardupilot_gazebo (LGPL-3.0).",
     ]
     for k, ref in enumerate(refs, start=1):
         para = r.p(f"[{k}] {ref}")
         para.paragraph_format.left_indent = docx_inches(0.4)
         para.paragraph_format.first_line_indent = docx_inches(-0.4)
+        para.paragraph_format.line_spacing = 1.0          # entries single-spaced, spaced apart
+        para.paragraph_format.space_after = docx_points(3)
+
+
+def docx_points(value):
+    from docx.shared import Pt
+    return Pt(value)
 
 
 def docx_inches(value):
