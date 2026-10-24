@@ -89,8 +89,8 @@ def front(r, s) -> None:
         "the Department of Computer Science & Information Technology, Unitedworld Institute of Technology, Karnavati "
         "University, for including Agentic AI in the curriculum and for the laboratory and computing facilities that "
         "made the work possible.")
-    r.p("The simulation work builds on the disaster-zone world and the Hexa-X airframe our team developed for the Smart "
-        "India Hackathon 2026 (the Aero Sense project), and on open-source software from the ArduPilot, Gazebo and "
+    r.p("The simulation work builds on the disaster-zone world and the Hexa-X airframe developed by our team, and on "
+        "open-source software from the ArduPilot, Gazebo and "
         "Python communities: ArduPilot SITL, MAVProxy and pymavlink, Gazebo Harmonic, Streamlit, Plotly, pandas, "
         "Pydantic and Ollama. We acknowledge the authors of the third-party simulation models listed in the "
         "references.")
@@ -156,7 +156,7 @@ def references(r) -> None:
         "Plotly Technologies Inc., “Plotly Python Graphing Library,” plotly.com/python, 2026.",
         "The pandas development team, “pandas,” pandas.pydata.org, 2026; Pallets, “Jinja,” jinja.palletsprojects.com, 2026.",
         "OpenStreetMap contributors, “OpenStreetMap,” openstreetmap.org (map tiles in the Track tab), 2026.",
-        "Simulation assets: Aero Sense world and Hexa-X (the team's SIH 2026 project); tdf_gazebo and "
+        "Simulation assets: disaster-zone world and Hexa-X airframe (built by the team); tdf_gazebo and "
         "darpa_subt_worlds models (MIT); ardupilot_gazebo (LGPL-3.0).",
     ]
     for k, ref in enumerate(refs, start=1):

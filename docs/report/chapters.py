@@ -88,11 +88,9 @@ def chapter1(r) -> None:
         "**Goal-oriented execution:** work continues, with a self-correction round, until the result is verified.",
     ])
     r.h2("1.2 Background")
-    r.p("Drones running the open-source ArduPilot autopilot record their state as MAVLink telemetry, saved by ground "
-        "stations such as Mission Planner as a `.tlog` file [8], [9]. Existing tools such as ArduPilot's UAV Log Viewer "
-        "[10] and PX4 Flight Review [12] plot this data well but leave interpretation to the user, who must know which "
-        "message holds the cross-track error, what is normal and how to turn it into a better mission. AeroMind gives "
-        "the arithmetic to tools and the judgement to agents, and checks the agents against the tools.")
+    r.p("ArduPilot drones record MAVLink telemetry, saved by ground stations as a `.tlog` file [8], [9]. Tools such "
+        "as UAV Log Viewer [10] and PX4 Flight Review [12] plot it but leave interpretation to an expert. AeroMind "
+        "gives the arithmetic to tools and the judgement to agents, and checks the agents against the tools.")
     r.h2("1.3 Problem Statement")
     r.p("The objective of this project is to develop an Agentic AI-based system that analyses the telemetry log, "
         "mission and parameters of an ArduPilot flight, explains how the flight and its telemetry link went, identifies "
@@ -101,7 +99,7 @@ def chapter1(r) -> None:
         "there is a need for a system that can reason over flight data like an expert while every statement it makes "
         "is checked against the data.")
     r.h2("1.4 Motivation")
-    r.p("Our team builds drones for the Smart India Hackathon and spent hours working out from logs why a "
+    r.p("Our team builds and flies drones and spent hours working out from logs why a "
         "flight behaved as it did; small teams rarely have a flight-test engineer. Plotting tools leave interpretation to the user, and a stand-alone LLM can state numbers that are not in the "
         "data [6]. Agentic AI lets planned, specialised agents explain and advise while tools keep every number exact.")
     r.h2("1.5 Objectives")
@@ -118,8 +116,8 @@ def chapter1(r) -> None:
         "**Target users:** pilots and student teams flying ArduPilot multirotors.",
         "**Supported tasks:** post-flight analysis of `.tlog` files (several per flight are merged) with an optional "
         "mission, parameters and pilot notes; questions about the flight; a corrected mission file.",
-        "**Boundaries:** post-flight analysis, evaluated on simulated flights; by design the system never uploads "
-        "anything to the drone.",
+        "**Technologies:** Python, Claude or Qwen2.5-3B agents, Streamlit; SITL and Gazebo for testing.",
+        "**Usage and limitations:** after each flight; `.tlog` logs; tested on simulated flights.",
     ])
 
 
@@ -158,45 +156,74 @@ def chapter2(r) -> None:
 def chapter3(r) -> None:
     r.h1("CHAPTER 3 – PROPOSED SYSTEM")
     r.h2("3.1 Proposed Solution")
-    r.p("The user uploads a flight's files in a Streamlit dashboard or the `run.py` command line. Python tools compute "
-        "the metrics, the orchestrator plans five agents running on Claude [14] or a local Qwen2.5-3B model [13] via "
-        "Ollama [15], and the Verifier approves the result, which is written as a report and a fixed mission.")
+    r.bullets([
+        "**User interaction:** the user uploads a flight's files in a Streamlit dashboard or `run.py`, and can ask "
+        "questions in the Ask tab.",
+        "**Agents and LLM:** five specialist agents (Flight Summary, Telemetry Link, Diagnosis, Risk, Advisor) run on "
+        "Claude [14] or a local Qwen2.5-3B model [13] through Ollama [15].",
+        "**Planning and reasoning:** an orchestrator plans which agents run; each agent reasons over verified metrics.",
+        "**Tools and memory:** Python tools compute the metrics and edit the mission; a flight history is the "
+        "long-term memory. No knowledge base or retrieval is used.",
+        "**Execution and final response:** a Verifier checks every claim; the approved result is shown and saved as a "
+        "report, a fixed mission and a change log.",
+    ])
     r.h2("3.2 System Requirements")
-    r.p(f"Table {r.ref('t_hw')} lists the hardware used and Table {r.ref('t_sw')} the software.")
-    r.table(["Component", "Requirement (as used)"], [
+    r.h3("3.2.1 Hardware Requirements")
+    r.table(["Component", "Requirement"], [
         ["Processor", "AMD Ryzen 5 7535HS, 6 cores / 12 threads"],
         ["RAM", "16 GB (analysis alone needs under 1 GB)"],
+        ["Storage", "About 25 MB; 3.3 GB more for the optional local LLM"],
         ["GPU / Internet", "NVIDIA GeForce RTX 2050, 4 GB / for the Claude API (both optional)"],
     ], "Hardware requirements", widths=[1.6, 4.4], label="t_hw")
+    r.h3("3.2.2 Software Requirements")
+    r.p(f"Table {r.ref('t_hw')} lists the hardware used and Table {r.ref('t_sw')} the software.")
     r.table(["Software/Technology", "Version/Specification"], [
         ["Operating System", "Ubuntu 22.04.5 LTS"],
         ["Programming Language", "Python 3.10.12 (Lua for the simulated battery)"],
-        ["Agent Framework / LLM", "Own orchestrator, Pydantic 2.13 [19]; Claude or Qwen2.5-3B via Ollama 0.40.8"],
-        ["Frontend", "Streamlit 1.57 [20], Plotly 6.7 [21]; Jinja2 3.1 for report.html"],
+        ["Agent Framework", "Own orchestrator in Python; Pydantic 2.13 schemas [19]"],
+        ["LLM", "Claude (Anthropic SDK 2.1.0) or Qwen2.5-3B via Ollama 0.40.8"],
+        ["Frontend", "Streamlit 1.57 [20], Plotly 6.7 [21], Jinja2 3.1"],
         ["Data and parsing", "pymavlink 2.4.49 [16], pandas 2.3 [22], NumPy 2.2"],
         ["Simulation", "ArduCopter SITL, MAVProxy 1.8.74, Gazebo Harmonic 8.15 [18]"],
-    ], "Software requirements and technologies used", widths=[1.9, 4.1], label="t_sw")
+    ], "Software requirements", widths=[1.9, 4.1], label="t_sw")
     r.h2("3.3 Functional Requirements")
-    r.p("The system accepts one or more `.tlog` files with an optional mission, parameters and notes; computes flight "
-        "and link metrics with statuses; plans and runs the agents; verifies every claim; remembers past flights; "
-        "and writes a corrected mission within hard limits.")
+    r.numbered([
+        "Accept one or more `.tlog` files with an optional mission, parameters and pilot notes.",
+        "Understand the flight: compute metrics with Good/Caution/Bad statuses and locate dropouts.",
+        "Generate a plan of agents and run them, using the tools' output.",
+        "Verify every agent claim and maintain a memory of past flights.",
+        "Generate the final response: verdict, causes, risk, advice and a corrected mission.",
+        "Handle unsuccessful LLM calls by retrying, then using a rule-based answer.",
+    ])
     r.h2("3.4 Non-Functional Requirements")
-    r.p("No number reaches the user unchecked, the analysis always completes, uploads are validated and the "
-        "dashboard is served only on the local machine.")
+    r.bullets([
+        "**Accuracy:** no number reaches the user unchecked. **Reliability:** every analysis completes.",
+        "**Performance:** the tool stage takes under 1 s; total time depends on LLM inference.",
+        "**Scalability:** flights are independent runs; the history grows by one record per flight.",
+        "**Security:** validated uploads, escaped text, local-only dashboard, API keys kept out of the code.",
+        "**Usability and maintainability:** one-page summary; small typed modules with 247 automated tests.",
+    ])
 
 
 def chapter4(r) -> None:
     r.h1("CHAPTER 4 – AGENT ARCHITECTURE")
     r.h2("4.1 Overall System Architecture")
-    r.p(f"Figure {r.ref('f_arch')} shows the architecture: inputs pass through Python tools into a shared state, the "
-        "orchestrator plans and runs the agents, and the Verifier lets only approved output reach the user and the "
-        "flight history.")
-    r.figure(ASSETS / "architecture.png", "Overall system architecture of AeroMind", width_in=5.0, label="f_arch")
+    r.p(f"Figure {r.ref('f_arch')} shows the architecture as implemented: inputs pass through Python tools into a "
+        "shared state, the orchestrator plans and runs the agents, and the Verifier lets only approved output reach "
+        "the user and the flight history.")
+    r.figure(ASSETS / "architecture.png", "Overall system architecture of AeroMind", width_in=4.6, label="f_arch")
     r.h2("4.2 Architecture Components")
-    r.p("The user interface is `app.py` (Streamlit) and `run.py`; the LLM layer is `agents/llm.py`; each agent is a "
-        "prompt and a Pydantic schema run by `run_agent()`; `orchestrator.py` plans and executes; `tools/` holds the "
-        "tools; `history.json` is the long-term memory; `pipeline.py` writes the outputs. No retriever is used.")
+    r.table(["Component", "Description"], [
+        ["User Interface", "Streamlit dashboard `app.py` (tabs, Ask chat); command line `run.py`"],
+        ["LLM", "`agents/llm.py`: Claude (structured output) or Ollama (JSON schema)"],
+        ["Agents", "Five agents, each a prompt and a Pydantic schema, run by `run_agent()`"],
+        ["Planner / Executor", "`orchestrator.py`: manifest → LLM plan → rule check → run → verify"],
+        ["Tools", "`tools/`: ingest, metrics, link metrics, risk rules, memory, mission I/O, report"],
+        ["Memory", "`history.json` (long-term) and the shared state of one analysis"],
+        ["Output Generator", "`pipeline.py`: state.json, report.html, fixed mission, change log"],
+    ], "Architecture components", widths=[1.6, 4.4], label="t_comp")
     r.h2("4.3 Agent Roles and Responsibilities")
+    r.p(f"Table {r.ref('t_comp')} describes the components and Table {r.ref('t_roles')} the agents implemented.")
     r.table(["Agent", "Role", "Responsibility"], [
         ["Orchestrator", "Planner, executor", "Plans, checks the plan, runs agents, triggers refinement"],
         ["Flight Summary", "Narrator", "Verdict, a line per flight phase, 3-sentence summary"],
@@ -207,122 +234,130 @@ def chapter4(r) -> None:
         ["Verifier", "Reviewer", "Checks every claim and number against the data"],
     ], "Agent roles and responsibilities", widths=[1.3, 1.3, 3.4], label="t_roles")
     r.h2("4.4 Agent Workflow")
-    r.p(f"Table {r.ref('t_roles')} lists the agents. Figure {r.ref('f_flow')} shows one analysis: tools compute "
-        "metrics and memory, the orchestrator plans, agents run in order, the Verifier observes their outputs, an "
-        "agent with more than 30 % of its claims rejected refines its answer once, and the result is saved.")
-    r.figure(ASSETS / "workflow.png", "Agent workflow of one analysis", width_in=2.3, label="f_flow")
+    r.numbered([
+        "The user provides the flight's files (and optional notes).",
+        "Tools compute the metrics, statuses and memory context (objective understood).",
+        "The orchestrator creates the plan of agents.",
+        "Each agent receives the tools' output it needs.",
+        "The agents run in order on the shared state.",
+        "The Verifier observes every output.",
+        "Agents with over 30 % of claims rejected are identified.",
+        "Those agents refine their answer once with the reasons.",
+        "The approved result is saved and presented.",
+    ])
+    r.figure(ASSETS / "workflow.png", f"Agent workflow of one analysis", width_in=2.0, label="f_flow")
+    r.p(f"Figure {r.ref('f_flow')} shows these steps.")
 
 
 def chapter5(r) -> None:
     r.h1("CHAPTER 5 – AGENTIC AI CONCEPTS USED")
     r.h2("5.1 ReAct")
-    r.p("Instead of letting the LLM pick tools [1], the tools always run first so none can be skipped. The reason → "
-        "act → observe cycle appears as verify and refine: the Verifier observes each output and the agent acts again "
-        "with the feedback.")
+    r.p("The tools always run first so none can be skipped [1]. The reason → act → observe cycle appears as verify "
+        "and refine: the agent reasons and answers, the Verifier observes, and the agent acts again on the feedback.")
     r.h2("5.2 Planning")
-    r.p(f"The orchestrator uses plan-and-execute (Figure {r.ref('f_orch')}). The LLM receives a manifest (inputs, "
-        "metric statuses, problems, link health, history) and returns an ordered list of agents with a reason each. "
-        "`checked_plan()` enforces the rules: Flight Summary first, Verifier last, Diagnosis only when something is "
-        "Caution or Bad, dependencies in order. A healthy flight therefore skips diagnosis.")
+    r.p(f"Plan-and-execute with dynamic planning (Figure {r.ref('f_orch')}): the LLM receives a manifest (inputs, "
+        "statuses, problems, history) and returns an ordered list of agents with reasons; `checked_plan()` enforces "
+        "the rules (Flight Summary first, Verifier last, Diagnosis only when something is Caution or Bad).")
     r.figure(ASSETS / "orchestration.png", "Planning and execution flow of the orchestrator", width_in=2.9,
              label="f_orch")
     r.h2("5.3 Tool Calling")
-    r.p("The tools are Python functions run by the pipeline: the ingestor (logs, mission, parameters, notes), the "
-        "metrics engine (metrics, statuses, phases, anomalies), the memory store, the risk rules, mission I/O (edits "
-        "within limits) and the report writer. Agents receive their output as compact JSON context.")
+    r.p(f"Table {r.ref('t_tools')} lists the tools. The pipeline runs them in a fixed order and each agent receives "
+        "the output it needs as JSON context; Mission I/O runs only when a mission was given.")
+    r.table(["Tool", "Purpose", "Input", "Output"], [
+        ["Ingestor", "Read and merge logs, mission, params, notes", "Files", "Flight data tables"],
+        ["Metrics engine", "Metrics, statuses, phases, anomalies", "Flight data", "metrics.json"],
+        ["Memory store", "Baselines, battery prediction, recurrence", "history.json", "History context"],
+        ["Risk rules", "Repeatable base risk score", "Metrics, params", "Score and factors"],
+        ["Mission I/O", "Apply edits within limits", "Mission, edits", "Fixed mission, change log"],
+        ["Report", "Printable report", "Approved state", "report.html"],
+    ], "Tools: purpose, input and output", widths=[1.3, 2.4, 1.4, 1.6], label="t_tools")
     r.h2("5.4 Memory")
-    r.p("**Working memory** is the shared state of one analysis. **Long-term memory** is `history.json`, one validated "
-        "record per flight (battery use per km, cross-track, link uptime, health, causes, applied edits, parent run). "
-        "From it the system computes baselines (2σ test over 3 or more flights), a battery prediction from the median "
-        "mAh per km, recurring causes (3 of the last 5 flights) and whether past fixes worked.")
+    r.bullets([
+        "**Short-term:** the shared state of one analysis, read and extended by every agent.",
+        "**Long-term:** `history.json`, one validated record per flight.",
+        "**Conversational:** the Ask tab keeps the conversation for each flight.",
+        "**Retrieval:** computed (baselines, battery prediction, recurring causes); no vector memory.",
+    ])
     r.h2("5.5 Retrieval-Augmented Generation")
-    r.p("RAG is not used: the agents' knowledge of the flight comes from computed metrics.")
+    r.p("Not used: the agents' knowledge of the flight comes from computed metrics.")
     r.h2("5.6 Multi-Agent System")
-    r.p("The agents communicate through the shared state (blackboard): Risk reads the causes from Diagnosis, and the "
-        "Advisor reads causes and risk. Python guards keep shared quantities consistent: the risk score is always "
-        "base plus adjustment and mission edits are re-checked against the approved diagnosis. Any agent with more "
-        "than 30 % of its claims rejected refines its answer once with the reasons.")
+    r.p("The orchestrator delegates by plan and the agents communicate through the shared state (blackboard): Risk "
+        "reads the causes from Diagnosis, and the Advisor reads causes and risk. Python guards keep shared values "
+        "consistent, and the Verifier coordinates one refinement round.")
     r.h2("5.7 Human-in-the-Loop")
-    r.p("Nothing is uploaded to the vehicle: the pilot reviews `mission_fixed.waypoints` and the change log and "
-        "decides whether to fly it, and can add notes that the agents use as evidence.")
+    r.p("Nothing is uploaded to the drone, because a wrong mission could crash it. The pilot reviews "
+        "`mission_fixed.waypoints` and the change log: if approved, the pilot loads and flies it, and the next "
+        "analysis measures whether the fix worked; if rejected, the original mission stays in use.")
 
 
 def chapter6(r) -> None:
     r.h1("CHAPTER 6 – METHODOLOGY")
     r.h2("6.1 Input Processing")
-    r.p("Files arrive by dashboard upload (extension and size checks, sanitised names) or the command line. "
-        "`ingest.py` reads each `.tlog` with pymavlink [7], [16] and merges several files of one flight by time.")
+    r.p("Uploads are checked (extension, size, sanitised names); `ingest.py` reads each `.tlog` with pymavlink [7], "
+        "[16] and merges the files of one flight.")
     r.h2("6.2 Task Understanding")
-    r.p(f"The metrics engine computes about 30 metrics and rates 14 of them Good, Caution or Bad (Table "
-        f"{r.ref('t_thr')}); the health score starts at 100 and loses 10 per Caution and 25 per Bad.")
-    r.table(["Metric", "Good", "Caution", "Bad"], [
-        ["Cross-track error, max (m)", "< 1", "1–3", "> 3"],
-        ["Battery at landing (%)", "> 30", "20–30", "< 20"],
-        ["Vibration max, airborne (m/s²)", "< 30", "30–60", "> 60"],
-        ["Link uptime (%)", "≥ 99", "95–99", "< 95"],
-        ["Dropouts (silence > 2 s)", "0", "1–2, each ≤ 10 s", "> 2, or any > 10 s"],
-    ], "Main metrics and thresholds", widths=[2.6, 1.0, 1.3, 1.4], label="t_thr")
+    r.p("The metrics engine computes about 30 metrics and rates 14 of them Good, Caution or Bad (for example, link "
+        "uptime Good ≥ 99 %, Bad < 95 %; battery at landing Good > 30 %, Bad < 20 %). The Caution and Bad statuses "
+        "tell the system what must be explained.")
     r.h2("6.3 Task Planning")
-    r.p("The tool steps always run; the agent steps are planned (Section 5.2).")
+    r.p("Tool steps always run; agent steps are planned (Section 5.2).")
     r.h2("6.4 Reasoning and Decision Making")
-    r.p("Diagnosis starts from candidate causes produced by hint rules; the Risk agent may move the rule-based score "
-        "(Low < 30, Medium 30–59, High ≥ 60) by at most ±10 with a reason.")
+    r.p("Diagnosis starts from rule-based candidate causes; Risk may move the rule score by ±10 with a reason.")
     r.h2("6.5 Tool Selection")
-    r.p("The pipeline runs the analysis tools; Mission I/O runs when a mission file was given.")
+    r.p("The plan selects the agents; Mission I/O runs only when a mission file was given.")
     r.h2("6.6 Task Execution")
-    r.p("Each LLM call requests output in the agent's schema; an invalid reply is retried with the error. Mission "
-        "edits (speed 3–10 m/s, altitude 25–120 m [17], waypoint removal, holds) are applied within hard limits.")
+    r.p("Each LLM reply must match the agent's schema (else retried with the error); mission edits stay within hard "
+        "limits such as 25–120 m altitude [17].")
     r.h2("6.7 Observation and Feedback")
-    r.p("The Verifier checks every cited metric and every number with a unit against the data (Listing 1, Section "
-        "7.2); its reasons are the feedback for refinement.")
+    r.p("The Verifier checks every cited metric and number against the data (Listing 2); its reasons drive refinement.")
     r.h2("6.8 Final Response Generation")
-    r.p("`approve()` keeps the verified items and `pipeline.py` writes the outputs.")
-    r.h2("6.9 Evaluation Environment")
-    r.p(f"Flights were flown in ArduCopter SITL [8] in the team's Gazebo [18] disaster world (Figure "
-        f"{r.ref('f_world')}). The Hexa-X hexacopter flew one 1.3 km route at 30 m in five scenarios with known "
-        f"injected faults (Table {r.ref('t_scen')}).")
-    r.table(["ID", "Scenario", "Injected fault"], [
-        ["S0", "Baseline, 5 m/s", "None"],
-        ["S1", "Wind + fast flight", "10 m/s wind from the east; mission speed 12 m/s"],
-        ["S2", "Undersized battery", "BATT_CAPACITY 2200 mAh instead of 10000"],
-        ["S3", "Telemetry dropout", "Link down for 12 s at 90 s and at 200 s"],
-        ["S4", "Combined", "S1 + S2 + link loss over the no-network zone"],
-        ["S1/S2/S4 fixed", "Re-flights", "Same faults, flying the agents' mission_fixed.waypoints"],
-    ], "Evaluation scenarios", widths=[1.1, 1.8, 3.1], label="t_scen")
-    r.figure(panel("world", ["01_world_overview.png", "04_earthquake_zone.png", "07_flight_over_earthquake_zone.png",
-                             "12_landing_approach.png"],
-                   ["World overview", "Earthquake zone and radio mast", "Hexa-X over the earthquake zone",
-                    "Landing approach"]),
-             "The Gazebo disaster world and the Hexa-X during a SITL mission", width_in=3.8, label="f_world")
+    r.p("`approve()` keeps the verified items; `pipeline.py` writes the outputs shown in the dashboard.")
 
 
 def chapter7(r) -> None:
     r.h1("CHAPTER 7 – IMPLEMENTATION")
     r.h2("7.1 Project Structure")
-    r.p("`agents/` holds the schemas, LLM backends, prompts, orchestrator and Verifier; `tools/` the ingestion, "
-        "metrics, memory, risk and mission tools; `dashboard/` the user interface; `sim/` the Gazebo world and fault "
-        "injection; `tests/` 247 pytest tests (about 5,000 lines of Python).")
+    r.code("""AeroMind/
+├── app.py, run.py   dashboard and command line
+├── pipeline.py      one analysis end to end
+├── agents/          schemas, llm, prompts, base, orchestrator, verifier
+├── tools/           ingest, metrics, memory, risk_rules, mission_io
+├── dashboard/       summary and detail tabs, charts, Ask
+├── sim/             Gazebo world, Hexa-X, SITL, fault injection
+├── data/, outputs/  flights and analysis results
+├── history.json     long-term memory
+└── tests/           247 pytest tests""", "Listing 1: project structure.")
     r.h2("7.2 Agent Implementation")
     r.p("Each agent is a system prompt (Appendix C) plus a Pydantic schema. With Claude, `messages.parse()` validates "
-        "the reply against the schema [14]; with Ollama the schema is passed as the output `format` [15]. Listing 1 "
+        "the reply against the schema [14]; with Ollama the schema is passed as the output `format` [15]. Listing 2 "
         "shows the Verifier's check of numbers in free text.")
     r.code(excerpt("agents/verifier.py", "def check_text(", 10),
-           "Listing 1: unit-aware grounding of numbers in free text (agents/verifier.py).")
+           "Listing 2: unit-aware grounding of numbers in free text (agents/verifier.py).")
     r.h2("7.3 Tool Implementation")
-    r.p("The link tool finds silences longer than 2 s that also appear on the vehicle clock; Mission I/O applies each "
-        "edit to a copy and re-checks the whole mission before writing it.")
+    r.p(f"Purpose, input and output of each tool are in Table {r.ref('t_tools')}; Table {r.ref('t_toolimpl')} gives "
+        "the implementation and role in the workflow.")
+    r.table(["Tool", "Implementation", "Role in Agent Workflow"], [
+        ["Ingestor", "pymavlink reader; merges files by time", "Provides the data for all tools"],
+        ["Metrics engine", "pandas; thresholds; phases; dropouts on vehicle clock", "Context for every agent"],
+        ["Memory store", "Validated records; median and 2σ statistics", "History for Risk and Advisor"],
+        ["Risk rules", "Additive points per factor", "Base score for the Risk agent"],
+        ["Mission I/O", "Applies edits to a copy; re-checks the mission", "Executes the Advisor's edits"],
+        ["Report", "Jinja2 template", "Final printable output"],
+    ], "Tool implementation", widths=[1.3, 2.7, 2.2], label="t_toolimpl")
     r.h2("7.4 Memory Implementation")
-    r.p("`tools/memory.py` stores validated records in `history.json` and computes the values of Section 5.4.")
+    r.p("Long-term memory is a JSON file (`history.json`) written atomically by `tools/memory.py`. Each record holds "
+        "battery use per km, cross-track, link uptime, health, causes and applied edits. Retrieval computes "
+        "baselines, a battery prediction (median mAh per km), recurring causes (3 of the last 5 flights) and fix "
+        "effectiveness, which raise the risk score and guide the Advisor's edits.")
     r.h2("7.5 RAG Implementation")
     r.p("Not applicable (Section 5.5).")
     r.h2("7.6 User Interface")
-    r.p(f"Figure {r.ref('f_home')} shows (a) the input form with the Summary tab and (b) the agents' plan, "
-        f"Verifier verdicts and execution; Figure {r.ref('f_ask')} shows the Ask tab. More tabs are in Appendix B.")
+    r.p(f"Figure {r.ref('f_home')} shows (a) the home page with the input form and the final output (Summary tab) "
+        f"and (b) the agents' execution. The Ask tab and further tabs are in Appendix B (Figures {r.ref('f_ask')}–"
+        f"{r.ref('f_hist')}).")
     r.figure(pair("ui_home_agents", crop("ui_summary_s4.png", keep_sidebar=True), crop("ui_agents_s3.png"),
                   ["Home page and Summary tab (S4)", "Agents tab (S3)"]),
-             "Dashboard: input form, Summary and Agents tabs", width_in=6.2, label="f_home")
-    r.figure(crop("ui_ask_s3.png"), "Ask tab (S3): an answer verified against the cited metrics", width_in=4.6,
-             label="f_ask")
+             "Dashboard: input form, Summary and Agents tabs", width_in=4.6, label="f_home")
 
 
 def chapter8(r, s) -> None:
@@ -339,6 +374,22 @@ def chapter8(r, s) -> None:
     med = median_seconds(s)
     xt_drop = 100 * (1 - m["s1_fixed"]["tracking"]["xtrack_max_m"] / m["s1"]["tracking"]["xtrack_max_m"])
     r.h2("8.1 Test Cases")
+    r.p(f"The system was tested on flights flown in ArduCopter SITL [8] in a Gazebo [18] disaster-zone world built by "
+        f"the team (Figure {r.ref('f_world')}). A Hexa-X hexacopter flew one 1.3 km route at 30 m in five scenarios "
+        f"with known injected faults (Table {r.ref('t_scen')}).")
+    r.table(["ID", "Scenario", "Injected fault"], [
+        ["S0", "Baseline, 5 m/s", "None"],
+        ["S1", "Wind + fast flight", "10 m/s wind from the east; mission speed 12 m/s"],
+        ["S2", "Undersized battery", "BATT_CAPACITY 2200 mAh instead of 10000"],
+        ["S3", "Telemetry dropout", "Link down for 12 s at 90 s and at 200 s"],
+        ["S4", "Combined", "S1 + S2 + link loss over the no-network zone"],
+        ["S1/S2/S4 fixed", "Re-flights", "Same faults, flying the agents' mission_fixed.waypoints"],
+    ], "Test scenarios", widths=[1.1, 1.8, 3.1], label="t_scen")
+    r.figure(panel("world", ["01_world_overview.png", "04_earthquake_zone.png", "07_flight_over_earthquake_zone.png",
+                             "12_landing_approach.png"],
+                   ["World overview", "Earthquake zone and radio mast", "Hexa-X over the earthquake zone",
+                    "Landing approach"]),
+             "The Gazebo test world and the Hexa-X during a SITL mission", width_in=3.8, label="f_world")
     tc_rows = [
         ["TC01", "S0 baseline flight", "Good verdict, no Bad metric",
          f"{ap['s0']['flight_summary']['verdict']}, health {m['s0']['health_score']}, risk {risk('s0')}", "Pass"],
@@ -404,7 +455,7 @@ Observation    Verifier: {st['verification']['claims']} claims checked
 Decision       refined: {', '.join(x['agent'] for x in st['verification']['reruns']) or 'none'}
    ↓
 Final response {ap['s3']['flight_summary']['verdict']}; causes: {causes('s3')}; risk {risk('s3')}""",
-           "Listing 2: execution trace of S3 (from outputs/s3/state.json).")
+           "Listing 3: execution trace of S3 (from outputs/s3/state.json).")
 
 
 def chapter9(r, s) -> None:
@@ -493,12 +544,15 @@ def chapter12(r, s) -> None:
         f"error fell from {xt['s1']} m to {xt['s1_fixed']} m. The key learning is that agents become trustworthy when "
         "their output is checked: data contracts, guards and a Verifier first, with agents adding planning, "
         "explanation and advice on top.")
+    r.p("Overall, AeroMind is effective as an agentic system: it plans its own work, uses tools, remembers past "
+        "flights, corrects its own answers and leaves the final decision to the pilot, while every analysis "
+        "completed and every agent output reached the user verified.")
 
 
 def appendix(r, s) -> None:
     r.h1("APPENDIX", numbered=False)
     r.h2("Appendix A – Source Code")
-    r.p("GitHub Repository: ______________________________")
+    r.p("GitHub Repository: https://github.com/Lithika07/AeroMind")
     r.p("Deployed Link: Not deployed (runs locally: `streamlit run app.py`)")
     r.code("""pip install -e .
 python3 run.py --batch data/              # analyse all flights
@@ -506,8 +560,10 @@ python3 run.py --results                  # success metrics -> docs/RESULTS.md
 streamlit run app.py                      # dashboard
 python3 -m pytest -q                      # tests""")
     r.h2("Appendix B – Additional Screenshots")
-    r.p(f"Figures {r.ref('f_track')}–{r.ref('f_hist')} show the Track, Telemetry and History tabs referred to in "
+    r.p(f"Figures {r.ref('f_ask')}–{r.ref('f_hist')} show the Ask, Track, Telemetry and History tabs referred to in "
         f"Section 7.6, and Figures {r.ref('f_power')}–{r.ref('f_flood')} further dashboard and simulator views.")
+    r.figure(crop("ui_ask_s3.png"), "Ask tab (S3): an answer verified against the cited metrics", width_in=5.0,
+             label="f_ask")
     r.figure(crop("ui_track_s3.png"), "Track tab (S3): planned route, flown path coloured by link quality",
              width_in=5.4, label="f_track")
     r.figure(crop("ui_telemetry_s3.png"), "Telemetry tab (S3): link strip, message rate and dropout table",
