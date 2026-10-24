@@ -45,6 +45,8 @@ OLLAMA_PING_S = 2
 RATE_LIMIT_RETRIES = 2
 RATE_LIMIT_MAX_WAIT_S = 30.0
 HTTP_TIMEOUT_S = 120
+#: Cloudflare in front of hosted APIs (Groq) answers urllib's default "Python-urllib" agent with 403 (code 1010)
+USER_AGENT = "AeroMind/1.0"
 
 
 class LLMError(RuntimeError):
@@ -91,7 +93,8 @@ class HttpBackend:
         if time.monotonic() < self.down_until:
             raise LLMError(f"{self.name} at {self.url} failed recently; using the rules until it recovers")
         request = urllib.request.Request(f"{self.url}{path}", data=json.dumps(body).encode(),
-                                         headers={"Content-Type": "application/json", **(headers or {})})
+                                         headers={"Content-Type": "application/json", "User-Agent": USER_AGENT,
+                                                  **(headers or {})})
         for attempt in range(RATE_LIMIT_RETRIES + 1):
             try:
                 with urllib.request.urlopen(request, timeout=timeout) as response:
@@ -100,7 +103,8 @@ class HttpBackend:
                 if error.code == 429 and attempt < RATE_LIMIT_RETRIES:
                     time.sleep(retry_after(error))
                     continue
-                raise LLMError(f"{self.name} at {self.url} returned HTTP {error.code}") from error
+                detail = error.read(300).decode(errors="replace").strip() if error.fp else ""
+                raise LLMError(f"{self.name} at {self.url} returned HTTP {error.code} {detail}".rstrip()) from error
             except (OSError, http.client.HTTPException) as error:
                 self.down_until = time.monotonic() + BREAKER_S
                 raise LLMError(f"{self.name} at {self.url} failed: {error}") from error

@@ -89,6 +89,7 @@ def test_groq_sends_the_schema_and_key_and_validates_the_reply(monkeypatch):
     body = json.loads(sent[0].data)
     assert result.plan[0].agent == "flight_summary"
     assert sent[0].get_header("Authorization") == "Bearer gsk_test"
+    assert "Python-urllib" not in (sent[0].get_header("User-agent") or "Python-urllib")   # Cloudflare 403s it
     assert body["response_format"]["type"] == "json_schema"
     assert "maxLength" not in json.dumps(body["response_format"])
 
