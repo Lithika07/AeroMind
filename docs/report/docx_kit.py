@@ -64,19 +64,19 @@ def styles(document) -> None:
         style.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER if name == "Heading 1" else WD_ALIGN_PARAGRAPH.LEFT
         style.paragraph_format.line_spacing_rule = WD_LINE_SPACING.SINGLE
     caption = s.add_style("Caption", 1) if "Caption" not in [x.name for x in s] else s["Caption"]
-    _font(caption, 11, italic=False)
+    _font(caption, 12, italic=False)
     caption.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
     caption.paragraph_format.space_before = Pt(4)
     caption.paragraph_format.space_after = Pt(10)
     caption.paragraph_format.line_spacing_rule = WD_LINE_SPACING.SINGLE
     code = s.add_style("Code", 1)
-    _font(code, 9, name=MONO)
+    _font(code, 10, name=MONO)
     code.paragraph_format.line_spacing_rule = WD_LINE_SPACING.SINGLE
     code.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.LEFT
     code.paragraph_format.space_after = Pt(0)
     code.paragraph_format.left_indent = Inches(0.2)
     cell = s.add_style("Table Text", 1)
-    _font(cell, 10.5)
+    _font(cell, 12)
     cell.paragraph_format.line_spacing_rule = WD_LINE_SPACING.SINGLE
     cell.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.LEFT
     cell.paragraph_format.space_after = Pt(0)
@@ -221,8 +221,7 @@ def inline(paragraph, text: str) -> None:
             paragraph.add_run(part[2:-2]).bold = True
         elif part.startswith("`"):
             run = paragraph.add_run(part[1:-1])
-            run.font.name = MONO
-            run.font.size = Pt(10.5)
+            run.font.name = MONO          # same size as the surrounding text
         else:
             paragraph.add_run(part)
 

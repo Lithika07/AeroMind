@@ -10,43 +10,55 @@ PANELS = ASSETS / "panels"
 PANEL_TILE = (750, 484)
 
 
-def panel(name: str, files: list, captions: list) -> "Path":
-    """A 2 x 2 panel of simulator renders labelled (a)-(d)."""
-    PANELS.mkdir(parents=True, exist_ok=True)
-    w, h = PANEL_TILE
-    gap, label_h = 12, 34
-    sheet = Image.new("RGB", (2 * w + gap, 2 * (h + label_h) + gap), "white")
-    draw = ImageDraw.Draw(sheet)
+def _tag(draw, x: int, y: int, letter: str, size: int) -> None:
+    """A '(a)' tag in a white box at the top-left of a picture; the description goes in the figure caption."""
     try:
-        font = ImageFont.truetype("/usr/share/fonts/truetype/liberation/LiberationSerif-Regular.ttf", 24)
+        font = ImageFont.truetype("/usr/share/fonts/truetype/liberation/LiberationSerif-Bold.ttf", size)
     except OSError:
         font = ImageFont.load_default()
-    for k, (file, text) in enumerate(zip(files, captions)):
-        x, y = (k % 2) * (w + gap), (k // 2) * (h + label_h + gap)
+    text = f"({letter})"
+    left, top, right, bottom = draw.textbbox((x, y), text, font=font)
+    pad = size // 5
+    draw.rectangle((left - pad, top - pad, right + pad, bottom + pad), fill="white", outline="black")
+    draw.text((x, y), text, fill="black", font=font)
+
+
+def _tag_px(sheet_width: int, width_in: float) -> int:
+    """Pixel size that prints the tags at the body text size (12 pt)."""
+    return round(sheet_width / width_in * 12 / 72)
+
+
+def panel(name: str, files: list, width_in: float) -> "Path":
+    """A 2 x 2 panel of simulator renders tagged (a)-(d)."""
+    PANELS.mkdir(parents=True, exist_ok=True)
+    w, h = PANEL_TILE
+    gap = 12
+    sheet = Image.new("RGB", (2 * w + gap, 2 * h + gap), "white")
+    draw = ImageDraw.Draw(sheet)
+    size = _tag_px(sheet.width, width_in)
+    for k, file in enumerate(files):
+        x, y = (k % 2) * (w + gap), (k // 2) * (h + gap)
         sheet.paste(Image.open(SIM / file).convert("RGB").resize((w, h)), (x, y))
-        draw.text((x + 4, y + h + 4), f"({'abcd'[k]}) {text}", fill="black", font=font)
+        _tag(draw, x + size // 2, y + size // 2, "abcd"[k], size)
     out = PANELS / f"{name}.png"
     sheet.save(out)
     return out
 
 
-def pair(name: str, left: "Path", right: "Path", captions: list) -> "Path":
-    """Two screenshots side by side at the same height, labelled (a) and (b)."""
+def pair(name: str, left: "Path", right: "Path", width_in: float) -> "Path":
+    """Two screenshots side by side at the same height, tagged (a) and (b)."""
     PANELS.mkdir(parents=True, exist_ok=True)
     images = [Image.open(f).convert("RGB") for f in (left, right)]
     height = min(i.height for i in images)
     images = [i.resize((round(i.width * height / i.height), height)) for i in images]
-    gap, label_h = 24, 44
-    sheet = Image.new("RGB", (images[0].width + gap + images[1].width, height + label_h), "white")
+    gap = 24
+    sheet = Image.new("RGB", (images[0].width + gap + images[1].width, height), "white")
     draw = ImageDraw.Draw(sheet)
-    try:
-        font = ImageFont.truetype("/usr/share/fonts/truetype/liberation/LiberationSerif-Regular.ttf", 30)
-    except OSError:
-        font = ImageFont.load_default()
+    size = _tag_px(sheet.width, width_in)
     x = 0
-    for k, (image, text) in enumerate(zip(images, captions)):
+    for k, image in enumerate(images):
         sheet.paste(image, (x, 0))
-        draw.text((x + 4, height + 6), f"({'ab'[k]}) {text}", fill="black", font=font)
+        _tag(draw, x + image.width - 4 * size, size // 2, "ab"[k], size)
         x += image.width + gap
     out = PANELS / f"{name}.png"
     sheet.save(out)
@@ -124,7 +136,6 @@ def chapter1(r) -> None:
 def chapter2(r) -> None:
     r.h1("CHAPTER 2 – LITERATURE REVIEW")
     r.h2("2.1 Existing Systems and Research")
-    r.p(f"Table {r.ref('t_lit')} summarises the work that shaped AeroMind.")
     r.table(["Sr. No.", "Paper/System", "Year", "Approach", "Key Finding", "Limitation"], [
         ["1", "ReAct [1]", "2023", "Reasoning traces with tool actions", "Reasoning and acting beat either alone",
          "Errors propagate"],
@@ -139,17 +150,17 @@ def chapter2(r) -> None:
     ], "Literature review summary", widths=[0.5, 1.45, 0.55, 1.4, 1.3, 1.3], label="t_lit")
     r.h2("2.2 Comparative Analysis")
     r.table(["Feature", "Existing System (log viewers)", "Proposed System (AeroMind)"], [
-        ["Autonomous Execution", "No: the user reads each plot", "Yes: files in, full analysis out"],
-        ["Task Planning", "No", "Orchestrator plans the agents; plan checked by rules"],
-        ["Reasoning", "No", "Agents explain causes and risk, citing metrics"],
-        ["Tool Usage", "Plotting only", "Ingest, metrics, memory, risk rules, mission editing"],
-        ["Memory", "No", "Flight history: baselines, battery prediction, recurring issues"],
+        ["Autonomous Execution", "No", "Yes: files in, full analysis out"],
+        ["Task Planning", "No", "Orchestrator plans the agents"],
+        ["Reasoning", "No", "Agents explain causes and risk"],
+        ["Tool Usage", "Plotting only", "Metrics, memory, risk, mission edits"],
+        ["Memory", "No", "Flight history and baselines"],
         ["RAG", "No", "Not used"],
-        ["Multi-Agent Support", "No", "Five specialist agents and a Verifier"],
-        ["Human Intervention", "Entirely manual", "Pilot reviews the fixed mission before flying"],
-    ], "Comparison of existing tools and the proposed system", widths=[1.6, 1.8, 3.1], label="t_cmp")
+        ["Multi-Agent Support", "No", "Five agents and a Verifier"],
+        ["Human Intervention", "Entirely manual", "Pilot approves the fixed mission"],
+    ], "Comparison of existing tools and the proposed system", widths=[2.2, 1.5, 3.0], label="t_cmp")
     r.h2("2.3 Research Gap")
-    r.p(f"As Table {r.ref('t_cmp')} shows, log tools are exact but explain nothing, while agent frameworks "
+    r.p(f"As Tables {r.ref('t_lit')} and {r.ref('t_cmp')} show, log tools are exact but explain nothing, while agent frameworks "
         "[1]–[5] do not check what an agent says against data [6]. AeroMind combines both with a Verifier.")
 
 
@@ -214,13 +225,13 @@ def chapter4(r) -> None:
     r.figure(ASSETS / "architecture.png", "Overall system architecture of AeroMind", width_in=4.6, label="f_arch")
     r.h2("4.2 Architecture Components")
     r.table(["Component", "Description"], [
-        ["User Interface", "Streamlit dashboard `app.py` (tabs, Ask chat); command line `run.py`"],
-        ["LLM", "`agents/llm.py`: Claude (structured output) or Ollama (JSON schema)"],
-        ["Agents", "Five agents, each a prompt and a Pydantic schema, run by `run_agent()`"],
-        ["Planner / Executor", "`orchestrator.py`: manifest → LLM plan → rule check → run → verify"],
-        ["Tools", "`tools/`: ingest, metrics, link metrics, risk rules, memory, mission I/O, report"],
-        ["Memory", "`history.json` (long-term) and the shared state of one analysis"],
-        ["Output Generator", "`pipeline.py`: state.json, report.html, fixed mission, change log"],
+        ["User Interface", "Streamlit dashboard (`app.py`) and command line"],
+        ["LLM", "Claude or a local Qwen2.5-3B (`agents/llm.py`)"],
+        ["Agents", "Five agents: a prompt and a schema each"],
+        ["Planner / Executor", "`orchestrator.py`: plan, check, run, verify"],
+        ["Tools", "Ingest, metrics, risk, memory, mission I/O"],
+        ["Memory", "`history.json` and the shared state"],
+        ["Output Generator", "`pipeline.py`: report, fixed mission, log"],
     ], "Architecture components", widths=[1.6, 4.4], label="t_comp")
     r.h2("4.3 Agent Roles and Responsibilities")
     r.p(f"Table {r.ref('t_comp')} describes the components and Table {r.ref('t_roles')} the agents implemented.")
@@ -234,19 +245,12 @@ def chapter4(r) -> None:
         ["Verifier", "Reviewer", "Checks every claim and number against the data"],
     ], "Agent roles and responsibilities", widths=[1.3, 1.3, 3.4], label="t_roles")
     r.h2("4.4 Agent Workflow")
-    r.numbered([
-        "The user provides the flight's files (and optional notes).",
-        "Tools compute the metrics, statuses and memory context (objective understood).",
-        "The orchestrator creates the plan of agents.",
-        "Each agent receives the tools' output it needs.",
-        "The agents run in order on the shared state.",
-        "The Verifier observes every output.",
-        "Agents with over 30 % of claims rejected are identified.",
-        "Those agents refine their answer once with the reasons.",
-        "The approved result is saved and presented.",
-    ])
-    r.figure(ASSETS / "workflow.png", f"Agent workflow of one analysis", width_in=2.0, label="f_flow")
-    r.p(f"Figure {r.ref('f_flow')} shows these steps.")
+    r.p(f"Figure {r.ref('f_flow')} shows the workflow. **Step 1:** the user provides the flight's files. **Step 2:** "
+        "tools compute metrics, statuses and memory context. **Step 3:** the orchestrator creates the plan. "
+        "**Step 4:** each agent receives the tool output it needs. **Step 5:** the agents run on the shared state. "
+        "**Step 6:** the Verifier observes every output. **Step 7:** agents with over 30 % of claims rejected are "
+        "identified. **Step 8:** they refine their answer once. **Step 9:** the approved result is saved and shown.")
+    r.figure(ASSETS / "workflow.png", "Agent workflow of one analysis", width_in=2.3, label="f_flow")
 
 
 def chapter5(r) -> None:
@@ -337,13 +341,13 @@ def chapter7(r) -> None:
     r.p(f"Purpose, input and output of each tool are in Table {r.ref('t_tools')}; Table {r.ref('t_toolimpl')} gives "
         "the implementation and role in the workflow.")
     r.table(["Tool", "Implementation", "Role in Agent Workflow"], [
-        ["Ingestor", "pymavlink reader; merges files by time", "Provides the data for all tools"],
-        ["Metrics engine", "pandas; thresholds; phases; dropouts on vehicle clock", "Context for every agent"],
-        ["Memory store", "Validated records; median and 2σ statistics", "History for Risk and Advisor"],
-        ["Risk rules", "Additive points per factor", "Base score for the Risk agent"],
-        ["Mission I/O", "Applies edits to a copy; re-checks the mission", "Executes the Advisor's edits"],
-        ["Report", "Jinja2 template", "Final printable output"],
-    ], "Tool implementation", widths=[1.3, 2.7, 2.2], label="t_toolimpl")
+        ["Ingestor", "pymavlink; merges files", "Data for all tools"],
+        ["Metrics engine", "pandas; thresholds", "Context for agents"],
+        ["Memory store", "Median, 2σ statistics", "History for Risk, Advisor"],
+        ["Risk rules", "Points per factor", "Base risk score"],
+        ["Mission I/O", "Edits a copy; re-checks", "Executes Advisor edits"],
+        ["Report", "Jinja2 template", "Printable output"],
+    ], "Tool implementation", widths=[1.5, 2.3, 2.4], label="t_toolimpl")
     r.h2("7.4 Memory Implementation")
     r.p("Long-term memory is a JSON file (`history.json`) written atomically by `tools/memory.py`. Each record holds "
         "battery use per km, cross-track, link uptime, health, causes and applied edits. Retrieval computes "
@@ -355,9 +359,9 @@ def chapter7(r) -> None:
     r.p(f"Figure {r.ref('f_home')} shows (a) the home page with the input form and the final output (Summary tab) "
         f"and (b) the agents' execution. The Ask tab and further tabs are in Appendix B (Figures {r.ref('f_ask')}–"
         f"{r.ref('f_hist')}).")
-    r.figure(pair("ui_home_agents", crop("ui_summary_s4.png", keep_sidebar=True), crop("ui_agents_s3.png"),
-                  ["Home page and Summary tab (S4)", "Agents tab (S3)"]),
-             "Dashboard: input form, Summary and Agents tabs", width_in=4.6, label="f_home")
+    r.figure(pair("ui_home_agents", crop("ui_summary_s4.png", keep_sidebar=True), crop("ui_agents_s3.png"), 4.6),
+             "Dashboard: (a) home page with the input form and Summary tab (S4); (b) Agents tab (S3)",
+             width_in=4.6, label="f_home")
 
 
 def chapter8(r, s) -> None:
@@ -386,10 +390,9 @@ def chapter8(r, s) -> None:
         ["S1/S2/S4 fixed", "Re-flights", "Same faults, flying the agents' mission_fixed.waypoints"],
     ], "Test scenarios", widths=[1.1, 1.8, 3.1], label="t_scen")
     r.figure(panel("world", ["01_world_overview.png", "04_earthquake_zone.png", "07_flight_over_earthquake_zone.png",
-                             "12_landing_approach.png"],
-                   ["World overview", "Earthquake zone and radio mast", "Hexa-X over the earthquake zone",
-                    "Landing approach"]),
-             "The Gazebo test world and the Hexa-X during a SITL mission", width_in=3.8, label="f_world")
+                             "12_landing_approach.png"], 4.0),
+             "Gazebo test world: (a) overview; (b) earthquake zone and radio mast; (c) Hexa-X over the earthquake "
+             "zone; (d) landing approach", width_in=4.0, label="f_world")
     tc_rows = [
         ["TC01", "S0 baseline flight", "Good verdict, no Bad metric",
          f"{ap['s0']['flight_summary']['verdict']}, health {m['s0']['health_score']}, risk {risk('s0')}", "Pass"],
@@ -478,7 +481,7 @@ def chapter9(r, s) -> None:
         ["Retrieval Accuracy", "Relevant retrievals / total", "Not applicable"],
         ["Test Case Success Rate", f"Table {r.ref('t_tc')}", f"{passed} / {cases}"],
         ["Automated Tests", "pytest", "247 / 247 passed; 91 % coverage of agents and tools"],
-    ], "Performance evaluation", widths=[1.7, 2.6, 1.9], label="t_perf")
+    ], "Performance evaluation", widths=[1.9, 2.7, 1.6], label="t_perf")
     table, inside = [], False
     for line in (ROOT / "docs" / "RESULTS.md").read_text().splitlines():
         if line.startswith("| scenario"):
@@ -487,13 +490,12 @@ def chapter9(r, s) -> None:
         if inside and line.startswith("|") and not line.startswith("|---"):
             table.append([c.strip().replace("->", "→") for c in line.strip("|").split("|")])
     r.p(f"Table {r.ref('t_ba')} compares each scenario before and after the mission corrected by the agents was flown under the same faults.")
-    r.table(["Scenario", "Verdict", "Health", "Risk", "Key metric", "Edits flown"], table,
-            "Results before and after the fixed missions", widths=[0.85, 0.9, 0.7, 1.1, 1.4, 2.1], label="t_ba")
+    r.table(["Run", "Verdict", "Health", "Risk", "Key metric", "Edits flown"], table,
+            "Results before and after the fixed missions", widths=[0.5, 1.1, 0.85, 1.25, 1.55, 1.75], label="t_ba")
     xt = {k: s[k]["metrics"]["tracking"]["xtrack_max_m"] for k in ("s1", "s1_fixed")}
-    r.p("**Interpretation.** The agents met the detection, root-cause, dropout-localisation, false-alarm, battery and "
-        "risk-ranking targets. The mission they corrected for S2 raised the battery at landing from 14 % to 25 %, and "
-        f"the speed fix for S1 reduced the maximum cross-track error from {xt['s1']} m to {xt['s1_fixed']} m. Run time "
-        f"is set by LLM inference on {INFERENCE_DEVICE}; GPU inference or the Claude API shortens it directly.")
+    r.p("**Interpretation.** The agents met the detection, root-cause, dropout, false-alarm and risk-ranking targets; "
+        f"their fixes raised S2's battery at landing from 14 % to 25 % and cut S1's cross-track error from {xt['s1']} m "
+        f"to {xt['s1_fixed']} m.")
 
 
 def chapter10(r) -> None:
@@ -572,9 +574,9 @@ python3 -m pytest -q                      # tests""")
              width_in=5.4, label="f_hist")
     r.figure(crop("ui_power_s2.png"), "Power & attitude tab (S2)", width_in=5.0, label="f_power")
     r.figure(panel("flight", ["02_world_top_view.png", "03_hexa_x_on_launch_pad.png", "05_flood_zone.png",
-                              "09_hexa_x_with_radio_mast.png"],
-                   ["Top view with zone signs", "Hexa-X on the launch pad", "Flood zone", "Passing the radio mast"]),
-             "More views of the simulation world", width_in=4.8, label="f_more")
+                              "09_hexa_x_with_radio_mast.png"], 4.8),
+             "More simulation views: (a) top view with zone signs; (b) Hexa-X on the launch pad; (c) flood zone; "
+             "(d) passing the radio mast", width_in=4.8, label="f_more")
     r.figure(SIM / "10_hexa_x_over_collapsed_buildings.png", "Hexa-X over the collapsed buildings", width_in=4.0,
              label="f_collapse")
     r.figure(SIM / "06_flight_past_flood_zone.png", "Hexa-X flying past the flood zone", width_in=4.0,

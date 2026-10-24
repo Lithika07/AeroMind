@@ -163,13 +163,6 @@ def references(r) -> None:
         para = r.p(f"[{k}] {ref}")
         para.paragraph_format.left_indent = docx_inches(0.4)
         para.paragraph_format.first_line_indent = docx_inches(-0.4)
-        para.paragraph_format.line_spacing = 1.0          # entries single-spaced, spaced apart
-        para.paragraph_format.space_after = docx_points(3)
-
-
-def docx_points(value):
-    from docx.shared import Pt
-    return Pt(value)
 
 
 def docx_inches(value):
